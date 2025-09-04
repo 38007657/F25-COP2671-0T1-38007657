@@ -8,4 +8,3 @@ This is the repository for my COP2671 class.
 git commit -m 'This is my first COP2671 git commit!' 
 
 
-
