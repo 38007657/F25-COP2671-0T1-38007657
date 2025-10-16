@@ -22,4 +22,10 @@ public class PlayerController : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
         transform.position += new Vector3(horizontalInput, verticalInput, 0) * moveSpeed * Time.deltaTime;
     }
+
+    private void FixedUpdate()
+    {
+        Vector2 movement = new Vector2(horizontalInput, verticalInput) * moveSpeed * Time.deltaTime;
+        playerRb.MovePosition(playerRb.position + movement);
+    }
 }
