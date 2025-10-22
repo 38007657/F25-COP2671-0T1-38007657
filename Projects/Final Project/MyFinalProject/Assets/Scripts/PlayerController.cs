@@ -2,15 +2,17 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5.0f;
+    [SerializeField] private float moveSpeed = 5.0f;
     private Rigidbody2D playerRb;
     private Vector2 movementInput;
     private Animator animator;
+    public bool isWalking = false;
+
 
     void Start()
     {
         playerRb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
+        animator = animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -18,12 +20,26 @@ public class PlayerController : MonoBehaviour
         // Get input in Update 
         movementInput.x = Input.GetAxisRaw("Horizontal");
         movementInput.y = Input.GetAxisRaw("Vertical");
+        movementInput.Normalize();
 
-        // Normalize diagonal movement to prevent speed boost
-        if (movementInput.magnitude > 1f)
+        // Check if player is moving
+        if (movementInput.x != 0 || movementInput.y != 0)
         {
-            movementInput.Normalize();
+            isWalking = true;
+            // Update last input direction for idle animations
+            animator.SetFloat("LastInputX", movementInput.x);
+            animator.SetFloat("LastInputY", movementInput.y);
         }
+        else
+        {
+            isWalking = false;
+            // Keep the last direction when idle (don't reset to 0)
+        }
+
+        // Update animator parameters
+        animator.SetFloat("InputX", movementInput.x);
+        animator.SetFloat("InputY", movementInput.y);
+        animator.SetBool("isWalking", isWalking);
     }
 
     void FixedUpdate()
