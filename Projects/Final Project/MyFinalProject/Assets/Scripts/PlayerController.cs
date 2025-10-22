@@ -4,28 +4,47 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5.0f;
     private Rigidbody2D playerRb;
-    public float horizontalInput;
-    public float verticalInput;
-    
+    private Vector2 movementInput;
+    private Animator animator;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         playerRb = GetComponent<Rigidbody2D>();
+        // Ensure proper Rigidbody2D settings for pixel-perfect movement
+        playerRb.gravityScale = 0f; // No gravity for top-down
+        playerRb.freezeRotation = true; // Prevent rotation
+        animator = GetComponent<Animator>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Get user vertical and horizontal movement
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
-        transform.position += new Vector3(horizontalInput, verticalInput, 0) * moveSpeed * Time.deltaTime;
+        // Get input in Update (best practice for input)
+        movementInput.x = Input.GetAxisRaw("Horizontal");
+        movementInput.y = Input.GetAxisRaw("Vertical");
+
+        // Normalize diagonal movement to prevent speed boost
+        if (movementInput.magnitude > 1f)
+        {
+            movementInput.Normalize();
+        }
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
-        Vector2 movement = new Vector2(horizontalInput, verticalInput) * moveSpeed * Time.deltaTime;
-        playerRb.MovePosition(playerRb.position + movement);
+        animator.SetBool("isWalking", true);
+
+        if (movementInput.x == 0 && movementInput.y == 0)
+        {
+            animator.SetBool("isWalking", false);
+            animator.SetFloat("LastInputX", movementInput.x);
+            animator.SetFloat("LastInputY", movementInput.y);
+        }
+
+
+        // Apply velocity in FixedUpdate for physics
+        playerRb.linearVelocity = movementInput * moveSpeed;
+
+        animator.SetFloat("InputX", movementInput.x);
+        animator.SetFloat("InputY", movementInput.y);
     }
 }
