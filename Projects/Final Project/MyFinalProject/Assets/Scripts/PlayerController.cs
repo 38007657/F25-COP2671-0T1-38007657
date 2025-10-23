@@ -29,16 +29,16 @@ public class PlayerController : MonoBehaviour
             // Update last input direction for idle animations
             animator.SetFloat("LastInputX", movementInput.x);
             animator.SetFloat("LastInputY", movementInput.y);
+            animator.SetFloat("InputX", movementInput.x);
+            animator.SetFloat("InputY", movementInput.y);
         }
         else
         {
             isWalking = false;
-            // Keep the last direction when idle (don't reset to 0)
+            animator.SetFloat("InputX", animator.GetFloat("LastInputX"));
+            animator.SetFloat("InputY", animator.GetFloat("LastInputY"));
         }
 
-        // Update animator parameters
-        animator.SetFloat("InputX", movementInput.x);
-        animator.SetFloat("InputY", movementInput.y);
         animator.SetBool("isWalking", isWalking);
     }
 
