@@ -2,22 +2,23 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Movement")]
     [SerializeField] private float moveSpeed = 5.0f;
+
     private Rigidbody2D playerRb;
     private Vector2 movementInput;
     private Animator animator;
     public bool isWalking = false;
 
-
     void Start()
     {
         playerRb = GetComponent<Rigidbody2D>();
-        animator = animator = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
     {
-        // Get input in Update 
+        // Get input in Update
         movementInput.x = Input.GetAxisRaw("Horizontal");
         movementInput.y = Input.GetAxisRaw("Vertical");
         movementInput.Normalize();
@@ -39,15 +40,12 @@ public class PlayerController : MonoBehaviour
             animator.SetFloat("InputY", animator.GetFloat("LastInputY"));
         }
 
-        animator.SetBool("isWalking", isWalking);
+        animator.SetBool("isWalking", isWalking);        
     }
 
     void FixedUpdate()
     {
-
         // Apply velocity in FixedUpdate for physics
         playerRb.linearVelocity = movementInput * moveSpeed;
-
-
     }
 }

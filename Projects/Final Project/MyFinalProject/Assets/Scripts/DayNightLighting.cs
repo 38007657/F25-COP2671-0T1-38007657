@@ -6,15 +6,10 @@ public class DayNightLighting : MonoBehaviour
     [Header("2D Light Reference")]
     [SerializeField] private Light2D globalLight2D;
 
-    [Header("Fog Settings")]
-    [SerializeField] private bool enableFog = true;
-    [SerializeField] private float maxFogDensity = 0.05f;
-
     // These will be set by DayNightEvents
     private AnimationCurve lightIntensityCurve;
     private Gradient lightColorGradient;
     private Gradient ambientColorGradient;
-    private AnimationCurve fogDensityCurve;
 
     private TimeManager timeManager;
 
@@ -23,7 +18,7 @@ public class DayNightLighting : MonoBehaviour
         // Find 2D light if not assigned
         if (globalLight2D == null)
         {
-            globalLight2D = FindObjectOfType<Light2D>();
+            globalLight2D = FindAnyObjectByType<Light2D>();
 
             if (globalLight2D == null)
             {
@@ -65,12 +60,11 @@ public class DayNightLighting : MonoBehaviour
     }
 
     // Called by DayNightEvents to set the curves
-    public void SetLightingCurves(AnimationCurve intensityCurve, Gradient colorGradient, Gradient ambientGradient, AnimationCurve fogCurve)
+    public void SetLightingCurves(AnimationCurve intensityCurve, Gradient colorGradient, Gradient ambientGradient)
     {
         lightIntensityCurve = intensityCurve;
         lightColorGradient = colorGradient;
         ambientColorGradient = ambientGradient;
-        fogDensityCurve = fogCurve;
 
         Debug.Log("[DayNightLighting] 2D lighting curves set");
     }
@@ -109,38 +103,6 @@ public class DayNightLighting : MonoBehaviour
         {
             Color ambientColor = ambientColorGradient.Evaluate(normalizedTime);
             RenderSettings.ambientLight = ambientColor;
-        }
-
-        // Update fog
-        if (enableFog && fogDensityCurve != null && fogDensityCurve.length > 0)
-        {
-            RenderSettings.fog = true;
-            RenderSettings.fogDensity = fogDensityCurve.Evaluate(normalizedTime) * maxFogDensity;
-            RenderSettings.fogColor = ambientColorGradient != null ? ambientColorGradient.Evaluate(normalizedTime) : Color.gray;
-        }
-    }
-
-    // Debug methods for 2D lighting
-    [ContextMenu("Preview Sunrise")]
-    public void PreviewSunrise() => UpdateLighting(6f);
-
-    [ContextMenu("Preview Noon")]
-    public void PreviewNoon() => UpdateLighting(12f);
-
-    [ContextMenu("Preview Sunset")]
-    public void PreviewSunset() => UpdateLighting(18f);
-
-    [ContextMenu("Preview Midnight")]
-    public void PreviewMidnight() => UpdateLighting(0f);
-
-    [ContextMenu("Test 2D Light")]
-    public void Test2DLight()
-    {
-        if (globalLight2D != null)
-        {
-            globalLight2D.intensity = 2f;
-            globalLight2D.color = Color.red;
-            Debug.Log("[DayNightLighting] 2D Light test - should see bright red lighting");
         }
     }
 }

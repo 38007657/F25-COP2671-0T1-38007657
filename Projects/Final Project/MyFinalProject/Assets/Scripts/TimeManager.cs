@@ -5,7 +5,7 @@ public class TimeManager : MonoBehaviour
     public static TimeManager Instance { get; private set; }
 
     [Header("Time Settings")]
-    [SerializeField] private float dayDuration = 120f; // Duration of a full day in seconds (2 minutes default)
+    [SerializeField] private float dayDuration = 300f; // Duration of a full day in seconds (5 minutes default)
     [SerializeField][Range(0f, 24f)] private float currentTime = 12f; // Current time in hours (0-24)
     [SerializeField] private bool pauseTime = false;
 
@@ -71,49 +71,8 @@ public class TimeManager : MonoBehaviour
                 lastHour = currentHour;
                 OnHourChanged?.Invoke(currentTime);
             }
-        }
-
-        // Debug controls
-        HandleDebugInput();
-    }
-
-    private void HandleDebugInput()
-    {
-        // Speed up time (hold right arrow)
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            currentTime += 10f * Time.deltaTime; // 10x speed
-            if (currentTime >= 24f) currentTime -= 24f;
-            OnTimeChanged?.Invoke(currentTime);
-        }
-
-        // Slow down time (hold left arrow)
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            currentTime -= 10f * Time.deltaTime;
-            if (currentTime < 0f) currentTime += 24f;
-            OnTimeChanged?.Invoke(currentTime);
-        }
-
-        // Pause/unpause (P key)
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            pauseTime = !pauseTime;
-            Debug.Log($"[TimeManager] Time {(pauseTime ? "paused" : "resumed")} at {GetTimeString()}");
-        }
-
-        // Jump to specific times
-        if (Input.GetKeyDown(KeyCode.Alpha1)) SetTime(6f);   // Sunrise
-        if (Input.GetKeyDown(KeyCode.Alpha2)) SetTime(12f);  // Noon
-        if (Input.GetKeyDown(KeyCode.Alpha3)) SetTime(18f);  // Sunset
-        if (Input.GetKeyDown(KeyCode.Alpha4)) SetTime(0f);   // Midnight
-
-        // Show current time
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            Debug.Log($"[TimeManager] Current time: {GetTimeString()} - {(IsDaytime ? "Day" : "Night")}");
-        }
-    }
+        }        
+    }    
 
     // Public methods
     public void SetTime(float hour)
@@ -135,6 +94,7 @@ public class TimeManager : MonoBehaviour
         pauseTime = pause;
     }
 
+    // Methods for UI
     public string GetTimeString()
     {
         int hours = Mathf.FloorToInt(currentTime);

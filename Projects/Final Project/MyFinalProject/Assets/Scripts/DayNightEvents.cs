@@ -4,11 +4,7 @@ using UnityEngine.Rendering.Universal;
 [System.Serializable]
 public enum LightingPreset
 {
-    Realistic,
-    Stylized,
-    Desert,
-    Arctic,
-    Custom
+    Realistic
 }
 
 public class DayNightEvents : MonoBehaviour
@@ -23,7 +19,6 @@ public class DayNightEvents : MonoBehaviour
     [SerializeField] private AnimationCurve lightIntensityCurve;
     [SerializeField] private Gradient lightColorGradient;
     [SerializeField] private Gradient ambientColorGradient;
-    [SerializeField] private AnimationCurve fogDensityCurve;
 
     private TimeManager timeManager;
     private DayNightLighting lightingController;
@@ -71,7 +66,7 @@ public class DayNightEvents : MonoBehaviour
         }
 
         // Pass curves to lighting controller
-        lightingController.SetLightingCurves(lightIntensityCurve, lightColorGradient, ambientColorGradient, fogDensityCurve);
+        lightingController.SetLightingCurves(lightIntensityCurve, lightColorGradient, ambientColorGradient);
         Debug.Log("[DayNightEvents] 2D lighting curves passed to controller");
 
         // Subscribe to time changes for events only
@@ -89,15 +84,6 @@ public class DayNightEvents : MonoBehaviour
         {
             timeManager.OnTimeChanged -= CheckForDayNightEvents;
             timeManager.OnHourChanged -= CheckForSpecificTimeEvents;
-        }
-    }
-
-    private void OnValidate()
-    {
-        // When preset changes in inspector, update curves
-        if (lightingPreset != LightingPreset.Custom)
-        {
-            ApplyPreset(lightingPreset);
         }
     }
 
@@ -163,21 +149,12 @@ public class DayNightEvents : MonoBehaviour
             case LightingPreset.Realistic:
                 SetRealisticPreset();
                 break;
-            case LightingPreset.Stylized:
-                SetStylizedPreset();
-                break;
-            //case LightingPreset.Desert:
-            //    SetDesertPreset();
-            //    break;
-            //case LightingPreset.Arctic:
-            //    SetArcticPreset();
-            //    break;
         }
 
         // Update lighting controller if it exists
         if (lightingController != null)
         {
-            lightingController.SetLightingCurves(lightIntensityCurve, lightColorGradient, ambientColorGradient, fogDensityCurve);
+            lightingController.SetLightingCurves(lightIntensityCurve, lightColorGradient, ambientColorGradient);
         }
     }
 
@@ -216,64 +193,8 @@ public class DayNightEvents : MonoBehaviour
             new GradientColorKey(new Color(0.5f, 0.4f, 0.4f), 0.77f), // Dusk
             new GradientColorKey(new Color(0.2f, 0.2f, 0.4f), 1f)    // Night
         };
-        ambientColorGradient.alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) };
-
-        fogDensityCurve = new AnimationCurve(new Keyframe[]
-        {
-            new Keyframe(0f, 0.3f),    // Less fog for 2D
-            new Keyframe(0.25f, 0.5f),
-            new Keyframe(0.35f, 0.1f),
-            new Keyframe(0.5f, 0.05f),
-            new Keyframe(0.7f, 0.2f),
-            new Keyframe(0.8f, 0.4f),
-            new Keyframe(1f, 0.3f)
-        });
+        ambientColorGradient.alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) };        
     }
-
-    // Add your other preset methods here (SetStylizedPreset, SetDesertPreset, SetArcticPreset)
-    // I'll include just one more example:
-
-    private void SetStylizedPreset()
-    {
-        lightIntensityCurve = new AnimationCurve(new Keyframe[]
-        {
-            new Keyframe(0f, 0.2f),
-            new Keyframe(0.25f, 0.4f),
-            new Keyframe(0.3f, 1f),
-            new Keyframe(0.5f, 1.3f),  // Brighter for stylized look
-            new Keyframe(0.7f, 1f),
-            new Keyframe(0.75f, 0.4f),
-            new Keyframe(1f, 0.2f)
-        });
-
-        lightColorGradient = new Gradient();
-        lightColorGradient.colorKeys = new GradientColorKey[]
-        {
-            new GradientColorKey(new Color(0.5f, 0.3f, 0.8f), 0f),     // Purple night
-            new GradientColorKey(new Color(1f, 0.4f, 0.6f), 0.25f),    // Pink sunrise
-            new GradientColorKey(new Color(1f, 1f, 0.7f), 0.35f),      // Yellow morning
-            new GradientColorKey(new Color(0.9f, 0.95f, 1f), 0.5f),    // Bright blue noon
-            new GradientColorKey(new Color(1f, 0.5f, 0.2f), 0.75f),    // Orange sunset
-            new GradientColorKey(new Color(0.5f, 0.3f, 0.8f), 1f)      // Purple night
-        };
-        lightColorGradient.alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) };
-
-        // Use the same ambient gradient as realistic for now
-        ambientColorGradient = new Gradient();
-        ambientColorGradient.colorKeys = new GradientColorKey[]
-        {
-            new GradientColorKey(new Color(0.3f, 0.2f, 0.4f), 0f),
-            new GradientColorKey(new Color(0.6f, 0.5f, 0.5f), 0.25f),
-            new GradientColorKey(new Color(0.8f, 0.8f, 0.9f), 0.5f),
-            new GradientColorKey(new Color(0.6f, 0.4f, 0.5f), 0.75f),
-            new GradientColorKey(new Color(0.3f, 0.2f, 0.4f), 1f)
-        };
-        ambientColorGradient.alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) };
-
-        fogDensityCurve = AnimationCurve.Constant(0f, 1f, 0.2f); // Light constant fog
-    }
-
-    // Add SetDesertPreset and SetArcticPreset following the same pattern...
 
     [ContextMenu("Apply Current Preset")]
     public void ApplyCurrentPreset()
