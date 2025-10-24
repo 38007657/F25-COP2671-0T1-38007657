@@ -40,8 +40,11 @@ public class CropGrowthManager : MonoBehaviour
             return;
         }
         Instance = this;
+    }
 
-        // Subscribe to TimeManager
+    private void Start()
+    {
+        // Subscribe to TimeManager (moved to Start to ensure TimeManager is initialized first)
         if (TimeManager.Instance != null)
         {
             TimeManager.Instance.OnHourChanged += OnHourChanged;
@@ -49,7 +52,7 @@ public class CropGrowthManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[CropGrowthManager] TimeManager not found!");
+            Debug.LogError("[CropGrowthManager] TimeManager not found! Make sure TimeManager GameObject exists in the scene.");
         }
     }
 

@@ -22,7 +22,7 @@ public class DayNightLighting : MonoBehaviour
 
             if (globalLight2D == null)
             {
-                Debug.LogError("[DayNightLighting] No Light2D found! Please create a Global Light 2D.");
+                //Debug.LogError("[DayNightLighting] No Light2D found! Please create a Global Light 2D.");
             }
         }
     }
@@ -38,7 +38,7 @@ public class DayNightLighting : MonoBehaviour
 
         if (timeManager == null)
         {
-            Debug.LogError("[DayNightLighting] TimeManager not found!");
+            //Debug.LogError("[DayNightLighting] TimeManager not found!");
             return;
         }
 
@@ -48,7 +48,7 @@ public class DayNightLighting : MonoBehaviour
         // Initial lighting update
         UpdateLighting(timeManager.CurrentTime);
 
-        Debug.Log("[DayNightLighting] 2D Lighting system initialized");
+        //Debug.Log("[DayNightLighting] 2D Lighting system initialized");
     }
 
     private void OnDestroy()
@@ -66,28 +66,28 @@ public class DayNightLighting : MonoBehaviour
         lightColorGradient = colorGradient;
         ambientColorGradient = ambientGradient;
 
-        Debug.Log("[DayNightLighting] 2D lighting curves set");
+        //Debug.Log("[DayNightLighting] 2D lighting curves set");
     }
 
     private void UpdateLighting(float currentTime)
     {
         if (globalLight2D == null)
         {
-            Debug.LogWarning("[DayNightLighting] Global Light 2D is null!");
+            //Debug.LogWarning("[DayNightLighting] Global Light 2D is null!");
             return;
         }
 
         // Get normalized time (0-1)
         float normalizedTime = timeManager.CurrentTimeNormalized;
 
-        Debug.Log($"[DayNightLighting] Updating 2D lighting - Time: {currentTime:F2}, Normalized: {normalizedTime:F2}");
+        //Debug.Log($"[DayNightLighting] Updating 2D lighting - Time: {currentTime:F2}, Normalized: {normalizedTime:F2}");
 
         // Update light intensity
         if (lightIntensityCurve != null && lightIntensityCurve.length > 0)
         {
             float intensity = lightIntensityCurve.Evaluate(normalizedTime);
             globalLight2D.intensity = intensity;
-            Debug.Log($"[DayNightLighting] Light intensity: {intensity:F2}");
+            //Debug.Log($"[DayNightLighting] Light intensity: {intensity:F2}");
         }
 
         // Update light color
@@ -95,7 +95,7 @@ public class DayNightLighting : MonoBehaviour
         {
             Color color = lightColorGradient.Evaluate(normalizedTime);
             globalLight2D.color = color;
-            Debug.Log($"[DayNightLighting] Light color: {color}");
+            //Debug.Log($"[DayNightLighting] Light color: {color}");
         }
 
         // Update ambient lighting (still works with 2D)

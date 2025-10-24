@@ -51,6 +51,11 @@ public class CropInstance : MonoBehaviour
         if (TimeManager.Instance != null)
         {
             TimeManager.Instance.OnHourChanged += OnHourChanged;
+            Debug.Log($"[CropInstance] Successfully subscribed to TimeManager OnHourChanged");
+        }
+        else
+        {
+            Debug.LogError($"[CropInstance] TimeManager.Instance is null in Awake! Cannot subscribe to events.");
         }
     }
 
@@ -128,13 +133,15 @@ public class CropInstance : MonoBehaviour
     {
         if (TimeManager.Instance == null) return;
 
+        int currentHour = Mathf.FloorToInt(time);
+
         // Check for sunrise (6 AM) - new day begins, advance stage if conditions met
-        if (Mathf.Approximately(time, TimeManager.Instance.SunriseTime))
+        if (currentHour == 6)
         {
             OnSunrise();
         }
-        // Check for sunset (6 PM) - stop growth animation
-        else if (Mathf.Approximately(time, TimeManager.Instance.SunsetTime))
+        // Check for sunset (6 PM) - stop growth animation  
+        else if (currentHour == 18)
         {
             OnSunset();
         }
@@ -145,11 +152,15 @@ public class CropInstance : MonoBehaviour
     /// </summary>
     private void OnSunrise()
     {
-        if (CropGrowthManager.Instance == null) return;
+        if (CropGrowthManager.Instance == null)
+        {
+            Debug.LogError("[CropInstance] CropGrowthManager.Instance is null!");
+            return;
+        }
 
         int currentDay = CropGrowthManager.Instance.CurrentDay;
 
-        Debug.Log($"[CropInstance] {cropData.cropName} - Sunrise on day {currentDay}");
+        Debug.Log($"[CropInstance] {cropData.cropName} - Sunrise on day {currentDay}, isWatered: {isWatered}, isWilted: {isWilted}, currentStage: {currentStage}");
 
         // Check if crop should wilt
         CheckWiltStatus(currentDay);
@@ -164,9 +175,12 @@ public class CropInstance : MonoBehaviour
         bool wasWateredYesterday = isWatered;
         isWatered = false;
 
+        Debug.Log($"[CropInstance] Was watered yesterday: {wasWateredYesterday}");
+
         // Don't advance if already harvestable
         if (currentStage >= 4)
         {
+            Debug.Log($"[CropInstance] {cropData.cropName} already harvestable (stage 4)");
             return;
         }
 
@@ -181,6 +195,8 @@ public class CropInstance : MonoBehaviour
         int daysPerStage = Mathf.CeilToInt(cropData.totalGrowthDays / 4f);
 
         daysSinceStageChange++;
+
+        Debug.Log($"[CropInstance] Days since stage change: {daysSinceStageChange}, Days per stage: {daysPerStage}");
 
         // Advance stage if enough days passed
         if (daysSinceStageChange >= daysPerStage)
@@ -252,11 +268,21 @@ public class CropInstance : MonoBehaviour
         if (TimeManager.Instance == null || cropData == null)
             yield break;
 
-        // Calculate start and end scales for this stage
-        float startScale = currentStage == 0 ? cropData.seedScale : cropData.finalScale * 0.7f;
+        // No visual growth for seed stage (stage 0 - invisible)
+        if (currentStage == 0)
+        {
+            spriteRenderer.enabled = false;
+            yield break;
+        }
+
+        // Enable sprite renderer for visible stages
+        spriteRenderer.enabled = true;
+
+        // Get stage-specific start scale
+        float startScale = cropData.GetStageStartScale(currentStage);
         float endScale = cropData.finalScale;
 
-        // Set initial scale
+        // Set initial scale for this stage
         currentScale = startScale;
         targetScale = Vector3.one * endScale;
         transform.localScale = Vector3.one * startScale;
@@ -270,7 +296,7 @@ public class CropInstance : MonoBehaviour
         float daytimeHours = sunset - sunrise; // 12 hours
         float daytimeRealSeconds = (daytimeHours / 24f) * dayDuration; // Real seconds for 12 hours
 
-        Debug.Log($"[CropInstance] Starting growth animation for {daytimeRealSeconds} seconds (affected by {TimeManager.Instance.TimeSpeedMultiplier}x speed)");
+        Debug.Log($"[CropInstance] Stage {currentStage} growth animation: {startScale:F2} → {endScale:F2} over {daytimeRealSeconds:F1}s (at {TimeManager.Instance.TimeSpeedMultiplier}x speed)");
 
         float elapsedTime = 0f;
 
@@ -390,8 +416,19 @@ public class CropInstance : MonoBehaviour
     {
         if (cropData == null || spriteRenderer == null) return;
 
-        // Set sprite for current stage
-        spriteRenderer.sprite = cropData.GetStageSprite(currentStage);
+        // Get sprite for current stage
+        Sprite stageSprite = cropData.GetStageSprite(currentStage);
+
+        // Stage 0 (seed) has no sprite - disable renderer
+        if (stageSprite == null)
+        {
+            spriteRenderer.enabled = false;
+            return;
+        }
+
+        // Enable renderer and set sprite for visible stages
+        spriteRenderer.enabled = true;
+        spriteRenderer.sprite = stageSprite;
 
         // Apply color
         if (isWilted)
@@ -403,9 +440,9 @@ public class CropInstance : MonoBehaviour
             spriteRenderer.color = Color.white;
         }
 
-        // Set initial scale
-        float scale = currentStage == 0 ? cropData.seedScale : cropData.finalScale;
-        transform.localScale = Vector3.one * scale;
+        // Set initial scale based on current stage
+        float startScale = cropData.GetStageStartScale(currentStage);
+        transform.localScale = Vector3.one * startScale;
         targetScale = Vector3.one * cropData.finalScale;
     }
 
