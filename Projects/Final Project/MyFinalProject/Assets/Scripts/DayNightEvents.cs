@@ -59,23 +59,23 @@ public class DayNightEvents : MonoBehaviour
         }
 
         // Make sure curves are initialized
-        if (lightIntensityCurve == null || lightIntensityCurve.length == 0)
-        {
-            Debug.Log("[DayNightEvents] Applying default preset for 2D lighting...");
-            ApplyPreset(lightingPreset);
-        }
+        //if (lightIntensityCurve == null || lightIntensityCurve.length == 0)
+        //{
+        //    Debug.Log("[DayNightEvents] Applying default preset for 2D lighting...");
+        //    ApplyPreset(lightingPreset);
+        //}
 
-        // Pass curves to lighting controller
-        lightingController.SetLightingCurves(lightIntensityCurve, lightColorGradient, ambientColorGradient);
-        Debug.Log("[DayNightEvents] 2D lighting curves passed to controller");
+        //// Pass curves to lighting controller
+        //lightingController.SetLightingCurves(lightIntensityCurve, lightColorGradient, ambientColorGradient);
+        //Debug.Log("[DayNightEvents] 2D lighting curves passed to controller");
 
-        // Subscribe to time changes for events only
-        timeManager.OnTimeChanged += CheckForDayNightEvents;
-        timeManager.OnHourChanged += CheckForSpecificTimeEvents;
+        //// Subscribe to time changes for events only
+        //timeManager.OnTimeChanged += CheckForDayNightEvents;
+        //timeManager.OnHourChanged += CheckForSpecificTimeEvents;
 
-        wasDay = timeManager.IsDaytime;
+        //wasDay = timeManager.IsDaytime;
 
-        Debug.Log($"[DayNightEvents] 2D system initialized - Current time: {timeManager.CurrentTime:F2}");
+        //Debug.Log($"[DayNightEvents] 2D system initialized - Current time: {timeManager.CurrentTime:F2}");
     }
 
     private void OnDestroy()
