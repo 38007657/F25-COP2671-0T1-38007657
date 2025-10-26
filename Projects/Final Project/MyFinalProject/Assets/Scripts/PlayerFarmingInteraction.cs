@@ -14,9 +14,10 @@ public class PlayerFarmingInteraction : MonoBehaviour
     [SerializeField] private bool enableTestMode = true;
 
     [Header("Key Bindings")]
+    [SerializeField] private KeyCode hoeKey = KeyCode.H;
     [SerializeField] private KeyCode plantKey = KeyCode.P;
     [SerializeField] private KeyCode waterKey = KeyCode.W;
-    [SerializeField] private KeyCode harvestKey = KeyCode.H;
+    [SerializeField] private KeyCode harvestKey = KeyCode.E;
 
     [Header("Visual Feedback")]
     [SerializeField] private bool showInteractionPrompts = true;
@@ -39,6 +40,12 @@ public class PlayerFarmingInteraction : MonoBehaviour
     {
         if (!enableTestMode) return;
 
+        // Hoe plot (H key)
+        if (Input.GetKeyDown(hoeKey))
+        {
+            TryHoe();
+        }
+
         // Plant crop (P key)
         if (Input.GetKeyDown(plantKey))
         {
@@ -51,10 +58,36 @@ public class PlayerFarmingInteraction : MonoBehaviour
             TryWater();
         }
 
-        // Harvest crop (H key)
+        // Harvest crop (E key)
         if (Input.GetKeyDown(harvestKey))
         {
             TryHarvest();
+        }
+    }
+
+    /// <summary>
+    /// Try to hoe a plot at nearest position
+    /// </summary>
+    public void TryHoe()
+    {
+        if (FarmPlotManager.Instance == null)
+        {
+            Debug.LogWarning("[PlayerFarmingInteraction] FarmPlotManager not found!");
+            return;
+        }
+
+        bool success = FarmPlotManager.Instance.HoeNearestPlot(transform.position);
+
+        if (success)
+        {
+            Debug.Log("[PlayerFarmingInteraction] Hoed plot");
+
+            // TODO: Play hoeing animation/sound
+            // TODO: Show dirt particles
+        }
+        else
+        {
+            Debug.Log("[PlayerFarmingInteraction] Cannot hoe - no valid plot in range or already hoed");
         }
     }
 
@@ -191,7 +224,11 @@ public class PlayerFarmingInteraction : MonoBehaviour
 
         string prompt = "";
 
-        if (nearestPlot.IsEmpty)
+        if (!nearestPlot.IsHoed)
+        {
+            prompt = $"[{hoeKey}] Hoe Soil";
+        }
+        else if (nearestPlot.IsEmpty)
         {
             prompt = $"[{plantKey}] Plant Crop";
         }

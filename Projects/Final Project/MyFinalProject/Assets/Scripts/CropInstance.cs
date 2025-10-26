@@ -81,10 +81,10 @@ public class CropInstance : MonoBehaviour
     {
         cropData = data;
         dayPlanted = currentDay;
-        lastWateredDay = currentDay;
+        lastWateredDay = -1; // Not watered yet
         currentStage = 0;
         daysSinceStageChange = 0;
-        isWatered = true;
+        isWatered = false; // Must water after planting
         isWilted = false;
         GridPosition = gridPos;
 
@@ -162,12 +162,20 @@ public class CropInstance : MonoBehaviour
 
         Debug.Log($"[CropInstance] {cropData.cropName} - Sunrise on day {currentDay}, isWatered: {isWatered}, isWilted: {isWilted}, currentStage: {currentStage}");
 
+        // If already wilted, check if it should die
+        if (isWilted)
+        {
+            Debug.Log($"[CropInstance] {cropData.cropName} is wilted! It will die and clear the plot.");
+            DieCrop();
+            return;
+        }
+
         // Check if crop should wilt
         CheckWiltStatus(currentDay);
 
         if (isWilted)
         {
-            Debug.Log($"[CropInstance] {cropData.cropName} is wilted!");
+            Debug.Log($"[CropInstance] {cropData.cropName} just wilted!");
             return;
         }
 
@@ -369,6 +377,27 @@ public class CropInstance : MonoBehaviour
 
             Debug.Log($"[CropInstance] {cropData.cropName} wilted after {daysSinceWater} days without water!");
         }
+    }
+
+    /// <summary>
+    /// Kill this crop and clear the plot (called when wilted crop reaches next sunrise)
+    /// </summary>
+    private void DieCrop()
+    {
+        Debug.Log($"[CropInstance] {cropData.cropName} died from wilting. Clearing plot and returning to unhoed state.");
+
+        // Find the plot this crop is on and clear it (which resets to unhoed)
+        if (FarmPlotManager.Instance != null)
+        {
+            FarmPlot plot = FarmPlotManager.Instance.GetPlotAtPosition(GridPosition);
+            if (plot != null)
+            {
+                plot.ClearPlot(); // This calls ResetToUnhoed() internally
+            }
+        }
+
+        // Destroy the crop GameObject
+        Destroy(gameObject);
     }
 
     /// <summary>

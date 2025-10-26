@@ -11,6 +11,11 @@ public class FarmPlotManager : MonoBehaviour
     [Header("Plot Configuration")]
     [SerializeField] private List<FarmPlot> farmPlots = new List<FarmPlot>();
 
+    [Header("Plot Sprites")]
+    [SerializeField] private Sprite unhoedSprite; // Grass/dirt (not used - plots invisible when unhoed)
+    [SerializeField] private Sprite hoedDrySprite; // Tilled soil (dry)
+    [SerializeField] private Sprite hoedWetSprite; // Tilled soil (wet/dark)
+
     [Header("Crop Prefab")]
     [SerializeField] private GameObject cropPrefab; // Base crop prefab
 
@@ -24,6 +29,9 @@ public class FarmPlotManager : MonoBehaviour
     // Dictionary for fast lookup
     private Dictionary<Vector2Int, FarmPlot> plotLookup = new Dictionary<Vector2Int, FarmPlot>();
 
+    // Container for plot visual markers
+    private Transform plotMarkersContainer;
+
     private void Awake()
     {
         // Singleton setup
@@ -34,7 +42,20 @@ public class FarmPlotManager : MonoBehaviour
         }
         Instance = this;
 
+        // Create container for plot markers
+        plotMarkersContainer = new GameObject("PlotMarkers").transform;
+        plotMarkersContainer.SetParent(transform);
+
         InitializePlots();
+    }
+
+    private void Update()
+    {
+        // Update drying state for all plots
+        foreach (FarmPlot plot in farmPlots)
+        {
+            plot.UpdateDryingState();
+        }
     }
 
     /// <summary>
@@ -94,9 +115,22 @@ public class FarmPlotManager : MonoBehaviour
             FarmPlot plot = new FarmPlot(pos);
             farmPlots.Add(plot);
             plotLookup[pos] = plot;
+
+            // Create visual marker for this plot
+            plot.CreateVisualMarker(plotMarkersContainer);
         }
 
         Debug.Log($"[FarmPlotManager] Initialized {farmPlots.Count} farm plots");
+    }
+
+    /// <summary>
+    /// Get appropriate sprite for plot state
+    /// </summary>
+    public Sprite GetPlotSprite(bool isHoed, bool isWet, bool isOccupied)
+    {
+        if (!isHoed) return null; // Unhoed plots are invisible
+
+        return isWet ? hoedWetSprite : hoedDrySprite;
     }
 
     /// <summary>
@@ -172,6 +206,12 @@ public class FarmPlotManager : MonoBehaviour
             return false;
         }
 
+        if (!plot.IsHoed)
+        {
+            Debug.LogWarning($"[FarmPlotManager] Plot at {gridPos} must be hoed before planting!");
+            return false;
+        }
+
         if (plot.IsOccupied)
         {
             Debug.LogWarning($"[FarmPlotManager] Plot at {gridPos} is already occupied");
@@ -191,6 +231,12 @@ public class FarmPlotManager : MonoBehaviour
         if (plot == null)
         {
             Debug.LogWarning("[FarmPlotManager] No empty plots available");
+            return false;
+        }
+
+        if (!plot.IsHoed)
+        {
+            Debug.LogWarning("[FarmPlotManager] Nearest plot is not hoed! Press H to hoe it first.");
             return false;
         }
 
@@ -253,6 +299,32 @@ public class FarmPlotManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Hoe the nearest unhoed plot to world position
+    /// </summary>
+    public bool HoeNearestPlot(Vector3 worldPos)
+    {
+        FarmPlot plot = GetNearestPlot(worldPos, interactionRange);
+
+        if (plot == null)
+        {
+            if (showDebugInfo)
+            {
+                Debug.Log("[FarmPlotManager] No plot in range to hoe");
+            }
+            return false;
+        }
+
+        bool success = plot.Hoe();
+
+        if (success && showDebugInfo)
+        {
+            Debug.Log($"[FarmPlotManager] Hoed plot at {plot.GridPosition}");
+        }
+
+        return success;
     }
 
     /// <summary>
