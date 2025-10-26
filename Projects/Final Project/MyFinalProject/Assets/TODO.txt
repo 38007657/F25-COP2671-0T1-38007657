@@ -1,0 +1,27 @@
+Animations
+- Hoe animation shows above character
+- W key moves player up when watering
+- collision bumps shift layers around
+- sticking in between tiles
+- only plant crops where their sign is and only bushes by house
+- add trees to farm area
+- add fountain to area across bridge
+- add tree right side up the ladder
+- add hoeing and watering animations
+- add crop status indicators - needs watering, needs harvesting, wilted
+- if wilted player must hoe before using plot again
+- watered plant sound
+- harvested plant sound
+- sold crops money sound
+
+House Scene
+-inside house scene - can sleep -  Wakes up at 6am if sleeping. Haven't slept in 24 hours player must sleep - energy level goes down to one after 24 hours and player walks more slowly, can't hoe or plant or harvest.
+
+Inventory
+- access inventory any time in game to check numbers and sell crops/buy seeds
+
+UI
+good night/good morning message
+You're tired message
+Zzz text when sleeping, screen fades to black, fades into scene at 6am.
+Pause option
