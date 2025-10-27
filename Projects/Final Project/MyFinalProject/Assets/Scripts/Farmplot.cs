@@ -321,4 +321,21 @@ public class FarmPlot
             plotSpriteRenderer = null;
         }
     }
+
+    /// <summary>
+    /// Debug the sprite renderer state
+    /// </summary>
+    public void DebugSpriteRenderer()
+    {
+        if (plotSpriteRenderer != null)
+        {
+            Debug.Log($"[FarmPlot] Plot {gridPosition} SpriteRenderer Debug:" +
+                     $"\n  Enabled: {plotSpriteRenderer.enabled}" +
+                     $"\n  Sprite: {plotSpriteRenderer.sprite?.name}" +
+                     $"\n  Color: {plotSpriteRenderer.color}" +
+                     $"\n  Sorting Layer: {plotSpriteRenderer.sortingLayerName}" +
+                     $"\n  Sorting Order: {plotSpriteRenderer.sortingOrder}" +
+                     $"\n  Position: {plotSpriteRenderer.transform.position}");
+        }
+    }
 }

@@ -577,4 +577,39 @@ public class FarmPlotManager : MonoBehaviour
             Gizmos.DrawWireCube(plot.WorldPosition, Vector3.one * 0.8f);
         }
     }
+
+    [ContextMenu("Debug Y=9 Plots Only")]
+    public void DebugY9Plots()
+    {
+        Debug.Log("[FarmPlotManager] === DEBUG Y=9 PLOTS ===");
+
+        foreach (FarmPlot plot in farmPlots)
+        {
+            if (plot.GridPosition.y == 9)
+            {
+                GameObject marker = plot.GetMarker();
+
+                Debug.Log($"Plot {plot.GridPosition}: " +
+                         $"Hoed={plot.IsHoed}, " +
+                         $"Marker={(marker != null ? "EXISTS" : "NULL")}, " +
+                         $"SpriteRenderer={(marker?.GetComponent<SpriteRenderer>() != null ? "EXISTS" : "NULL")}, " +
+                         $"Sprite={(marker?.GetComponent<SpriteRenderer>()?.sprite?.name ?? "NULL")}");
+
+                // Force refresh this specific plot
+                plot.RefreshVisual();
+            }
+        }
+    }
+
+    [ContextMenu("Debug Y6 and Y9 Sprite Renderers")]
+    public void DebugProblematicPlots()
+    {
+        foreach (FarmPlot plot in farmPlots)
+        {
+            if (plot.GridPosition.y == 6 || plot.GridPosition.y == 9)
+            {
+                plot.DebugSpriteRenderer();
+            }
+        }
+    }
 }
