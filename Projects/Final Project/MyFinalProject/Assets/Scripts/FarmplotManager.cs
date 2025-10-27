@@ -15,6 +15,8 @@ public class FarmPlotManager : MonoBehaviour
     [SerializeField] private Sprite unhoedSprite; // Grass/dirt (not used - plots invisible when unhoed)
     [SerializeField] private Sprite hoedDrySprite; // Tilled soil (dry)
     [SerializeField] private Sprite hoedWetSprite; // Tilled soil (wet/dark)
+    [SerializeField] private string plotSortingLayer = "Default"; // Sorting layer for plot sprites
+    [SerializeField] private int plotSortingOrder = -100; // Sorting order within layer
 
     [Header("Crop Prefab")]
     [SerializeField] private GameObject cropPrefab; // Base crop prefab
@@ -42,9 +44,12 @@ public class FarmPlotManager : MonoBehaviour
         }
         Instance = this;
 
-        // Create container for plot markers
-        plotMarkersContainer = new GameObject("PlotMarkers").transform;
+        // Create container for plot markers with proper setup
+        GameObject markersContainerObj = new GameObject("PlotMarkers");
+        plotMarkersContainer = markersContainerObj.transform;
         plotMarkersContainer.SetParent(transform);
+        plotMarkersContainer.localPosition = Vector3.zero; // Ensure it's at origin relative to manager
+        plotMarkersContainer.localScale = Vector3.one; // Ensure scale is correct
 
         InitializePlots();
     }
@@ -131,6 +136,38 @@ public class FarmPlotManager : MonoBehaviour
         if (!isHoed) return null; // Unhoed plots are invisible
 
         return isWet ? hoedWetSprite : hoedDrySprite;
+    }
+
+    /// <summary>
+    /// Get sorting layer name for plot sprites
+    /// </summary>
+    public string GetPlotSortingLayer()
+    {
+        return plotSortingLayer;
+    }
+
+    /// <summary>
+    /// Get sorting order for plot sprites
+    /// </summary>
+    public int GetPlotSortingOrder()
+    {
+        return plotSortingOrder;
+    }
+
+    /// <summary>
+    /// Get plot markers container
+    /// </summary>
+    public Transform GetPlotMarkersContainer()
+    {
+        return plotMarkersContainer;
+    }
+
+    /// <summary>
+    /// Get all plots (for iteration/filtering)
+    /// </summary>
+    public List<FarmPlot> GetAllPlots()
+    {
+        return farmPlots;
     }
 
     /// <summary>
@@ -420,6 +457,88 @@ public class FarmPlotManager : MonoBehaviour
         return $"Plots: {occupied}/{farmPlots.Count} | Harvestable: {harvestable} | Need Water: {needWater}";
     }
 
+    /// <summary>
+    /// Debug method to check all plot visual markers
+    /// </summary>
+    [ContextMenu("Debug Plot Visuals")]
+    public void DebugPlotVisuals()
+    {
+        Debug.Log($"[FarmPlotManager] Checking {farmPlots.Count} plots...");
+
+        int missingVisuals = 0;
+        int workingVisuals = 0;
+
+        foreach (FarmPlot plot in farmPlots)
+        {
+            GameObject marker = plot.GetMarker();
+            if (marker == null)
+            {
+                Debug.LogError($"[FarmPlotManager] Plot at {plot.GridPosition} has NO visual marker!");
+                missingVisuals++;
+
+                // Recreate it
+                plot.CreateVisualMarker(plotMarkersContainer);
+            }
+            else
+            {
+                Debug.Log($"[FarmPlotManager] Plot at {plot.GridPosition} has visual at world position {marker.transform.position}");
+                workingVisuals++;
+
+                // Force update the visual
+                plot.RefreshVisual();
+            }
+        }
+
+        Debug.Log($"[FarmPlotManager] Visual check complete: {workingVisuals} working, {missingVisuals} missing (now fixed)");
+    }
+
+    /// <summary>
+    /// Force refresh all plot visuals - useful for debugging visual issues
+    /// </summary>
+    [ContextMenu("Force Refresh All Visuals")]
+    public void ForceRefreshAllVisuals()
+    {
+        // Ensure container exists
+        if (plotMarkersContainer == null)
+        {
+            GameObject markersContainerObj = new GameObject("PlotMarkers");
+            plotMarkersContainer = markersContainerObj.transform;
+            plotMarkersContainer.SetParent(transform);
+            plotMarkersContainer.localPosition = Vector3.zero;
+            plotMarkersContainer.localScale = Vector3.one;
+        }
+
+        foreach (FarmPlot plot in farmPlots)
+        {
+            // Destroy existing marker if it exists
+            plot.DestroyMarker();
+
+            // Recreate the visual marker
+            plot.CreateVisualMarker(plotMarkersContainer);
+
+            // If plot is hoed, make sure it shows
+            if (plot.IsHoed)
+            {
+                plot.RefreshVisual();
+            }
+        }
+
+        Debug.Log("[FarmPlotManager] Force refreshed all plot visuals");
+    }
+
+    /// <summary>
+    /// Refresh all plot visuals (call this if some plots aren't showing correctly)
+    /// </summary>
+    [ContextMenu("Refresh All Plot Visuals")]
+    public void RefreshAllPlotVisuals()
+    {
+        foreach (FarmPlot plot in farmPlots)
+        {
+            plot.RefreshVisual();
+        }
+        Debug.Log("[FarmPlotManager] Refreshed all plot visuals");
+    }
+
     // Debug visualization
     private void OnDrawGizmos()
     {
@@ -445,9 +564,13 @@ public class FarmPlotManager : MonoBehaviour
                     Gizmos.color = Color.yellow; // Growing
                 }
             }
+            else if (plot.IsHoed)
+            {
+                Gizmos.color = new Color(0.8f, 0.6f, 0.4f, 0.8f); // Hoed (light brown)
+            }
             else
             {
-                Gizmos.color = new Color(0.5f, 0.3f, 0.1f, 0.5f); // Empty (brown)
+                Gizmos.color = new Color(0.5f, 0.3f, 0.1f, 0.5f); // Unhoed (dark brown)
             }
 
             // Draw plot marker

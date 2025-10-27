@@ -1,5 +1,5 @@
 Animations
-- Hoe animation shows above character
+- Hoed dirt animation shows above character
 - W key moves player up when watering
 - collision bumps shift layers around
 - sticking in between tiles

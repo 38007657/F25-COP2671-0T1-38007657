@@ -28,7 +28,17 @@ public class FarmPlot
     public bool IsEmpty => !isOccupied;
     public bool CanPlant => isHoed && !isOccupied; // Must be hoed to plant
     public CropInstance CurrentCrop => currentCrop;
-    public Vector3 WorldPosition => new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, 0); // Center of cell
+    public Vector3 WorldPosition
+    {
+        get
+        {
+            if (plotMarker != null)
+            {
+                return plotMarker.transform.position; // Use actual marker position if available
+            }
+            return new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, 0); // Fallback calculation
+        }
+    }
 
     // Constructor
     public FarmPlot(Vector2Int position)
@@ -106,7 +116,12 @@ public class FarmPlot
     /// </summary>
     private void UpdatePlotVisual()
     {
-        if (plotSpriteRenderer == null) return;
+        // If visual marker doesn't exist, we can't update it
+        if (plotSpriteRenderer == null)
+        {
+            Debug.LogWarning($"[FarmPlot] Plot at {gridPosition} has no sprite renderer! Visual marker may not be created.");
+            return;
+        }
 
         // Get appropriate sprite from FarmPlotManager
         if (FarmPlotManager.Instance != null)
@@ -116,6 +131,12 @@ public class FarmPlot
 
             // Show/hide based on state
             plotSpriteRenderer.enabled = isHoed; // Only show if hoed
+
+            Debug.Log($"[FarmPlot] Updated visual for plot at {gridPosition}: hoed={isHoed}, wet={isWet}, sprite={sprite?.name}");
+        }
+        else
+        {
+            Debug.LogWarning("[FarmPlot] FarmPlotManager.Instance is null!");
         }
     }
 
@@ -124,15 +145,45 @@ public class FarmPlot
     /// </summary>
     public void CreateVisualMarker(Transform parent)
     {
-        if (plotMarker != null) return;
+        if (plotMarker != null)
+        {
+            Debug.LogWarning($"[FarmPlot] Plot at {gridPosition} already has a visual marker!");
+            return;
+        }
 
         plotMarker = new GameObject($"PlotMarker_{gridPosition.x}_{gridPosition.y}");
-        plotMarker.transform.SetParent(parent);
-        plotMarker.transform.position = WorldPosition;
+        plotMarker.transform.SetParent(parent, false); // Important: worldPositionStays = false
+        plotMarker.transform.localPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, 0); // Use localPosition
 
         plotSpriteRenderer = plotMarker.AddComponent<SpriteRenderer>();
-        plotSpriteRenderer.sortingOrder = -10; // Below crops
+
+        // Set sorting layer and order from FarmPlotManager
+        if (FarmPlotManager.Instance != null)
+        {
+            plotSpriteRenderer.sortingLayerName = FarmPlotManager.Instance.GetPlotSortingLayer();
+            plotSpriteRenderer.sortingOrder = FarmPlotManager.Instance.GetPlotSortingOrder();
+        }
+
         plotSpriteRenderer.enabled = false; // Hidden until hoed
+
+        Debug.Log($"[FarmPlot] Created visual marker for plot at {gridPosition} with world position {plotMarker.transform.position}");
+    }
+
+    /// <summary>
+    /// Ensure visual marker exists and update it
+    /// </summary>
+    public void RefreshVisual()
+    {
+        if (plotSpriteRenderer == null && FarmPlotManager.Instance != null)
+        {
+            // Try to recreate the visual marker if it's missing
+            Transform container = FarmPlotManager.Instance.GetPlotMarkersContainer();
+            if (container != null)
+            {
+                CreateVisualMarker(container);
+            }
+        }
+        UpdatePlotVisual();
     }
 
     /// <summary>
@@ -237,6 +288,10 @@ public class FarmPlot
     public void SetMarker(GameObject marker)
     {
         plotMarker = marker;
+        if (marker != null)
+        {
+            plotSpriteRenderer = marker.GetComponent<SpriteRenderer>();
+        }
     }
 
     /// <summary>
@@ -245,5 +300,25 @@ public class FarmPlot
     public GameObject GetMarker()
     {
         return plotMarker;
+    }
+
+    /// <summary>
+    /// Destroy the visual marker (cleanup)
+    /// </summary>
+    public void DestroyMarker()
+    {
+        if (plotMarker != null)
+        {
+            if (Application.isPlaying)
+            {
+                Object.Destroy(plotMarker);
+            }
+            else
+            {
+                Object.DestroyImmediate(plotMarker);
+            }
+            plotMarker = null;
+            plotSpriteRenderer = null;
+        }
     }
 }
