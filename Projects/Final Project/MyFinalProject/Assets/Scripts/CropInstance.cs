@@ -14,7 +14,7 @@ public class CropInstance : MonoBehaviour
     [Header("Current State")]
     [SerializeField] private int currentStage = 0; // 0=Seed, 1=Sprout, 2=Growing, 3=Mature, 4=Harvestable
     [SerializeField] private int dayPlanted = 0;
-    [SerializeField] private int lastWateredDay = 0;
+    [SerializeField] private int lastWateredDay = -1;
     [SerializeField] private bool isWatered = false;
     [SerializeField] private bool isWilted = false;
     [SerializeField] private int daysSinceStageChange = 0;
@@ -81,22 +81,21 @@ public class CropInstance : MonoBehaviour
     {
         cropData = data;
         dayPlanted = currentDay;
-        lastWateredDay = -1; // Not watered yet
-        currentStage = 0;
+        lastWateredDay = currentDay; // Not watered yet
+        currentStage = 1; // Start at stage 1 (sprout) so sprite is visible immediately
         daysSinceStageChange = 0;
         isWatered = false; // Must water after planting
         isWilted = false;
         GridPosition = gridPos;
 
+        // Set initial scale to stage 1 start scale (small, visible seed/sprout)
+        float startScale = cropData.GetStageStartScale(1);
+        transform.localScale = Vector3.one * startScale;
+
         UpdateVisuals();
 
-        // Start growth animation if it's daytime
-        if (TimeManager.Instance != null && TimeManager.Instance.IsDaytime)
-        {
-            StartGrowthAnimation();
-        }
-
-        Debug.Log($"[CropInstance] Planted {cropData.cropName} at {gridPos} on day {currentDay}");
+        // DO NOT start growth animation when planted - sprite stays at small scale until next sunrise
+        Debug.Log($"[CropInstance] Planted {cropData.cropName} at {gridPos} on day {currentDay} - showing at scale {startScale}");
     }
 
     /// <summary>
@@ -165,7 +164,7 @@ public class CropInstance : MonoBehaviour
         // If already wilted, check if it should die
         if (isWilted)
         {
-            Debug.Log($"[CropInstance] {cropData.cropName} is wilted! It will die and clear the plot.");
+            Debug.Log($"[CropInstance] {cropData.cropName} is wilted! It will die and show wilted sprite.");
             DieCrop();
             return;
         }
@@ -195,8 +194,8 @@ public class CropInstance : MonoBehaviour
         // Check if crop was watered yesterday
         if (cropData.requiresWater && !wasWateredYesterday)
         {
-            Debug.Log($"[CropInstance] {cropData.cropName} not watered yesterday, not advancing");
-            return;
+            Debug.Log($"[CropInstance] {cropData.cropName} not watered yesterday, not advancing or growing visually");
+            return; // EXIT HERE - no visual growth animation for unwatered crops
         }
 
         // Calculate days per stage (evenly distribute growth)
@@ -213,7 +212,7 @@ public class CropInstance : MonoBehaviour
             daysSinceStageChange = 0;
         }
 
-        // Start daytime growth animation
+        // ONLY start growth animation if crop was watered (or doesn't require water)
         StartGrowthAnimation();
     }
 
@@ -286,11 +285,18 @@ public class CropInstance : MonoBehaviour
         // Enable sprite renderer for visible stages
         spriteRenderer.enabled = true;
 
-        // Get stage-specific start scale
-        float startScale = cropData.GetStageStartScale(currentStage);
+        // Start from current scale, not stage start scale
+        float startScale = transform.localScale.x; // Use actual current scale
         float endScale = cropData.finalScale;
 
-        // Set initial scale for this stage
+        // If we're starting a new stage and current scale is too small, use stage start scale
+        float stageStartScale = cropData.GetStageStartScale(currentStage);
+        if (startScale < stageStartScale)
+        {
+            startScale = stageStartScale;
+        }
+
+        // Set initial scale for this animation
         currentScale = startScale;
         targetScale = Vector3.one * endScale;
         transform.localScale = Vector3.one * startScale;
@@ -300,7 +306,6 @@ public class CropInstance : MonoBehaviour
         float dayDuration = TimeManager.Instance.DayDuration;
 
         // Calculate real-time duration from sunrise to sunset
-        // Daytime is 12 hours of game time (6 AM to 6 PM)
         float daytimeHours = sunset - sunrise; // 12 hours
         float daytimeRealSeconds = (daytimeHours / 24f) * dayDuration; // Real seconds for 12 hours
 
@@ -336,7 +341,7 @@ public class CropInstance : MonoBehaviour
     {
         if (isWilted)
         {
-            Debug.Log($"[CropInstance] Cannot water wilted crop!");
+            Debug.LogWarning($"[CropInstance] Cannot water wilted/dead crop {cropData.cropName}!");
             return;
         }
 
@@ -360,13 +365,29 @@ public class CropInstance : MonoBehaviour
     {
         if (!cropData.requiresWater || isWilted) return;
 
-        int daysSinceWater = currentDay - lastWateredDay;
+        // If crop was never watered (lastWateredDay = -1), calculate from planting day
+        int daysSinceWater;
+        if (lastWateredDay == -1)
+        {
+            // Crop hasn't been watered since planting
+            daysSinceWater = currentDay - dayPlanted;
+        }
+        else
+        {
+            // Normal case - calculate from last watered day
+            daysSinceWater = currentDay - lastWateredDay;
+        }
+
+        Debug.Log($"[CropInstance] {cropData.cropName} - Days since water: {daysSinceWater}, Allowed days without water: {cropData.daysWithoutWater}");
 
         if (daysSinceWater > cropData.daysWithoutWater)
         {
             isWilted = true;
             OnCropWilted?.Invoke(this);
             UpdateVisuals();
+
+            // Start shrinking animation
+            StartWiltShrinkAnimation();
 
             // Stop growth animation
             if (growthCoroutine != null)
@@ -380,24 +401,27 @@ public class CropInstance : MonoBehaviour
     }
 
     /// <summary>
-    /// Kill this crop and clear the plot (called when wilted crop reaches next sunrise)
+    /// Kill this crop and show wilted sprite (stays until player hoes the plot)
     /// </summary>
     private void DieCrop()
     {
-        Debug.Log($"[CropInstance] {cropData.cropName} died from wilting. Clearing plot and returning to unhoed state.");
+        Debug.Log($"[CropInstance] {cropData.cropName} died from wilting. Showing wilted sprite.");
 
-        // Find the plot this crop is on and clear it (which resets to unhoed)
-        if (FarmPlotManager.Instance != null)
+        // Stop any growth animations
+        if (growthCoroutine != null)
         {
-            FarmPlot plot = FarmPlotManager.Instance.GetPlotAtPosition(GridPosition);
-            if (plot != null)
-            {
-                plot.ClearPlot(); // This calls ResetToUnhoed() internally
-            }
+            StopCoroutine(growthCoroutine);
+            growthCoroutine = null;
         }
 
-        // Destroy the crop GameObject
-        Destroy(gameObject);
+        // Show wilted sprite permanently
+        isWilted = true;
+
+        // Update visual to show wilted state
+        UpdateVisuals();
+
+        // DO NOT destroy the GameObject - keep it visible as wilted
+        // Player must hoe the plot to remove it
     }
 
     /// <summary>
@@ -420,7 +444,7 @@ public class CropInstance : MonoBehaviour
 
         OnCropHarvested?.Invoke(this);
 
-        // Multi-harvest crops regrow, others are destroyed
+        // Multi-harvest crops regrow, others clear the plot
         if (cropData.multiHarvest)
         {
             currentStage = 2; // Reset to growing stage
@@ -431,11 +455,96 @@ public class CropInstance : MonoBehaviour
         }
         else
         {
+            // Clear the plot before destroying the crop
+            if (FarmPlotManager.Instance != null)
+            {
+                FarmPlot plot = FarmPlotManager.Instance.GetPlotAtPosition(GridPosition);
+                if (plot != null)
+                {
+                    plot.ClearPlot(); // This resets plot to unhoed state
+                }
+            }
+
             Debug.Log($"[CropInstance] {cropData.cropName} harvested and removed");
             Destroy(gameObject);
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Start shrinking animation for wilted crops
+    /// </summary>
+    private void StartWiltShrinkAnimation()
+    {
+        if (growthCoroutine != null)
+        {
+            StopCoroutine(growthCoroutine);
+        }
+
+        growthCoroutine = StartCoroutine(WiltShrinkCoroutine());
+    }
+
+    /// <summary>
+    /// Coroutine that progressively shrinks wilted crops through stages to smallest size
+    /// </summary>
+    private IEnumerator WiltShrinkCoroutine()
+    {
+        if (cropData == null) yield break;
+
+        int startingStage = currentStage;
+        float stageShrinkDuration = 4f; // 4 seconds per stage shrink
+
+        Debug.Log($"[CropInstance] Starting progressive wilt shrink from stage {startingStage}");
+
+        // Progressive shrinking through each stage down to stage 1
+        for (int stage = startingStage; stage >= 1; stage--)
+        {
+            // Use wilted sprite if available, otherwise use normal sprite
+            if (cropData.wiltedSprite != null)
+            {
+                spriteRenderer.sprite = cropData.wiltedSprite; // Use dedicated wilted sprite
+            }
+            else
+            {
+                spriteRenderer.sprite = cropData.GetStageSprite(stage); // Fallback to normal sprite
+                spriteRenderer.color = cropData.wiltedColor; // Apply brown color if no wilted sprite
+            }
+
+            if (cropData.wiltedSprite != null)
+            {
+                spriteRenderer.color = Color.white; // No color tinting needed for dedicated sprite
+            }
+
+            // Get scale range for this stage
+            float startScale = (stage == startingStage) ? transform.localScale.x : cropData.GetStageStartScale(stage + 1);
+            float endScale = cropData.GetStageStartScale(stage);
+
+            Debug.Log($"[CropInstance] Stage {stage} shrink: {startScale:F2} → {endScale:F2}");
+
+            // Shrink from start to end scale over duration
+            float elapsedTime = 0f;
+            while (elapsedTime < stageShrinkDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float progress = elapsedTime / stageShrinkDuration;
+
+                // Smooth shrinking curve
+                float currentScale = Mathf.Lerp(startScale, endScale, progress);
+                transform.localScale = Vector3.one * currentScale;
+
+                yield return null;
+            }
+
+            // Ensure final scale for this stage
+            transform.localScale = Vector3.one * endScale;
+
+            // Small pause between stage transitions
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        Debug.Log($"[CropInstance] Wilt shrink complete - using wilted sprite at smallest scale");
+        growthCoroutine = null;
     }
 
     /// <summary>
@@ -445,8 +554,27 @@ public class CropInstance : MonoBehaviour
     {
         if (cropData == null || spriteRenderer == null) return;
 
-        // Get sprite for current stage
-        Sprite stageSprite = cropData.GetStageSprite(currentStage);
+        // If wilted and shrinking animation is running, don't interfere
+        if (isWilted && growthCoroutine != null)
+        {
+            return; // Let the shrinking coroutine handle visuals
+        }
+
+        Sprite stageSprite;
+
+        // Use wilted sprite if crop is wilted and wilted sprite is available
+        if (isWilted && cropData.wiltedSprite != null)
+        {
+            stageSprite = cropData.wiltedSprite;
+            Debug.Log($"[CropInstance] Using WILTED sprite for {cropData.cropName} at {GridPosition}");
+        }
+        else
+        {
+            // Use normal stage sprite
+            int displayStage = currentStage;
+            stageSprite = cropData.GetStageSprite(displayStage);
+            Debug.Log($"[CropInstance] Using NORMAL stage {displayStage} sprite for {cropData.cropName} at {GridPosition}");
+        }
 
         // Stage 0 (seed) has no sprite - disable renderer
         if (stageSprite == null)
@@ -455,24 +583,38 @@ public class CropInstance : MonoBehaviour
             return;
         }
 
-        // Enable renderer and set sprite for visible stages
+        // Enable renderer and set sprite
         spriteRenderer.enabled = true;
         spriteRenderer.sprite = stageSprite;
 
         // Apply color
-        if (isWilted)
+        if (isWilted && cropData.wiltedSprite == null)
         {
+            // Only use color tinting if no dedicated wilted sprite
             spriteRenderer.color = cropData.wiltedColor;
         }
         else
         {
+            // Use white color for healthy crops or when using dedicated wilted sprite
             spriteRenderer.color = Color.white;
         }
 
-        // Set initial scale based on current stage
-        float startScale = cropData.GetStageStartScale(currentStage);
-        transform.localScale = Vector3.one * startScale;
-        targetScale = Vector3.one * cropData.finalScale;
+        // Set scale - only set if not currently animating
+        if (growthCoroutine == null)
+        {
+            float startScale;
+            if (isWilted)
+            {
+                startScale = cropData.GetStageStartScale(1); // Smallest scale for wilted crops
+            }
+            else
+            {
+                startScale = cropData.GetStageStartScale(currentStage); // Normal scale for healthy crops
+            }
+
+            transform.localScale = Vector3.one * startScale;
+            targetScale = Vector3.one * cropData.finalScale;
+        }
     }
 
     // Debug gizmo

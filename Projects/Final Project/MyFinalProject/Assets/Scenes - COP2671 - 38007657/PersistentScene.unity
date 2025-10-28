@@ -5455,7 +5455,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c7e4863bb476425dacad3b359be47ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dayDuration: 200
+  dayDuration: 100
   currentTime: 12
   pauseTime: 0
   sunriseTime: 6
@@ -7756,321 +7756,385 @@ MonoBehaviour:
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -20, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -18, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -17, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -21, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -20, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -18, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -17, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -21, y: 3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -20, y: 3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: 3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -18, y: 3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -17, y: 3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: 3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: 0}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: -1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: -3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -19, y: -4}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: 0}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: -1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: -3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -16, y: -4}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -22, y: 0}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -22, y: -3}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -9, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -8, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -7, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -6, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -5, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -4, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -3, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -2, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -1, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: 0, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: 1, y: 9}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -9, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -8, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -7, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -6, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -5, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -4, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -3, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -2, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -1, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: 0, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: 1, y: 6}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -5, y: 1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -4, y: 1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -3, y: 1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -2, y: 1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -1, y: 1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: 0, y: 1}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -5, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -4, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -3, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -2, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: -1, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   - gridPosition: {x: 0, y: -2}
     isHoed: 0
     isWet: 0
     isOccupied: 0
+    hasDeadCrop: 0
     currentCrop: {fileID: 0}
   unhoedSprite: {fileID: 0}
   hoedDrySprite: {fileID: -761770585386879356, guid: a787d978b74a56f40b7cf02bc7a54910, type: 3}
@@ -21236,7 +21300,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactionRange: 1.5
-  requireFacingPlot: 1
   facingAngleTolerance: 45
   testCropData: {fileID: 11400000, guid: 81db0243c08504dfc9b939eefabaea7e, type: 2}
   enableTestMode: 1

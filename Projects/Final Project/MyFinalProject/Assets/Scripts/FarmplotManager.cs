@@ -23,6 +23,7 @@ public class FarmPlotManager : MonoBehaviour
 
     [Header("Interaction Settings")]
     [SerializeField] private float interactionRange = 1.5f;
+    private float lastDryingCheck = 0f;
 
     [Header("Debug")]
     [SerializeField] private bool showPlotGizmos = true;
@@ -56,10 +57,14 @@ public class FarmPlotManager : MonoBehaviour
 
     private void Update()
     {
-        // Update drying state for all plots
-        foreach (FarmPlot plot in farmPlots)
+        // Update drying state once per second instead of every frame
+        if (Time.time - lastDryingCheck > 1f)
         {
-            plot.UpdateDryingState();
+            foreach (FarmPlot plot in farmPlots)
+            {
+                plot.UpdateDryingState();
+            }
+            lastDryingCheck = Time.time;
         }
     }
 

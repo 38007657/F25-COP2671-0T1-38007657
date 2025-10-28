@@ -9,7 +9,6 @@ public class PlayerFarmingInteraction : MonoBehaviour
 {
     [Header("Interaction Settings")]
     [SerializeField] private float interactionRange = 2.5f;
-    [SerializeField] private bool requireFacingPlot = true;
     [SerializeField] private float facingAngleTolerance = 90f; // Increased for easier interaction
 
     [Header("Test Crop (For Development)")]
@@ -117,6 +116,13 @@ public class PlayerFarmingInteraction : MonoBehaviour
             return;
         }
 
+        // Check if plot can be hoed (unhoed or has dead crop)
+        if (!plot.CanHoe)
+        {
+            Debug.Log("[PlayerFarmingInteraction] Plot is already hoed and has no dead crop to clear!");
+            return;
+        }
+
         // Calculate direction to plot
         Vector3 directionToPlot = (plot.WorldPosition - transform.position).normalized;
 
@@ -128,7 +134,14 @@ public class PlayerFarmingInteraction : MonoBehaviour
 
         if (success)
         {
-            Debug.Log("[PlayerFarmingInteraction] Hoed plot");
+            if (plot.HasDeadCrop)
+            {
+                Debug.Log("[PlayerFarmingInteraction] Cleared dead crop and re-hoed plot");
+            }
+            else
+            {
+                Debug.Log("[PlayerFarmingInteraction] Hoed plot");
+            }
 
             // Trigger hoe animation
             if (playerAnimator != null && !string.IsNullOrEmpty(hoeAnimationTrigger))
@@ -142,10 +155,6 @@ public class PlayerFarmingInteraction : MonoBehaviour
                 }
                 playerAnimator.SetTrigger(hoeAnimationTrigger);
             }
-        }
-        else
-        {
-            Debug.Log("[PlayerFarmingInteraction] Cannot hoe - plot is already hoed or has a crop");
         }
     }
 
@@ -287,13 +296,36 @@ public class PlayerFarmingInteraction : MonoBehaviour
     }
 
     /// <summary>
-    /// Get the plot the player is facing within interaction range and angle tolerance
+    /// Get the plot the player is facing or standing on within interaction range
     /// </summary>
     private FarmPlot GetFacingPlot()
     {
         if (farmPlotManager == null) return null;
 
-        // Get player's forward direction (from InputX/InputY if available, or transform)
+        // First, check if player is standing directly on a plot (within 0.8 units)
+        FarmPlot standingOnPlot = null;
+        float closestStandingDistance = 0.8f; // Close enough to be "standing on"
+
+        foreach (FarmPlot plot in farmPlotManager.GetAllPlots())
+        {
+            Vector3 directionToPlot = (plot.WorldPosition - transform.position);
+            float distance = directionToPlot.magnitude;
+
+            // If player is very close to a plot, prioritize it regardless of facing
+            if (distance < closestStandingDistance)
+            {
+                closestStandingDistance = distance;
+                standingOnPlot = plot;
+            }
+        }
+
+        // If standing on a plot, return it immediately
+        if (standingOnPlot != null)
+        {
+            return standingOnPlot;
+        }
+
+        // Fall back to original facing logic for plots at a distance
         Vector3 playerForward = transform.up; // Default to transform.up
 
         // If animator has InputX/InputY, use those for more accurate facing
@@ -310,14 +342,14 @@ public class PlayerFarmingInteraction : MonoBehaviour
         FarmPlot bestPlot = null;
         float bestScore = float.MaxValue; // Lower is better (combination of distance and angle)
 
-        // Check all plots within range
+        // Check all plots within range using facing logic
         foreach (FarmPlot plot in farmPlotManager.GetAllPlots())
         {
             Vector3 directionToPlot = (plot.WorldPosition - transform.position);
             float distance = directionToPlot.magnitude;
 
-            // Skip if out of range
-            if (distance > interactionRange) continue;
+            // Skip if out of range or too close (already handled above)
+            if (distance > interactionRange || distance < closestStandingDistance) continue;
 
             directionToPlot.Normalize();
 
@@ -328,7 +360,6 @@ public class PlayerFarmingInteraction : MonoBehaviour
             if (angle > facingAngleTolerance) continue;
 
             // Score based on distance (prioritize closest plot in facing direction)
-            // Lower score = better match
             float score = distance + (angle * 0.1f); // Prioritize closest plot, angle is minor factor
 
             if (score < bestScore)
@@ -369,7 +400,11 @@ public class PlayerFarmingInteraction : MonoBehaviour
 
         string prompt = "";
 
-        if (!nearestPlot.IsHoed)
+        if (nearestPlot.HasDeadCrop)
+        {
+            prompt = $"[{hoeKey}] Clear Dead Crop";
+        }
+        else if (!nearestPlot.IsHoed)
         {
             prompt = $"[{hoeKey}] Hoe Soil";
         }
@@ -383,9 +418,13 @@ public class PlayerFarmingInteraction : MonoBehaviour
             {
                 prompt = $"[{harvestKey}] Harvest {nearestPlot.CurrentCrop.CropData.cropName}";
             }
-            else if (!nearestPlot.CurrentCrop.IsWatered)
+            else if (!nearestPlot.CurrentCrop.IsWatered && !nearestPlot.CurrentCrop.IsWilted)
             {
                 prompt = $"[{waterKey}] Water {nearestPlot.CurrentCrop.CropData.cropName}";
+            }
+            else if (nearestPlot.CurrentCrop.IsWilted)
+            {
+                prompt = $"[{hoeKey}] Clear Dead Crop";
             }
             else
             {

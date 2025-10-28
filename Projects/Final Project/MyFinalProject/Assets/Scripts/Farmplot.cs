@@ -10,6 +10,7 @@ public class FarmPlot
     [SerializeField] private bool isHoed;
     [SerializeField] private bool isWet;
     [SerializeField] private bool isOccupied;
+    [SerializeField] private bool hasDeadCrop; // Track if there's a dead/wilted crop
     [SerializeField] private CropInstance currentCrop;
 
     // Visual marker (sprite that shows plot state)
@@ -17,15 +18,17 @@ public class FarmPlot
     private SpriteRenderer plotSpriteRenderer;
 
     // Time tracking for wet soil drying
-    private float lastWateredTime;
+    private int lastWateredDay = -1;
     private const float WET_DURATION = 120f; // 2 minutes (or adjust as needed)
 
     // Properties
     public Vector2Int GridPosition => gridPosition;
     public bool IsHoed => isHoed;
     public bool IsWet => isWet;
-    public bool IsOccupied => isOccupied;
-    public bool IsEmpty => !isOccupied;
+    public bool IsOccupied => isOccupied && currentCrop != null && currentCrop.IsWilted;
+    public bool HasDeadCrop => hasDeadCrop;
+    public bool IsEmpty => !isOccupied && !hasDeadCrop;
+    public bool CanHoe => !isHoed || HasDeadCrop;
     public bool CanPlant => isHoed && !isOccupied; // Must be hoed to plant
     public CropInstance CurrentCrop => currentCrop;
     public Vector3 WorldPosition
@@ -55,6 +58,32 @@ public class FarmPlot
     /// </summary>
     public bool Hoe()
     {
+        // If there's a dead crop, remove it and reset to unhoed state
+        if (hasDeadCrop && currentCrop != null)
+        {
+            Debug.Log($"[FarmPlot] Removing dead crop at {gridPosition} and resetting to unhoed state");
+
+            // Destroy the dead crop GameObject
+            if (Application.isPlaying)
+            {
+                Object.Destroy(currentCrop.gameObject);
+            }
+            else
+            {
+                Object.DestroyImmediate(currentCrop.gameObject);
+            }
+
+            currentCrop = null;
+            hasDeadCrop = false;
+            isOccupied = false;
+            isHoed = false; // Reset to unhoed after clearing dead crop
+            isWet = false;
+            UpdatePlotVisual();
+
+            Debug.Log($"[FarmPlot] Plot at {gridPosition} has been reset to unhoed state after clearing dead crop");
+            return true; // Successfully cleared dead crop
+        }
+
         if (isHoed)
         {
             Debug.LogWarning($"[FarmPlot] Plot at {gridPosition} is already hoed!");
@@ -81,22 +110,42 @@ public class FarmPlot
         if (!isHoed) return;
 
         isWet = true;
-        lastWateredTime = Time.time;
+        // Track which day the soil was watered
+        if (CropGrowthManager.Instance != null)
+        {
+            lastWateredDay = CropGrowthManager.Instance.CurrentDay;
+        }
         UpdatePlotVisual();
     }
 
     /// <summary>
-    /// Check if wet soil should dry out
+    /// Check if wet soil should dry out (called daily)
     /// </summary>
     public void UpdateDryingState()
     {
         if (!isWet) return;
 
-        if (Time.time - lastWateredTime > WET_DURATION)
+        // Soil dries out the day after watering
+        if (CropGrowthManager.Instance != null)
         {
-            isWet = false;
-            UpdatePlotVisual();
+            int currentDay = CropGrowthManager.Instance.CurrentDay;
+            if (currentDay > lastWateredDay)
+            {
+                isWet = false;
+                UpdatePlotVisual();
+                Debug.Log($"[FarmPlot] Soil at {gridPosition} dried out on day {currentDay}");
+            }
         }
+    }
+
+    /// <summary>
+    /// Mark that the crop at this plot is dead/wilted
+    /// </summary>
+    public void SetCropDead()
+    {
+        hasDeadCrop = true;
+        isOccupied = false; // No longer occupied by a living crop
+        Debug.Log($"[FarmPlot] Crop at {gridPosition} marked as dead. Player must hoe to clear.");
     }
 
     /// <summary>
@@ -107,6 +156,7 @@ public class FarmPlot
         isHoed = false;
         isWet = false;
         isOccupied = false;
+        hasDeadCrop = false;
         currentCrop = null;
         UpdatePlotVisual();
     }
@@ -216,6 +266,7 @@ public class FarmPlot
     {
         currentCrop = null;
         isOccupied = false;
+        hasDeadCrop = false;
 
         // Reset to unhoed state after harvest
         ResetToUnhoed();
@@ -236,15 +287,14 @@ public class FarmPlot
     {
         if (!isOccupied || currentCrop == null)
         {
-            // If plot is hoed but empty, just water the soil
-            if (isHoed)
-            {
-                WaterSoil();
-                Debug.Log($"[FarmPlot] Watered empty soil at {gridPosition}");
-                return true;
-            }
+            Debug.LogWarning($"[FarmPlot] Cannot water - no crop planted at {gridPosition}");
+            return false;
+        }
 
-            Debug.LogWarning($"[FarmPlot] No crop to water at {gridPosition}");
+        // Check if crop is wilted/dead before attempting to water
+        if (currentCrop.IsWilted)
+        {
+            Debug.LogWarning($"[FarmPlot] Cannot water dead/wilted crop at {gridPosition}");
             return false;
         }
 
