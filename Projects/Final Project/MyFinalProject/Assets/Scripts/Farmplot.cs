@@ -345,6 +345,19 @@ public class FarmPlot
     }
 
     /// <summary>
+    /// Clear dead crop and keep plot hoed
+    /// </summary>
+    public void ClearDeadCrop()
+    {
+        hasDeadCrop = false;
+        currentCrop = null;
+        isOccupied = false;
+        // Keep isHoed = true so plot stays ready for planting
+        UpdatePlotVisual();
+        Debug.Log($"[FarmPlot] Dead crop cleared at {gridPosition} - plot remains hoed");
+    }
+
+    /// <summary>
     /// Get visual marker
     /// </summary>
     public GameObject GetMarker()

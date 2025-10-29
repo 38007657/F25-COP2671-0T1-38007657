@@ -21307,12 +21307,14 @@ MonoBehaviour:
   plantKey: 112
   waterKey: 111
   harvestKey: 101
+  clearDeadCropKey: 99
   playerAnimator: {fileID: 1629046988}
   hoeAnimationTrigger: Hoe
   waterAnimationTrigger: Water
   useDirectionalAnimations: 1
   horizontalParameter: InputX
   verticalParameter: InputY
+  plantAnimationTrigger: 
   showInteractionPrompts: 1
 --- !u!1 &1848534789
 GameObject:

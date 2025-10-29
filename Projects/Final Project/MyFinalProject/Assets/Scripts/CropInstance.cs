@@ -81,8 +81,8 @@ public class CropInstance : MonoBehaviour
     {
         cropData = data;
         dayPlanted = currentDay;
-        lastWateredDay = currentDay; // Not watered yet
-        currentStage = 1; // Start at stage 1 (sprout) so sprite is visible immediately
+        lastWateredDay = -1; // Crop has never been watered
+        currentStage = 1;
         daysSinceStageChange = 0;
         isWatered = false; // Must water after planting
         isWilted = false;
@@ -248,7 +248,8 @@ public class CropInstance : MonoBehaviour
                 Instantiate(cropData.stageAdvanceParticles, transform.position, Quaternion.identity);
             }
 
-            UpdateVisuals();
+            // DON'T call UpdateVisuals here - let the growth animation handle it
+            // This prevents the crop from shrinking when advancing stages
 
             Debug.Log($"[CropInstance] {cropData.cropName} advanced to stage {currentStage}");
         }
@@ -285,6 +286,14 @@ public class CropInstance : MonoBehaviour
         // Enable sprite renderer for visible stages
         spriteRenderer.enabled = true;
 
+        // Update sprite for current stage at the start of animation
+        Sprite stageSprite = cropData.GetStageSprite(currentStage);
+        if (stageSprite != null)
+        {
+            spriteRenderer.sprite = stageSprite;
+            spriteRenderer.color = Color.white;
+        }
+
         // Start from current scale, not stage start scale
         float startScale = transform.localScale.x; // Use actual current scale
         float endScale = cropData.finalScale;
@@ -309,7 +318,7 @@ public class CropInstance : MonoBehaviour
         float daytimeHours = sunset - sunrise; // 12 hours
         float daytimeRealSeconds = (daytimeHours / 24f) * dayDuration; // Real seconds for 12 hours
 
-        Debug.Log($"[CropInstance] Stage {currentStage} growth animation: {startScale:F2} → {endScale:F2} over {daytimeRealSeconds:F1}s (at {TimeManager.Instance.TimeSpeedMultiplier}x speed)");
+        Debug.Log($"[CropInstance] Stage {currentStage} growth animation: {startScale:F2} â†’ {endScale:F2} over {daytimeRealSeconds:F1}s (at {TimeManager.Instance.TimeSpeedMultiplier}x speed)");
 
         float elapsedTime = 0f;
 
@@ -520,7 +529,7 @@ public class CropInstance : MonoBehaviour
             float startScale = (stage == startingStage) ? transform.localScale.x : cropData.GetStageStartScale(stage + 1);
             float endScale = cropData.GetStageStartScale(stage);
 
-            Debug.Log($"[CropInstance] Stage {stage} shrink: {startScale:F2} → {endScale:F2}");
+            Debug.Log($"[CropInstance] Stage {stage} shrink: {startScale:F2} â†’ {endScale:F2}");
 
             // Shrink from start to end scale over duration
             float elapsedTime = 0f;

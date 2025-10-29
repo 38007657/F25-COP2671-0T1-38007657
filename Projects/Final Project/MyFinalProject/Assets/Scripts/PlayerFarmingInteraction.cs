@@ -20,6 +20,7 @@ public class PlayerFarmingInteraction : MonoBehaviour
     [SerializeField] private KeyCode plantKey = KeyCode.P;
     [SerializeField] private KeyCode waterKey = KeyCode.O; // Changed from W to avoid movement conflict
     [SerializeField] private KeyCode harvestKey = KeyCode.E; // E for harvest (H is for hoe)
+    [SerializeField] private KeyCode clearDeadCropKey = KeyCode.C;
 
     [Header("Animation")]
     [SerializeField] private Animator playerAnimator;
@@ -28,12 +29,22 @@ public class PlayerFarmingInteraction : MonoBehaviour
     [SerializeField] private bool useDirectionalAnimations = true;
     [SerializeField] private string horizontalParameter = "InputX";
     [SerializeField] private string verticalParameter = "InputY";
+    [SerializeField] private string plantAnimationTrigger = "Plant";
 
     [Header("Visual Feedback")]
     [SerializeField] private bool showInteractionPrompts = true;
 
+    [Header("Auto-Facing")]
+    [SerializeField] private float facingLockDuration = 0.3f; // How long to maintain facing after action
+
     private FarmPlot nearestPlot;
     private FarmPlotManager farmPlotManager;
+    private Vector2 lockedFacingDirection;
+    private float facingLockTimer = 0f;
+
+    // Public property so PlayerController can check if facing is locked
+    public bool IsFacingLocked => facingLockTimer > 0f;
+    public Vector2 LockedFacingDirection => lockedFacingDirection;
 
     private void Start()
     {
@@ -48,6 +59,19 @@ public class PlayerFarmingInteraction : MonoBehaviour
 
     private void Update()
     {
+        // Update facing lock timer
+        if (facingLockTimer > 0f)
+        {
+            facingLockTimer -= Time.deltaTime;
+
+            // Apply locked facing direction
+            if (playerAnimator != null && lockedFacingDirection != Vector2.zero)
+            {
+                playerAnimator.SetFloat(horizontalParameter, lockedFacingDirection.x);
+                playerAnimator.SetFloat(verticalParameter, lockedFacingDirection.y);
+            }
+        }
+
         // Find nearest plot to player
         if (farmPlotManager != null)
         {
@@ -85,6 +109,8 @@ public class PlayerFarmingInteraction : MonoBehaviour
         {
             TryHarvest();
         }
+
+
     }
 
     /// <summary>
@@ -123,11 +149,14 @@ public class PlayerFarmingInteraction : MonoBehaviour
             return;
         }
 
-        // Calculate direction to plot
+        // Calculate direction to plot and auto-face it
         Vector3 directionToPlot = (plot.WorldPosition - transform.position).normalized;
 
-        // Face the plot before performing action
-        FaceDirection(directionToPlot);
+        // Always face the plot before performing action (even if standing on it)
+        if (directionToPlot.magnitude > 0.01f) // Only if there's a meaningful direction
+        {
+            FaceDirection(directionToPlot);
+        }
 
         // Try to hoe that specific plot
         bool success = plot.Hoe();
@@ -175,20 +204,46 @@ public class PlayerFarmingInteraction : MonoBehaviour
             return;
         }
 
-        // Try to plant at nearest empty plot
-        bool success = farmPlotManager.PlantCropNearPosition(
-            transform.position,
-            testCropData,
-            interactionRange
-        );
+        // Get the plot the player is facing
+        FarmPlot plot = GetFacingPlot();
+        if (plot == null || !plot.CanPlant)
+        {
+            Debug.Log("[PlayerFarmingInteraction] No suitable plot to plant on. Face an empty hoed plot!");
+            return;
+        }
+
+        // Calculate direction to plot and auto-face it
+        Vector3 directionToPlot = (plot.WorldPosition - transform.position).normalized;
+
+        // Always face the plot before performing action (even if standing on it)
+        if (directionToPlot.magnitude > 0.01f) // Only if there's a meaningful direction
+        {
+            FaceDirection(directionToPlot);
+        }
+
+        // Try to plant at the specific plot
+        bool success = farmPlotManager.PlantCrop(plot.GridPosition, testCropData);
 
         if (success)
         {
             Debug.Log($"[PlayerFarmingInteraction] Planted {testCropData.cropName}");
+
+            // Trigger plant animation
+            if (playerAnimator != null && !string.IsNullOrEmpty(plantAnimationTrigger))
+            {
+                // Set direction parameters for blend tree (if using directional animations)
+                if (useDirectionalAnimations)
+                {
+                    // Set animator parameters (InputX, InputY for blend tree)
+                    playerAnimator.SetFloat(horizontalParameter, directionToPlot.x);
+                    playerAnimator.SetFloat(verticalParameter, directionToPlot.y);
+                }
+                playerAnimator.SetTrigger(plantAnimationTrigger);
+            }
         }
         else
         {
-            Debug.Log("[PlayerFarmingInteraction] Cannot plant - no valid plot in range");
+            Debug.Log("[PlayerFarmingInteraction] Cannot plant - no valid plot in range or plot not suitable");
         }
     }
 
@@ -211,11 +266,14 @@ public class PlayerFarmingInteraction : MonoBehaviour
             return;
         }
 
-        // Calculate direction to plot
+        // Calculate direction to plot and auto-face it
         Vector3 directionToPlot = (plot.WorldPosition - transform.position).normalized;
 
-        // Face the plot before performing action
-        FaceDirection(directionToPlot);
+        // Always face the plot before performing action (even if standing on it)
+        if (directionToPlot.magnitude > 0.01f) // Only if there's a meaningful direction
+        {
+            FaceDirection(directionToPlot);
+        }
 
         // Water that specific plot
         bool success = plot.WaterCrop(CropGrowthManager.Instance != null ? CropGrowthManager.Instance.CurrentDay : 0);
@@ -254,15 +312,108 @@ public class PlayerFarmingInteraction : MonoBehaviour
             return;
         }
 
-        HarvestResult result = farmPlotManager.HarvestNearestCrop(transform.position);
+        // Get the plot the player is facing
+        FarmPlot plot = GetFacingPlot();
+        if (plot == null)
+        {
+            Debug.Log("[PlayerFarmingInteraction] No plot in front of you to harvest. Face a plot and try again!");
+            return;
+        }
+
+        if (plot.CurrentCrop == null || !plot.CurrentCrop.IsHarvestable)
+        {
+            Debug.Log("[PlayerFarmingInteraction] No harvestable crop at this plot");
+            return;
+        }
+
+        // Calculate direction to plot and auto-face it
+        Vector3 directionToPlot = (plot.WorldPosition - transform.position).normalized;
+
+        // Always face the plot before performing action (even if standing on it)
+        if (directionToPlot.magnitude > 0.01f) // Only if there's a meaningful direction
+        {
+            FaceDirection(directionToPlot);
+        }
+
+        // Harvest the crop
+        HarvestResult result = plot.HarvestCrop();
 
         if (result != null)
         {
             Debug.Log($"[PlayerFarmingInteraction] Harvested {result.quantity}x {result.cropName}!");
+
+            // Trigger harvest animation if set
+            if (playerAnimator != null && !string.IsNullOrEmpty("Harvest")) // You can add harvestAnimationTrigger field
+            {
+                if (useDirectionalAnimations)
+                {
+                    playerAnimator.SetFloat(horizontalParameter, directionToPlot.x);
+                    playerAnimator.SetFloat(verticalParameter, directionToPlot.y);
+                }
+                playerAnimator.SetTrigger("Harvest");
+            }
         }
         else
         {
-            Debug.Log("[PlayerFarmingInteraction] No harvestable crop in range");
+            Debug.Log("[PlayerFarmingInteraction] Failed to harvest crop");
+        }
+    }
+
+    /// <summary>
+    /// Try to clear dead crop at nearest plot
+    /// </summary>
+    public void TryClearDeadCrop()
+    {
+        if (farmPlotManager == null)
+        {
+            Debug.LogWarning("[PlayerFarmingInteraction] FarmPlotManager not found!");
+            return;
+        }
+
+        // Get the plot the player is facing
+        FarmPlot plot = GetFacingPlot();
+        if (plot == null)
+        {
+            Debug.Log("[PlayerFarmingInteraction] No plot in front of you to clear.");
+            return;
+        }
+
+        if (!plot.HasDeadCrop)
+        {
+            Debug.Log("[PlayerFarmingInteraction] No dead crop to clear at this plot.");
+            return;
+        }
+
+        // Calculate direction to plot and auto-face it
+        Vector3 directionToPlot = (plot.WorldPosition - transform.position).normalized;
+
+        // Always face the plot before performing action (even if standing on it)
+        if (directionToPlot.magnitude > 0.01f) // Only if there's a meaningful direction
+        {
+            FaceDirection(directionToPlot);
+        }
+
+        // Clear the dead crop
+        if (plot.CurrentCrop != null)
+        {
+            Destroy(plot.CurrentCrop.gameObject);
+        }
+
+        // Reset plot state manually since we're not using the Hoe() method
+        // You'll need to add a public method to FarmPlot for this
+        plot.ClearDeadCrop();
+
+        Debug.Log("[PlayerFarmingInteraction] Cleared dead crop - plot is now ready for planting");
+
+        // Optional: Trigger hoe animation since it's similar action
+        if (playerAnimator != null && !string.IsNullOrEmpty(hoeAnimationTrigger))
+        {
+            if (useDirectionalAnimations)
+            {
+                playerAnimator.SetFloat(horizontalParameter, directionToPlot.x);
+                playerAnimator.SetFloat(verticalParameter, directionToPlot.y);
+            }
+            playerAnimator.SetTrigger(hoeAnimationTrigger);
         }
     }
 
@@ -379,12 +530,37 @@ public class PlayerFarmingInteraction : MonoBehaviour
     {
         if (direction == Vector3.zero) return;
 
-        // For 2D games, don't rotate the transform - only update animator parameters
+        // Normalize the direction
+        direction.Normalize();
+
+        // Snap to cardinal directions for cleaner animations
+        float absX = Mathf.Abs(direction.x);
+        float absY = Mathf.Abs(direction.y);
+
+        Vector2 snappedDirection;
+        if (absX > absY)
+        {
+            // Horizontal direction dominates
+            snappedDirection = new Vector2(Mathf.Sign(direction.x), 0);
+        }
+        else
+        {
+            // Vertical direction dominates
+            snappedDirection = new Vector2(0, Mathf.Sign(direction.y));
+        }
+
+        // Store the locked facing direction
+        lockedFacingDirection = snappedDirection;
+        facingLockTimer = facingLockDuration;
+
+        // For 2D games, update animator parameters immediately
         // The blend tree will handle showing the correct directional animation
         if (playerAnimator != null)
         {
-            playerAnimator.SetFloat(horizontalParameter, direction.x);
-            playerAnimator.SetFloat(verticalParameter, direction.y);
+            playerAnimator.SetFloat(horizontalParameter, snappedDirection.x);
+            playerAnimator.SetFloat(verticalParameter, snappedDirection.y);
+
+            Debug.Log($"[PlayerFarmingInteraction] Auto-facing: Direction=({snappedDirection.x}, {snappedDirection.y}) locked for {facingLockDuration}s");
         }
     }
 
@@ -402,7 +578,7 @@ public class PlayerFarmingInteraction : MonoBehaviour
 
         if (nearestPlot.HasDeadCrop)
         {
-            prompt = $"[{hoeKey}] Clear Dead Crop";
+            prompt = $"[{clearDeadCropKey}] Clear Dead Crop"; // CHANGED to use C key
         }
         else if (!nearestPlot.IsHoed)
         {

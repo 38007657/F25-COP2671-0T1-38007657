@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b76d4e37d58504411922ce3601a47abb, type: 3}
-  m_Name: Wheat_CropData
+  m_Name: CeleryData
   m_EditorClassIdentifier: 
   cropID: 0
   cropName: Wheat
@@ -21,14 +21,18 @@ MonoBehaviour:
   totalGrowthDays: 2
   growthSpeed: 0
   requiresWater: 1
-  daysWithoutWater: 1
+  daysWithoutWater: 2
   harvestItemID: 0
   harvestQuantity: 1
   multiHarvest: 0
   regrowthDays: 1
   needsWaterSprite: {fileID: 0}
+  wiltedSprite: {fileID: -1228083979241763319, guid: 1f7c939d847d6b441b1a047e161bbf0f, type: 3}
   wiltedColor: {r: 0.5, g: 0.4, b: 0.3, a: 1}
-  seedScale: 0.3
+  stage1StartScale: 0.3
+  stage2StartScale: 0.5
+  stage3StartScale: 0.7
+  stage4StartScale: 0.9
   finalScale: 1
   growDuringDaytime: 1
   stageAdvanceParticles: {fileID: 0}
