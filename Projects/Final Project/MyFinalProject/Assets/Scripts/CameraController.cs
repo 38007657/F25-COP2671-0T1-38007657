@@ -1,27 +1,3 @@
-//using UnityEngine;
-
-//public class PixelPerfectCameraFollow : MonoBehaviour
-//{
-//    public Transform target;
-//    public Vector2 minBounds;
-//    public Vector2 maxBounds;
-
-//    void LateUpdate()
-//    {
-//        if (target == null) return;
-
-//        // Follow target directly (pixel-perfect snapping)
-//        Vector3 newPosition = target.position;
-//        newPosition.z = transform.position.z;
-
-//        // Clamp to boundaries
-//        newPosition.x = Mathf.Clamp(newPosition.x, minBounds.x, maxBounds.x);
-//        newPosition.y = Mathf.Clamp(newPosition.y, minBounds.y, maxBounds.y);
-
-//        transform.position = newPosition;
-//    }
-//}
-
 using UnityEngine;
 
 public class PixelPerfectCameraFollow : MonoBehaviour

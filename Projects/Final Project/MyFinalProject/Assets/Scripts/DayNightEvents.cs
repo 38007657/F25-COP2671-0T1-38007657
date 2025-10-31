@@ -158,12 +158,11 @@ public class DayNightEvents : MonoBehaviour
         }
     }
 
-    // Keep your existing preset methods (SetRealisticPreset, etc.) - they work the same for 2D
     private void SetRealisticPreset()
     {
         lightIntensityCurve = new AnimationCurve(new Keyframe[]
         {
-            new Keyframe(0f, 0.1f),    // Night - dim but not completely dark for 2D
+            new Keyframe(0f, 0.1f),    // Night
             new Keyframe(0.25f, 0.2f), // Sunrise
             new Keyframe(0.3f, 0.7f),  // Morning
             new Keyframe(0.5f, 1f),    // Noon

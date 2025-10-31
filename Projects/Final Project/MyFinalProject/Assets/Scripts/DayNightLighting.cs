@@ -98,7 +98,7 @@ public class DayNightLighting : MonoBehaviour
             //Debug.Log($"[DayNightLighting] Light color: {color}");
         }
 
-        // Update ambient lighting (still works with 2D)
+        // Update ambient lighting
         if (ambientColorGradient != null)
         {
             Color ambientColor = ambientColorGradient.Evaluate(normalizedTime);
