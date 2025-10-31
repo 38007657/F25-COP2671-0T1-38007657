@@ -1,27 +1,42 @@
 Animations
-- Hoed dirt animation shows above character
-- W key moves player up when watering
-- collision bumps shift layers around
-- sticking in between tiles
-- only plant crops where their sign is and only bushes by house
-- add trees to farm area
-- add fountain to area across bridge
-- add tree right side up the ladder
-- add hoeing and watering animations
-- add crop status indicators - needs watering, needs harvesting, wilted
-- if wilted player must hoe before using plot again
-- watered plant sound
-- harvested plant sound
-- sold crops money sound
+- Fix growth sprites to be 32px tall
+- Confirm sprite scaling looks proper during growth stage progression
+- Add crop status indicators - needs watering, needs harvesting, wilted
+- Wilted plant removal with hoe action not working
 
-House Scene
--inside house scene - can sleep -  Wakes up at 6am if sleeping. Haven't slept in 24 hours player must sleep - energy level goes down to one after 24 hours and player walks more slowly, can't hoe or plant or harvest.
+Tilemaps
+- Add tree right side up the ladder
+
+Sound and Effects
+- Watered plant sound
+- Harvested plant sound
+- Sold crops money chaching sound
 
 Inventory
-- access inventory any time in game to check numbers and sell crops/buy seeds
+- Add inventory button to toolbar.
+- Inventory slots for each crop and each crop seed.
+- Harvested crops can be sold and seeds can be purchased with the proceeds.
+- Access inventory any time in game to check numbers and sell crops/buy seeds.
 
 UI
-good night/good morning message
-You're tired message
-Zzz text when sleeping, screen fades to black, fades into scene at 6am.
-Pause option
+- Game Pause option
+- Game Save/Load
+
+House Scene
+- Inside house scene
+
+
+
+Potential Additions
+
+House Scene
+- Sleep Action
+- Wakes up at 6am if sleeping.
+- Sleep requriements
+    - If hasn't slept in 24 hours the player must sleep or there are consequences
+    - Energy level goes down to one after 24 hours and player walks more slowly, can't hoe or plant or harvest.
+
+UI
+- Good night/Good morning message
+- You're tired message
+- Zzz text when sleeping, screen fades to black, fades into scene at 6am.
