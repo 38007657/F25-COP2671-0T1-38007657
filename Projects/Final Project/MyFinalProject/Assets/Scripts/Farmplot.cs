@@ -298,6 +298,13 @@ public class FarmPlot
             return false;
         }
 
+        // Check if crop is harvestable - if so, don't water crop OR soil
+        if (currentCrop.IsHarvestable)
+        {
+            Debug.Log($"[FarmPlot] Crop at {gridPosition} is ready to harvest! Cannot water harvestable crops.");
+            return false;
+        }
+
         // Water both the crop and the soil
         currentCrop.Water(currentDay);
         WaterSoil();
