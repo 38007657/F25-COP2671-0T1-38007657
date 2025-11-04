@@ -1,0 +1,358 @@
+using UnityEngine;
+using UnityEngine.Tilemaps;
+using System.Collections.Generic;
+
+/// <summary>
+/// Manages all farming operations using tilemaps
+/// Replaces FarmPlotManager and CropGrowthManager
+/// Part 1 Requirements: Grid-based crop management system
+/// </summary>
+public class CropManager : MonoBehaviour
+{
+    public static CropManager Instance { get; private set; }
+
+    [Header("Tilemap References")]
+    [Tooltip("Ground tilemap for soil states (untilled, dry, wet)")]
+    [SerializeField] private Tilemap soilTilemap;
+
+    [Tooltip("FarmingVisuals tilemap for crop sprites")]
+    [SerializeField] private Tilemap cropTilemap;
+
+    [Header("Soil Tiles")]
+    [SerializeField] private TileBase untilledTile;
+    [SerializeField] private TileBase drySoilTile;
+    [SerializeField] private TileBase wetSoilTile;
+
+    [Header("Grid Settings")]
+    [SerializeField] private Vector2Int gridSize = new Vector2Int(20, 20);
+    [SerializeField] private Vector2Int gridOffset = new Vector2Int(-10, -10);
+
+    [Header("Current Day")]
+    [SerializeField] private int currentDay = 0;
+
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = true;
+
+    // 2D array to store crop blocks by tile position
+    private CropBlock[,] cropGrid;
+
+    // List of actively planted crops
+    private List<CropBlock> plantedCrops = new List<CropBlock>();
+
+    // Properties
+    public int CurrentDay => currentDay;
+
+    private void Awake()
+    {
+        // Singleton
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        // Initialize grid using both tilemaps
+        CreateGridUsingTilemap();
+    }
+
+    private void Start()
+    {
+        // Subscribe to TimeManager if it exists
+        if (TimeManager.Instance != null)
+        {
+            TimeManager.Instance.OnHourChanged += OnHourChanged;
+            UnityEngine.Debug.Log("[CropManager] Subscribed to TimeManager");
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("[CropManager] TimeManager not found!");
+        }
+    }
+
+    private void Update()
+    {
+        // Update all planted crops (growth progress)
+        float deltaTime = Time.deltaTime;
+        foreach (CropBlock block in plantedCrops)
+        {
+            if (block != null)
+            {
+                block.UpdateGrowth(deltaTime, currentDay);
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (TimeManager.Instance != null)
+        {
+            TimeManager.Instance.OnHourChanged -= OnHourChanged;
+        }
+    }
+
+    /// <summary>
+    /// Handle time changes - advance day at sunrise
+    /// </summary>
+    private void OnHourChanged(float time)
+    {
+        if (TimeManager.Instance == null) return;
+
+        int currentHour = Mathf.FloorToInt(time);
+
+        // Advance day at 6 AM (sunrise)
+        if (currentHour == 6)
+        {
+            AdvanceDay();
+        }
+    }
+
+    /// <summary>
+    /// Advance to next day
+    /// </summary>
+    private void AdvanceDay()
+    {
+        currentDay++;
+
+        if (showDebugInfo)
+        {
+            UnityEngine.Debug.Log($"[CropManager] === DAY {currentDay} ===");
+            UnityEngine.Debug.Log($"[CropManager] Planted crops: {plantedCrops.Count}");
+        }
+
+        // Call OnSunrise for each planted crop
+        foreach (CropBlock block in plantedCrops)
+        {
+            if (block != null)
+            {
+                block.OnSunrise(currentDay);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Create grid using tilemap - Part 1 Requirement
+    /// </summary>
+    public void CreateGridUsingTilemap()
+    {
+        if (soilTilemap == null || cropTilemap == null)
+        {
+            UnityEngine.Debug.LogError("[CropManager] Both soil and crop tilemaps must be assigned!");
+            return;
+        }
+
+        // Initialize 2D array to store crop data by tile position
+        cropGrid = new CropBlock[gridSize.x, gridSize.y];
+
+        // Create crop blocks for each grid position
+        for (int x = 0; x < gridSize.x; x++)
+        {
+            for (int y = 0; y < gridSize.y; y++)
+            {
+                Vector2Int gridPos = new Vector2Int(x + gridOffset.x, y + gridOffset.y);
+                Vector3 worldPos = soilTilemap.GetCellCenterWorld(new Vector3Int(gridPos.x, gridPos.y, 0));
+
+                CreateGridBlock(gridPos, worldPos, x, y);
+            }
+        }
+
+        UnityEngine.Debug.Log($"[CropManager] Created {gridSize.x}x{gridSize.y} farming grid");
+    }
+
+    /// <summary>
+    /// Create a single grid block - Part 1 Requirement
+    /// </summary>
+    private void CreateGridBlock(Vector2Int location, Vector3 position, int arrayX, int arrayY)
+    {
+        CropBlock block = new CropBlock(location, position, soilTilemap, cropTilemap, this);
+        cropGrid[arrayX, arrayY] = block;
+    }
+
+    /// <summary>
+    /// Add crop block to planted crops list - Part 1 Requirement
+    /// </summary>
+    public void AddToPlantedCrops(CropBlock cropBlock)
+    {
+        if (!plantedCrops.Contains(cropBlock))
+        {
+            plantedCrops.Add(cropBlock);
+
+            if (showDebugInfo)
+            {
+                UnityEngine.Debug.Log($"[CropManager] Added {cropBlock.seedPacket?.cropName ?? "crop"} to planted crops list");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Remove crop block from planted crops list - Part 1 Requirement
+    /// </summary>
+    public void RemoveFromPlantedCrops(CropBlock cropBlock)
+    {
+        plantedCrops.Remove(cropBlock);
+
+        if (showDebugInfo)
+        {
+            UnityEngine.Debug.Log($"[CropManager] Removed {cropBlock.seedPacket?.cropName ?? "crop"} from planted crops list");
+        }
+    }
+
+    /// <summary>
+    /// Get crop block at specific grid position
+    /// </summary>
+    public CropBlock GetBlockAtPosition(Vector2Int gridPos)
+    {
+        int x = gridPos.x - gridOffset.x;
+        int y = gridPos.y - gridOffset.y;
+
+        if (x < 0 || x >= gridSize.x || y < 0 || y >= gridSize.y)
+        {
+            return null;
+        }
+
+        return cropGrid[x, y];
+    }
+
+    /// <summary>
+    /// Get crop block at world position
+    /// </summary>
+    public CropBlock GetBlockAtWorldPosition(Vector3 worldPos)
+    {
+        if (soilTilemap == null) return null;
+
+        Vector3Int cellPos = soilTilemap.WorldToCell(worldPos);
+        return GetBlockAtPosition(new Vector2Int(cellPos.x, cellPos.y));
+    }
+
+    /// <summary>
+    /// Check if currently daytime (for growth logic)
+    /// </summary>
+    public bool IsDaytime()
+    {
+        if (TimeManager.Instance != null)
+        {
+            return TimeManager.Instance.IsDaytime;
+        }
+        return true; // Default to daytime if no TimeManager
+    }
+
+    // Tile setting methods for soil tilemap
+    public void SetUntilledTile(Vector3Int tilePos)
+    {
+        if (soilTilemap != null && untilledTile != null)
+        {
+            soilTilemap.SetTile(tilePos, untilledTile);
+        }
+    }
+
+    public void SetDrySoilTile(Vector3Int tilePos)
+    {
+        if (soilTilemap != null && drySoilTile != null)
+        {
+            soilTilemap.SetTile(tilePos, drySoilTile);
+        }
+    }
+
+    public void SetWetSoilTile(Vector3Int tilePos)
+    {
+        if (soilTilemap != null && wetSoilTile != null)
+        {
+            soilTilemap.SetTile(tilePos, wetSoilTile);
+        }
+    }
+
+    /// <summary>
+    /// Set crop sprite on crop tilemap layer
+    /// </summary>
+    public void SetCropTile(Vector3Int tilePos, Sprite sprite)
+    {
+        if (cropTilemap == null) return;
+
+        if (sprite != null)
+        {
+            Tile tile = ScriptableObject.CreateInstance<Tile>();
+            tile.sprite = sprite;
+            cropTilemap.SetTile(tilePos, tile);
+        }
+        else
+        {
+            // Clear crop tile (soil will be visible underneath)
+            cropTilemap.SetTile(tilePos, null);
+        }
+    }
+
+    /// <summary>
+    /// Get all harvestable crops
+    /// </summary>
+    public List<CropBlock> GetHarvestableCrops()
+    {
+        List<CropBlock> harvestable = new List<CropBlock>();
+
+        foreach (CropBlock block in plantedCrops)
+        {
+            if (block != null && block.IsHarvestable())
+            {
+                harvestable.Add(block);
+            }
+        }
+
+        return harvestable;
+    }
+
+    /// <summary>
+    /// Get crops that need water
+    /// </summary>
+    public List<CropBlock> GetCropsNeedingWater()
+    {
+        List<CropBlock> needWater = new List<CropBlock>();
+
+        foreach (CropBlock block in plantedCrops)
+        {
+            if (block != null && block.isPlanted && !block.isWatered && !block.isWilted)
+            {
+                needWater.Add(block);
+            }
+        }
+
+        return needWater;
+    }
+
+    /// <summary>
+    /// Debug: Show grid info
+    /// </summary>
+    [ContextMenu("Debug Grid Info")]
+    public void DebugGridInfo()
+    {
+        UnityEngine.Debug.Log($"=== CROP MANAGER DEBUG ===");
+        UnityEngine.Debug.Log($"Grid Size: {gridSize}");
+        UnityEngine.Debug.Log($"Grid Offset: {gridOffset}");
+        UnityEngine.Debug.Log($"Current Day: {currentDay}");
+        UnityEngine.Debug.Log($"Planted Crops: {plantedCrops.Count}");
+        UnityEngine.Debug.Log($"Harvestable Crops: {GetHarvestableCrops().Count}");
+        UnityEngine.Debug.Log($"Crops Needing Water: {GetCropsNeedingWater().Count}");
+    }
+
+    // Debug display
+    private void OnGUI()
+    {
+        if (showDebugInfo)
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.label);
+            style.fontSize = 14;
+            style.normal.textColor = Color.white;
+            style.fontStyle = FontStyle.Bold;
+
+            // Shadow effect
+            GUI.color = Color.black;
+            GUI.Label(new Rect(11, 11, 400, 25), $"Day: {currentDay}", style);
+            GUI.Label(new Rect(11, 31, 400, 25), $"Planted: {plantedCrops.Count} | Harvestable: {GetHarvestableCrops().Count} | Need Water: {GetCropsNeedingWater().Count}", style);
+
+            // Main text
+            GUI.color = Color.white;
+            GUI.Label(new Rect(10, 10, 400, 25), $"Day: {currentDay}", style);
+            GUI.Label(new Rect(10, 30, 400, 25), $"Planted: {plantedCrops.Count} | Harvestable: {GetHarvestableCrops().Count} | Need Water: {GetCropsNeedingWater().Count}", style);
+
+            GUI.color = Color.white;
+        }
+    }
+}

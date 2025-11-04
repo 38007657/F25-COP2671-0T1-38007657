@@ -294,8 +294,8 @@ TilemapRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 501485765
-  m_SortingLayer: -1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 1
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
@@ -5388,7 +5388,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &465041907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5614,6 +5614,7 @@ GameObject:
   - component: {fileID: 519658109}
   - component: {fileID: 519658108}
   - component: {fileID: 519658110}
+  - component: {fileID: 519658111}
   m_Layer: 5
   m_Name: Toolbar
   m_TagString: Untagged
@@ -5641,8 +5642,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 120.49997, y: 27.42102}
-  m_SizeDelta: {x: -1132.7999, y: 177.35}
+  m_AnchoredPosition: {x: 40, y: 27.42102}
+  m_SizeDelta: {x: -1132.7999, y: 169.09}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &519658108
 MonoBehaviour:
@@ -5706,6 +5707,82 @@ MonoBehaviour:
   m_Spacing: {x: 75, y: 0}
   m_Constraint: 1
   m_ConstraintCount: 4
+--- !u!114 &519658111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519658106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b662d96e1748643ae933ded9eca5eb65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoeButton: {fileID: 1209444026}
+  plantButton: {fileID: 373479099}
+  waterButton: {fileID: 775904663}
+  harvestButton: {fileID: 822163242}
+  OnHoe:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1209444024}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnWater:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 775904661}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnSeed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 373479097}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnGather:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 822163240}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &741221913
 GameObject:
   m_ObjectHideFlags: 0
@@ -8312,7 +8389,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1118977189
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9110,31 +9187,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1340785363}
-  - component: {fileID: 1340785362}
+  - component: {fileID: 1340785364}
   m_Layer: 0
-  m_Name: CropGrowthManager
+  m_Name: CropManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1340785362
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1340785361}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0485c4921f5a4babb5386dcaeece963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentDay: 0
-  currentSeason: 0
-  daysPerSeason: 28
-  activeCrops: []
-  showDebugInfo: 1
 --- !u!4 &1340785363
 Transform:
   m_ObjectHideFlags: 0
@@ -9150,6 +9210,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1340785364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1340785361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ebc98010b879460fa7808f907af94fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soilTilemap: {fileID: 238940639}
+  cropTilemap: {fileID: 224029093}
+  untilledTile: {fileID: 11400000, guid: 1161cf270aba148258abf516cc4aaf38, type: 2}
+  drySoilTile: {fileID: 11400000, guid: 2b7633c8fb8ba406b8fd97ea77233d5e, type: 2}
+  wetSoilTile: {fileID: 11400000, guid: f0e70b0f33bef45e8ac7916b5805bfcf, type: 2}
+  gridSize: {x: 20, y: 20}
+  gridOffset: {x: -10, y: -10}
+  currentDay: 0
+  showDebugInfo: 1
 --- !u!1 &1346069349
 GameObject:
   m_ObjectHideFlags: 0
@@ -21405,6 +21486,65 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1776019219
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1776019221}
+  - component: {fileID: 1776019220}
+  m_Layer: 0
+  m_Name: FarmingController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1776019220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776019219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13aacbb25a89454cba1a40611215e02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactionRange: 2.5
+  testSeedPacket: {fileID: 11400000, guid: 1dce9b814c1fb406c843ebf893aaeb92, type: 2}
+  playerTransform: {fileID: 1805825070}
+  playerAnimator: {fileID: 1629046988}
+  hoeAnimationTrigger: Hoe
+  waterAnimationTrigger: Water
+  plantAnimationTrigger: Plant
+  harvestAnimationTrigger: Harvest
+  useDirectionalAnimations: 1
+  horizontalParameter: InputX
+  verticalParameter: InputY
+  facingLockDuration: 0.3
+  selectionIndicator: {fileID: 0}
+  showSelectionIndicator: 1
+  showDebugInfo: 1
+--- !u!4 &1776019221
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776019219}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.1552098, y: 1.5782895, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1805825067
 GameObject:
   m_ObjectHideFlags: 0
@@ -21418,7 +21558,6 @@ GameObject:
   - component: {fileID: 1805825068}
   - component: {fileID: 1805825071}
   - component: {fileID: 1805825072}
-  - component: {fileID: 1805825073}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -21536,7 +21675,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1805825067}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e43051149ba484a7ca76387c6d567cc6, type: 3}
   m_Name: 
@@ -21559,18 +21698,6 @@ MonoBehaviour:
   plantAnimationTrigger: 
   showInteractionPrompts: 1
   facingLockDuration: 0.3
---- !u!114 &1805825073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1805825067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a207a64f570454bf1b11915f1aa51ca3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1848534789
 GameObject:
   m_ObjectHideFlags: 0
@@ -21665,7 +21792,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1911629467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21717,3 +21844,4 @@ SceneRoots:
   - {fileID: 1346069352}
   - {fileID: 465041908}
   - {fileID: 1911629468}
+  - {fileID: 1776019221}
