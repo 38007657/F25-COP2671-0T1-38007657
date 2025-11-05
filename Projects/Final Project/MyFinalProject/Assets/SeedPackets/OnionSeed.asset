@@ -20,6 +20,6 @@ MonoBehaviour:
   - {fileID: -459716627436792591, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   - {fileID: -8675129846650585020, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   wiltedSprite: {fileID: -1228083979241763319, guid: 1f7c939d847d6b441b1a047e161bbf0f, type: 3}
-  harvestablePrefab: {fileID: 0}
+  harvestablePrefab: {fileID: 8243805681713857550, guid: 8152eb4cddd614b5583953524767a462, type: 3}
   totalGrowthDays: 3
   requiresWater: 1

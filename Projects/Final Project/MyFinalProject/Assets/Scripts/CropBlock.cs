@@ -189,6 +189,7 @@ public class CropBlock
         GameObject harvestable = null;
         if (seedPacket.harvestablePrefab != null)
         {
+            Vector3 spawnPos = worldPosition + new Vector3(0, -0.3f, 0);
             harvestable = Object.Instantiate(seedPacket.harvestablePrefab, worldPosition, Quaternion.identity);
         }
 

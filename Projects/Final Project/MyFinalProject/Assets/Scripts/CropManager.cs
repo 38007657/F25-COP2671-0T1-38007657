@@ -44,7 +44,6 @@ public class CropManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -52,8 +51,13 @@ public class CropManager : MonoBehaviour
         }
         Instance = this;
 
-        // Initialize grid using both tilemaps
+        // Add this debug
+        Debug.Log($"[CropManager] Soil Tilemap: {soilTilemap != null}, Crop Tilemap: {cropTilemap != null}");
+
         CreateGridUsingTilemap();
+
+        // Add this too
+        Debug.Log($"[CropManager] Grid created: {cropGrid != null}");
     }
 
     private void Start()

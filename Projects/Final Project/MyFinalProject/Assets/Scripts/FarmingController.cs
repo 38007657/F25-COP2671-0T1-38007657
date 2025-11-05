@@ -289,9 +289,12 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        if (testSeedPacket == null)
+        // Get selected seed from inventory instead of using testSeedPacket
+        SeedPacket selectedSeed = SeedInventory.Instance?.SelectedSeed;
+
+        if (selectedSeed == null)
         {
-            UnityEngine.Debug.LogWarning("[FarmingController] No test seed packet assigned!");
+            UnityEngine.Debug.LogWarning("[FarmingController] No seed selected!");
             return;
         }
 
@@ -306,8 +309,8 @@ public class FarmingController : MonoBehaviour
 
         FaceDirection(facingDir);
 
-        // Perform action
-        bool success = selectedBlock.PlantSeed(testSeedPacket, cropManager.CurrentDay);
+        // Perform action with selected seed
+        bool success = selectedBlock.PlantSeed(selectedSeed, cropManager.CurrentDay);
 
         // Play animation if successful
         if (success)
@@ -348,37 +351,23 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Handle gather/harvest event from toolbar
-    /// </summary>
+    // In FarmingController.HandleGatherEvent() [3]
     public void HandleGatherEvent()
     {
-        if (selectedBlock == null)
-        {
-            UnityEngine.Debug.Log("[FarmingController] No block selected to harvest!");
-            return;
-        }
+        if (selectedBlock == null) return;
 
-        // Use player's CURRENT facing direction
+        Vector3 playerPosBefore = playerTransform.position;
+        Debug.Log($"[Harvest] Player position BEFORE: {playerPosBefore}");
+
         Vector3 facingDir = GetPlayerFacingDirection();
-
-        if (facingDir == Vector3.zero)
-        {
-            Vector3 adjustedPlayerPos = playerTransform.position + new Vector3(0, 0.5f, 0);
-            facingDir = (selectedBlock.worldPosition - playerTransform.position).normalized;
-        }
-
         FaceDirection(facingDir);
 
-        // Perform action
         GameObject result = selectedBlock.HarvestPlant();
 
-        // Play animation if we harvested something
+        Debug.Log($"[Harvest] Player position AFTER: {playerTransform.position}");
+        Debug.Log($"[Harvest] Position changed by: {playerTransform.position - playerPosBefore}");
+
         if (result != null)
-        {
-            PlayAnimation(harvestAnimationTrigger, facingDir);
-        }
-        else if (selectedBlock.IsHarvestable())
         {
             PlayAnimation(harvestAnimationTrigger, facingDir);
         }

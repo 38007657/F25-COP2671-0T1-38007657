@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        Vector3 positionBefore = transform.position;
+
         // Get input in Update
         movementInput.x = Input.GetAxisRaw("Horizontal");
         movementInput.y = Input.GetAxisRaw("Vertical");
@@ -63,11 +65,25 @@ public class PlayerController : MonoBehaviour
 
             animator.SetBool("isWalking", isWalking);
         }
+
+        if (Vector3.Distance(positionBefore, transform.position) > 0.01f)
+        {
+            Debug.LogWarning($"[PlayerController] Position changed in Update from {positionBefore} to {transform.position}");
+        }
     }
+
+
 
     void FixedUpdate()
     {
+        Vector3 positionBefore = transform.position;
+
         // Apply velocity in FixedUpdate for physics
         playerRb.linearVelocity = movementInput * moveSpeed;
+
+        if (Vector3.Distance(positionBefore, transform.position) > 0.01f)
+        {
+            Debug.LogWarning($"[PlayerController] Position changed in FixedUpdate from {positionBefore} to {transform.position}");
+        }
     }
 }
