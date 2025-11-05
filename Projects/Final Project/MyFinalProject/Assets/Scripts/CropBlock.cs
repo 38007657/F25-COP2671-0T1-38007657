@@ -47,12 +47,7 @@ public class CropBlock
     /// </summary>
     public bool TillSoil()
     {
-        if (isTilled)
-        {
-            UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
-            return false;
-        }
-
+        // CHECK FOR PLANTED CROPS FIRST (before checking isTilled)
         if (isPlanted)
         {
             // Allow hoeing if crop is wilted (to remove it)
@@ -68,6 +63,13 @@ public class CropBlock
             }
 
             UnityEngine.Debug.Log($"[CropBlock] Cannot till - crop already planted!");
+            return false;
+        }
+
+        // NOW check if already tilled (moved this down)
+        if (isTilled)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
             return false;
         }
 
@@ -104,6 +106,12 @@ public class CropBlock
         if (isWilted)
         {
             UnityEngine.Debug.Log($"[CropBlock] Cannot water wilted crop! Use hoe to remove it.");
+            return false;
+        }
+
+        if (currentGrowthStage >= 3)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] Crop is ready to harvest! No need to water.");
             return false;
         }
 
