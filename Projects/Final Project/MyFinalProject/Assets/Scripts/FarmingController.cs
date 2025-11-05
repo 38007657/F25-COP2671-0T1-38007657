@@ -8,6 +8,8 @@ public class FarmingController : MonoBehaviour
 {
     [Header("Interaction Settings")]
     [SerializeField] private float interactionRange = 2.5f;
+    [Tooltip("Y-axis offset for 64x64 player interacting with 16x16 tiles")]
+    [SerializeField] private float playerYOffset = -1.5f; // ← Start with -1.5
 
     [Header("Test Seed")]
     [SerializeField] private SeedPacket testSeedPacket;
@@ -24,6 +26,7 @@ public class FarmingController : MonoBehaviour
     [SerializeField] private bool useDirectionalAnimations = true;
     [SerializeField] private string horizontalParameter = "InputX";
     [SerializeField] private string verticalParameter = "InputY";
+
 
     [Header("Auto-Facing")]
     [SerializeField] private float facingLockDuration = 0.3f;
@@ -133,7 +136,7 @@ public class FarmingController : MonoBehaviour
     // ===== HELPER METHODS =====
 
     /// <summary>
-    /// Find the crop block directly in front of the player within range
+    /// Find the nearest crop block to player (no facing direction needed)
     /// </summary>
     private void UpdateSelectedBlock()
     {
@@ -143,30 +146,27 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Get player's facing direction
-        Vector2 facingDirection = GetPlayerFacingDirection();
-
-        // Snap to cardinal direction
-        facingDirection = SnapToCardinalDirection(facingDirection);
-
-        // Check tiles in front of player (1-2 tiles away)
+        // Just find the absolute closest block - period
         CropBlock closestBlock = null;
-        float closestDistance = float.MaxValue;
+        float closestDistance = interactionRange;
 
-        for (int i = 1; i <= 2; i++)
+        // Check all blocks in the grid (or optimize by checking nearby area)
+        for (int x = -2; x <= 2; x++)
         {
-            Vector3 checkPosition = playerTransform.position + (Vector3)(facingDirection * i);
-            CropBlock block = cropManager.GetBlockAtWorldPosition(checkPosition);
-
-            if (block != null)
+            for (int y = -2; y <= 2; y++)
             {
-                float distance = Vector3.Distance(playerTransform.position, block.worldPosition);
+                Vector3 checkPos = playerTransform.position + new Vector3(x, y, 0);
+                CropBlock block = cropManager.GetBlockAtWorldPosition(checkPos);
 
-                // Only select if within range and closer than previous
-                if (distance <= interactionRange && distance < closestDistance)
+                if (block != null)
                 {
-                    closestBlock = block;
-                    closestDistance = distance;
+                    float distance = Vector3.Distance(playerTransform.position, block.worldPosition);
+
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        closestBlock = block;
+                    }
                 }
             }
         }
@@ -261,6 +261,7 @@ public class FarmingController : MonoBehaviour
         // Only calculate direction to block if player isn't facing anywhere
         if (facingDir == Vector3.zero)
         {
+            Vector3 adjustedPlayerPos = playerTransform.position + new Vector3(0, 0.5f, 0);
             facingDir = (selectedBlock.worldPosition - playerTransform.position).normalized;
         }
 
@@ -299,6 +300,7 @@ public class FarmingController : MonoBehaviour
 
         if (facingDir == Vector3.zero)
         {
+            Vector3 adjustedPlayerPos = playerTransform.position + new Vector3(0, 0.5f, 0);
             facingDir = (selectedBlock.worldPosition - playerTransform.position).normalized;
         }
 
@@ -330,6 +332,7 @@ public class FarmingController : MonoBehaviour
 
         if (facingDir == Vector3.zero)
         {
+            Vector3 adjustedPlayerPos = playerTransform.position + new Vector3(0, 0.5f, 0);
             facingDir = (selectedBlock.worldPosition - playerTransform.position).normalized;
         }
 
@@ -361,6 +364,7 @@ public class FarmingController : MonoBehaviour
 
         if (facingDir == Vector3.zero)
         {
+            Vector3 adjustedPlayerPos = playerTransform.position + new Vector3(0, 0.5f, 0);
             facingDir = (selectedBlock.worldPosition - playerTransform.position).normalized;
         }
 

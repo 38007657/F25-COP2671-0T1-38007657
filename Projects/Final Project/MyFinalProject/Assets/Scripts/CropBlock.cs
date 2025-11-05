@@ -201,33 +201,14 @@ public class CropBlock
     }
 
     /// <summary>
-    /// Update growth progress - Part 3 Requirement: Advance growth stages over time
-    /// Only grow if watered
+    /// Update growth progress - Part 3 Requirement
+    /// Growth now happens at sunrise (day-based), not frame-based
+    /// This method kept for compatibility but no longer advances stages
     /// </summary>
     public void UpdateGrowth(float deltaTime, int currentDay)
     {
-        if (!isPlanted || seedPacket == null) return;
-        if (isWilted) return; // Wilted crops don't grow
-        if (currentGrowthStage >= 3) return; // Already fully grown
-
-        // Check if watered (required to grow) - seeds don't grow without water
-        if (seedPacket.requiresWater && !isWatered)
-        {
-            // Crop doesn't grow without water - stays at current stage
-            return;
-        }
-
-        // Advance growth timer
-        growthTimer += deltaTime;
-
-        // Check if ready for next stage
-        float stageDuration = seedPacket.stageDurations[currentGrowthStage];
-
-        if (growthTimer >= stageDuration)
-        {
-            growthTimer = 0f;
-            AdvanceStage();
-        }
+        // Day-based growth - stages advance at sunrise via OnSunrise()
+        // This method intentionally does nothing now
     }
 
     /// <summary>
@@ -246,46 +227,79 @@ public class CropBlock
     }
 
     /// <summary>
-    /// Called at sunrise (6 AM) - reset watered status and check for wilting
+    /// Called at sunrise (6 AM) - advance stage if watered yesterday
+    /// Day-based growth: One stage per day if watered
     /// </summary>
     public void OnSunrise(int currentDay)
     {
         if (!isPlanted) return;
-        if (isWilted) return; // Already wilted
+        if (isWilted) return; // Already wilted, can't grow
 
-        // Check if was watered yesterday
-        bool wasWatered = isWatered;
+        // Store yesterday's watered status BEFORE resetting
+        bool wasWateredYesterday = isWatered;
 
-        // Reset watered status for new day
+        // Reset watered status for the new day
         isWatered = false;
 
-        if (!wasWatered && seedPacket != null && seedPacket.requiresWater)
+        // Update soil visual to show dry
+        UpdateTileVisual();
+
+        UnityEngine.Debug.Log($"[CropBlock] === SUNRISE Day {currentDay} === {seedPacket.cropName} at {gridPosition}");
+        UnityEngine.Debug.Log($"[CropBlock] Was Watered Yesterday: {wasWateredYesterday} | Current Stage: {currentGrowthStage}/3");
+
+        // Check if crop requires water
+        if (seedPacket.requiresWater && !wasWateredYesterday)
         {
             daysWithoutWater++;
 
-            UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} not watered - {daysWithoutWater} days without water");
+            UnityEngine.Debug.Log($"[CropBlock] NOT watered - {daysWithoutWater} day(s) without water");
 
-            // Wilt if past seed stage (stage 0) and not watered
-            if (currentGrowthStage > 0 && daysWithoutWater >= 1)
+            // Wilt if past seed stage (stage > 0) and not watered
+            if (currentGrowthStage > 0)
             {
-                // Crop wilts after 1 day without water (only if past seed stage)
                 isWilted = true;
-                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} has wilted at {gridPosition}!");
+                UnityEngine.Debug.Log($"[CropBlock] ☠️ {seedPacket.cropName} has WILTED!");
                 UpdateTileVisual();
+                return; // Exit - crop is dead
             }
-            else if (currentGrowthStage == 0)
+            else
             {
-                // Seeds (stage 0) just stay as seeds, don't wilt
-                UnityEngine.Debug.Log($"[CropBlock] Seed at {gridPosition} remains planted (waiting for water)");
+                // Seeds (stage 0) don't wilt, just don't grow
+                UnityEngine.Debug.Log($"[CropBlock] 🌱 Seed remains at stage 0 (needs water to grow)");
+                return; // Exit - no growth
             }
-        }
-        else if (wasWatered)
-        {
-            daysWithoutWater = 0; // Reset counter
         }
 
-        // Update soil to show dry
-        UpdateTileVisual();
+        // Reset wilting counter if watered
+        if (wasWateredYesterday)
+        {
+            daysWithoutWater = 0;
+        }
+
+        // === ADVANCE STAGE if watered and not fully grown ===
+        if (wasWateredYesterday && currentGrowthStage < 3)
+        {
+            currentGrowthStage++;
+            growthTimer = 0f; // Reset timer (not used but kept for compatibility)
+
+            UnityEngine.Debug.Log($"[CropBlock] ✅ {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}!");
+
+            // Update visual to show new stage
+            UpdateTileVisual();
+
+            if (currentGrowthStage >= 3)
+            {
+                UnityEngine.Debug.Log($"[CropBlock] 🌾 {seedPacket.cropName} is now HARVESTABLE!");
+            }
+        }
+        else if (currentGrowthStage >= 3)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} is already harvestable (stage 3)");
+        }
+        else if (!wasWateredYesterday)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] No growth - crop wasn't watered yesterday");
+        }
     }
 
     /// <summary>

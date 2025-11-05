@@ -10,7 +10,7 @@ public class SeedPacket : ScriptableObject
     [Tooltip("Icon shown in toolbar/inventory")]
     public Sprite coverImage;
 
-    [Tooltip("4 growth stage sprites (Stage 0, 1, 2, 3)")]
+    [Tooltip("4 growth stage sprites (Stage 0=Seed, 1=Sprout, 2=Growing, 3=Harvestable)")]
     public Sprite[] growthSprites = new Sprite[4];
 
     [Tooltip("Sprite shown when crop is wilted/dead")]
@@ -21,9 +21,11 @@ public class SeedPacket : ScriptableObject
     public GameObject harvestablePrefab;
 
     [Header("Growth Settings")]
-    [Tooltip("Time in seconds for each growth stage")]
-    public float[] stageDurations = new float[4] { 2f, 2f, 2f, 2f };
+    [Tooltip("Total days from seed to harvest (minimum 3 days if watered each day)")]
+    [Range(3, 10)]
+    public int totalGrowthDays = 3;
 
     [Header("Requirements")]
+    [Tooltip("Crop must be watered each day to advance to next stage")]
     public bool requiresWater = true;
 }

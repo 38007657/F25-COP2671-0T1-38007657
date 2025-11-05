@@ -72,15 +72,10 @@ public class CropManager : MonoBehaviour
 
     private void Update()
     {
-        // Update all planted crops (growth progress)
-        float deltaTime = Time.deltaTime;
-        foreach (CropBlock block in plantedCrops)
-        {
-            if (block != null)
-            {
-                block.UpdateGrowth(deltaTime, currentDay);
-            }
-        }
+        // Growth is handled by OnSunrise() at 6 AM each day
+        // No need to update crops every frame
+
+        // Optional: Add visual effects here in the future
     }
 
     private void OnDestroy()
