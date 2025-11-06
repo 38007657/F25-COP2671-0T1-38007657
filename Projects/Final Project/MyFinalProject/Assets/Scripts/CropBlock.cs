@@ -7,6 +7,12 @@ using UnityEngine.Tilemaps;
 /// </summary>
 public class CropBlock
 {
+
+    [Header("Visual Effects")]
+    [SerializeField] private GameObject harvestReadyParticles; // Assign in inspector or via CropManager
+
+    private GameObject activeParticleInstance;
+
     // Grid info
     public Vector2Int gridPosition;
     public Vector3 worldPosition;
@@ -193,6 +199,8 @@ public class CropBlock
             return null;
         }
 
+        HideHarvestReadyParticles();
+
         // Spawn harvestable (if you want physical drops)
         GameObject harvestable = null;
         if (seedPacket.harvestablePrefab != null)
@@ -228,11 +236,40 @@ public class CropBlock
         if (currentGrowthStage >= 3) return;
 
         currentGrowthStage++;
-
-        // Update tile sprite based on growth stage - Part 3 Requirement
         UpdateTileVisual();
 
+        // NEW: Show harvest particles when reaching stage 3
+        if (currentGrowthStage >= 3)
+        {
+            ShowHarvestReadyParticles();
+        }
+
         UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} advanced to stage {currentGrowthStage}");
+    }
+
+    // NEW METHOD
+    private void ShowHarvestReadyParticles()
+    {
+        if (seedPacket == null || seedPacket.harvestReadyParticles == null) return;
+
+        if (activeParticleInstance == null)
+        {
+            activeParticleInstance = Object.Instantiate(
+                seedPacket.harvestReadyParticles,
+                worldPosition + new Vector3(0, 0.5f, 0), // Above crop
+                Quaternion.identity
+            );
+        }
+    }
+
+    // NEW METHOD
+    private void HideHarvestReadyParticles()
+    {
+        if (activeParticleInstance != null)
+        {
+            Object.Destroy(activeParticleInstance);
+            activeParticleInstance = null;
+        }
     }
 
     /// <summary>

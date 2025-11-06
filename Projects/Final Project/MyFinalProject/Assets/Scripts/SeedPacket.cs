@@ -20,6 +20,9 @@ public class SeedPacket : ScriptableObject
     [Tooltip("Prefab to spawn when harvesting (optional)")]
     public GameObject harvestablePrefab;
 
+    [Tooltip("Particle effect shown when crop is ready to harvest")]
+    public GameObject harvestReadyParticles;
+
     [Header("Growth Settings")]
     [Tooltip("Total days from seed to harvest (minimum 3 days if watered each day)")]
     [Range(3, 10)]
