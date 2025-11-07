@@ -18,6 +18,9 @@ public class CropManager : MonoBehaviour
     [Tooltip("FarmingVisuals tilemap for crop sprites")]
     [SerializeField] private Tilemap cropTilemap;
 
+    [Tooltip("Tilemap that defines farmable zones")] 
+    [SerializeField] private Tilemap farmZoneTilemap; 
+
     [Header("Soil Tiles")]
     [SerializeField] private TileBase untilledTile;
     [SerializeField] private TileBase drySoilTile;
@@ -80,6 +83,47 @@ public class CropManager : MonoBehaviour
         // No need to update crops every frame
 
         // Optional: Add visual effects here in the future
+    }
+
+    /// <summary>
+    /// Check if a world position is in a farmable zone
+    /// </summary>
+    public bool IsPositionFarmable(Vector3 worldPosition)
+    {
+        if (farmZoneTilemap == null)
+        {
+            // If no farm zone tilemap, all areas are farmable (legacy behavior)
+            Debug.LogWarning("[CropManager] Farm Zone Tilemap not assigned! Allowing all positions.");
+            return true;
+        }
+
+        Vector3Int cellPosition = farmZoneTilemap.WorldToCell(worldPosition);
+        TileBase tile = farmZoneTilemap.GetTile(cellPosition);
+
+        bool isFarmable = tile != null;
+        Debug.Log($"[CropManager] Checking world position {worldPosition}: Farmable = {isFarmable}");
+
+        return isFarmable;
+    }
+
+    /// <summary>
+    /// Check if a grid position is in a farmable zone
+    /// </summary>
+    public bool IsGridPositionFarmable(Vector2Int gridPosition)
+    {
+        if (farmZoneTilemap == null)
+        {
+            Debug.LogWarning("[CropManager] Farm Zone Tilemap not assigned! Allowing all positions.");
+            return true;
+        }
+
+        Vector3Int cellPosition = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        TileBase tile = farmZoneTilemap.GetTile(cellPosition);
+
+        bool isFarmable = tile != null;
+        Debug.Log($"[CropManager] Checking grid position {gridPosition}: Farmable = {isFarmable}, Tile = {tile}");
+
+        return isFarmable;
     }
 
     private void OnDestroy()
@@ -241,6 +285,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && untilledTile != null)
         {
             soilTilemap.SetTile(tilePos, untilledTile);
+            Debug.Log($"[CropManager] ✅ Set untilled tile at {tilePos}");
+        }
+        else
+        {
+            Debug.LogError($"[CropManager] ❌ Missing soilTilemap ({soilTilemap != null}) or untilledTile ({untilledTile != null})!");
         }
     }
 
@@ -249,6 +298,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && drySoilTile != null)
         {
             soilTilemap.SetTile(tilePos, drySoilTile);
+            Debug.Log($"[CropManager] ✅ Set dry soil tile at {tilePos}");
+        }
+        else
+        {
+            Debug.LogError($"[CropManager] ❌ Missing soilTilemap ({soilTilemap != null}) or drySoilTile ({drySoilTile != null})!");
         }
     }
 
@@ -257,6 +311,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && wetSoilTile != null)
         {
             soilTilemap.SetTile(tilePos, wetSoilTile);
+            Debug.Log($"[CropManager] ✅ Set wet soil tile at {tilePos}");
+        }
+        else
+        {
+            Debug.LogError($"[CropManager] ❌ Missing soilTilemap ({soilTilemap != null}) or wetSoilTile ({wetSoilTile != null})!");
         }
     }
 

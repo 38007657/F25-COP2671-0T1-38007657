@@ -17,6 +17,9 @@ public class SeedPacket : ScriptableObject
     public Sprite wiltedSprite;
 
     [Header("Harvest")]
+    [Tooltip("Icon shown when crop becomes a collectible pickup")]
+    public Sprite harvestIcon;
+
     [Tooltip("Prefab to spawn when harvesting (optional)")]
     public GameObject harvestablePrefab;
 

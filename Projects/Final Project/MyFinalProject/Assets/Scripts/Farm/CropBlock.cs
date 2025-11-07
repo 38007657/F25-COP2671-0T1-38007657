@@ -48,46 +48,50 @@ public class CropBlock
         this.cropManager = manager;
     }
 
-    /// <summary>
-    /// Till the soil at this block - Part 3 Requirement
-    /// </summary>
     public bool TillSoil()
+{
+    // NEW: Check if this position is farmable
+    if (!cropManager.IsGridPositionFarmable(gridPosition))
     {
-        // CHECK FOR PLANTED CROPS FIRST (before checking isTilled)
-        if (isPlanted)
-        {
-            // Allow hoeing if crop is wilted (to remove it)
-            if (isWilted)
-            {
-                UnityEngine.Debug.Log($"[CropBlock] Removing wilted crop at {gridPosition}");
-                ClearCrop();
-                // Now till the soil
-                isTilled = true;
-                isWatered = false;
-                UpdateTileVisual();
-                return true;
-            }
-
-            UnityEngine.Debug.Log($"[CropBlock] Cannot till - crop already planted!");
-            return false;
-        }
-
-        // NOW check if already tilled (moved this down)
-        if (isTilled)
-        {
-            UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
-            return false;
-        }
-
-        isTilled = true;
-        isWatered = false;
-
-        // Update tilemap visual
-        UpdateTileVisual();
-
-        UnityEngine.Debug.Log($"[CropBlock] Tilled soil at {gridPosition}");
-        return true;
+        UnityEngine.Debug.Log($"[CropBlock] ❌ Cannot till - not in farmable area at {gridPosition}!");
+        return false;
     }
+    
+    // CHECK FOR PLANTED CROPS FIRST (before checking isTilled)
+    if (isPlanted)
+    {
+        // Allow hoeing if crop is wilted (to remove it)
+        if (isWilted)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] Removing wilted crop at {gridPosition}");
+            ClearCrop();
+            // Now till the soil
+            isTilled = true;
+            isWatered = false;
+            UpdateTileVisual();
+            return true;
+        }
+
+        UnityEngine.Debug.Log($"[CropBlock] Cannot till - crop already planted!");
+        return false;
+    }
+
+    // NOW check if already tilled (moved this down)
+    if (isTilled)
+    {
+        UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
+        return false;
+    }
+
+    isTilled = true;
+    isWatered = false;
+
+    // Update tilemap visual
+    UpdateTileVisual();
+
+    UnityEngine.Debug.Log($"[CropBlock] ✅ Tilled soil at {gridPosition}");
+    return true;
+}
 
     /// <summary>
     /// Water the soil/crop at this block - Part 3 Requirement

@@ -20,7 +20,8 @@ MonoBehaviour:
   - {fileID: -6163400531934313660, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   - {fileID: -516951114122620916, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   wiltedSprite: {fileID: -1228083979241763319, guid: 1f7c939d847d6b441b1a047e161bbf0f, type: 3}
+  harvestIcon: {fileID: 3206853034534342297, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   harvestablePrefab: {fileID: 8243805681713857550, guid: 03e05ea7e030849cf8c88a38fde1add9, type: 3}
-  harvestReadyParticles: {fileID: 6393840698091616545, guid: dd2081ca2309b4e949ad0fa1964f2fa5, type: 3}
+  harvestReadyParticles: {fileID: 2729097628113087799, guid: 8a4f9363235204070bb5c639bf2bf1bd, type: 3}
   totalGrowthDays: 3
   requiresWater: 1
