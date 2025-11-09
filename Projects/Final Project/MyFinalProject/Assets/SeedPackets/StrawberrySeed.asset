@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: StrawberrySeed
   m_EditorClassIdentifier: 
   cropName: Strawberry
-  coverImage: {fileID: 0}
+  coverImage: {fileID: -4046316300514322149, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   growthSprites:
   - {fileID: -3681150878533250677, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   - {fileID: -523024238837532930, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CelerySeed
   m_EditorClassIdentifier: 
   cropName: Celery
-  coverImage: {fileID: 0}
+  coverImage: {fileID: -1640467911, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   growthSprites:
   - {fileID: 1899587781, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   - {fileID: 1717359325, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}

@@ -245,9 +245,17 @@ public class CropManager : MonoBehaviour
     /// </summary>
     public CropBlock GetBlockAtPosition(Vector2Int gridPos)
     {
+        // Add null check for grid
+        if (cropGrid == null)
+        {
+            Debug.LogWarning("[CropManager] cropGrid is null!");
+            return null;
+        }
+
         int x = gridPos.x - gridOffset.x;
         int y = gridPos.y - gridOffset.y;
 
+        // Check bounds
         if (x < 0 || x >= gridSize.x || y < 0 || y >= gridSize.y)
         {
             return null;

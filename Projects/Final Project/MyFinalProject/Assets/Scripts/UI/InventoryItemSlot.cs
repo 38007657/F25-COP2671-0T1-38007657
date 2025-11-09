@@ -12,7 +12,10 @@ public class InventoryItemSlot : MonoBehaviour
     [SerializeField] private TextMeshProUGUI quantityText;
     [SerializeField] private TextMeshProUGUI valueText; // Optional
 
-    public void Setup(Sprite icon, string itemName, int quantity, int value)
+    /// <summary>
+    /// Setup the slot with all info
+    /// </summary>
+    public void Setup(Sprite icon, string itemName, int quantity, int value, bool showValue = true)
     {
         if (itemIcon != null)
             itemIcon.sprite = icon;
@@ -23,7 +26,18 @@ public class InventoryItemSlot : MonoBehaviour
         if (quantityText != null)
             quantityText.text = $"x{quantity}";
 
+        // Only show value if requested
         if (valueText != null)
-            valueText.text = $"${value}";
+        {
+            if (showValue)
+            {
+                valueText.text = $"${value}";
+                valueText.gameObject.SetActive(true);
+            }
+            else
+            {
+                valueText.gameObject.SetActive(false);
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PotatoSeed
   m_EditorClassIdentifier: 
   cropName: Potato
-  coverImage: {fileID: 0}
+  coverImage: {fileID: 7557663613922564261, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   growthSprites:
   - {fileID: 1054563701318923691, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   - {fileID: -6860767295571080723, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}

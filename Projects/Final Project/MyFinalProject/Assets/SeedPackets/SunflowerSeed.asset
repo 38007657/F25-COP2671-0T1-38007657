@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SunflowerSeed
   m_EditorClassIdentifier: 
   cropName: Sunflower
-  coverImage: {fileID: 0}
+  coverImage: {fileID: 6614768778416726700, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   growthSprites:
   - {fileID: 3434212400135504495, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   - {fileID: -1340623528484842500, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}

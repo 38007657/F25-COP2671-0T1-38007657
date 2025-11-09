@@ -172,7 +172,7 @@ public class InventoryUIManager : MonoBehaviour
         RefreshShopTab();
     }
 
-    /// <summary>
+    //// <summary>
     /// Refresh Inventory Tab
     /// </summary>
     private void RefreshInventoryTab()
@@ -192,7 +192,7 @@ public class InventoryUIManager : MonoBehaviour
         ClearContainer(seedsContentParent);
         ClearContainer(cropsContentParent);
 
-        // Populate seeds
+        // Populate seeds - DON'T show value (we'll buy them in shop)
         foreach (var kvp in PlayerInventory.Instance.SeedPackets)
         {
             SeedPacket packet = kvp.Key;
@@ -204,7 +204,8 @@ public class InventoryUIManager : MonoBehaviour
             InventoryItemSlot slotScript = slot.GetComponent<InventoryItemSlot>();
             if (slotScript != null)
             {
-                slotScript.Setup(packet.coverImage, packet.cropName, quantity, packet.packetCost);
+                // Last parameter 'false' = don't show value
+                slotScript.Setup(packet.coverImage, packet.cropName, quantity, packet.packetCost, showValue: false);
             }
             else
             {
@@ -212,7 +213,7 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
 
-        // Populate harvested crops
+        // Populate harvested crops - SHOW value (what we can sell them for)
         foreach (var kvp in PlayerInventory.Instance.HarvestedItems)
         {
             InventoryItem item = kvp.Key;
@@ -224,7 +225,8 @@ public class InventoryUIManager : MonoBehaviour
             InventoryItemSlot slotScript = slot.GetComponent<InventoryItemSlot>();
             if (slotScript != null)
             {
-                slotScript.Setup(item.itemIcon, item.itemName, quantity, item.sellValue);
+                // Last parameter 'true' = show value (sell price)
+                slotScript.Setup(item.itemIcon, item.itemName, quantity, item.sellValue, showValue: true);
             }
             else
             {

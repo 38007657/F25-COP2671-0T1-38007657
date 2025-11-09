@@ -146,6 +146,13 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
+        // Add this check
+        if (cropManager == null)
+        {
+            selectedBlock = null;
+            return;
+        }
+
         // Just find the absolute closest block - period
         CropBlock closestBlock = null;
         float closestDistance = interactionRange;

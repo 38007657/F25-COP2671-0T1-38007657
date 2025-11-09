@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: OnionSeed
   m_EditorClassIdentifier: 
   cropName: Onion
-  coverImage: {fileID: 0}
+  coverImage: {fileID: 5349869915956102173, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   growthSprites:
   - {fileID: 8735613162132399940, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   - {fileID: -3361162195135565744, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
