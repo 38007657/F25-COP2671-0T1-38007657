@@ -95,8 +95,15 @@ public class HarvestablePlant : MonoBehaviour
 
         Debug.Log($"[HarvestablePlant] Picked up {quantity}x {plantName}");
 
-        // TODO: Add to player inventory here (we'll do this in the next step)
-        // Example: PlayerInventory.Instance.AddItem(inventoryItem, quantity);
+        // Add to player inventory
+        if (PlayerInventory.Instance != null)
+        {
+            PlayerInventory.Instance.AddHarvestedItem(inventoryItem, quantity);
+        }
+        else
+        {
+            Debug.LogError("[HarvestablePlant] PlayerInventory not found!");
+        }
 
         // Destroy pickup
         Destroy(gameObject);

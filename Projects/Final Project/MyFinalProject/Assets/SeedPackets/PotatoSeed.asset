@@ -29,3 +29,4 @@ MonoBehaviour:
   packetCost: 4
   isAvailableInShop: 1
   harvestYield: 6
+  harvestedItem: {fileID: 11400000, guid: 32fd22faa9e1544c19a8c8773ae74ff8, type: 2}

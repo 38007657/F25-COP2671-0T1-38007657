@@ -160,13 +160,30 @@ public class CropBlock
             return false;
         }
 
+        // === NEW: Check if player has seeds ===
+        if (PlayerInventory.Instance != null)
+        {
+            if (PlayerInventory.Instance.GetSeedPacketCount(seed) <= 0)
+            {
+                UnityEngine.Debug.Log($"[CropBlock] No {seed.cropName} seeds in inventory!");
+                return false;
+            }
+
+            // Consume one seed
+            if (!PlayerInventory.Instance.UseSeedFromPacket(seed))
+            {
+                UnityEngine.Debug.Log($"[CropBlock] Failed to use seed from inventory!");
+                return false;
+            }
+        }
+
         seedPacket = seed;
         isPlanted = true;
         isWilted = false;
         currentGrowthStage = 0;
         growthTimer = 0f;
         dayPlanted = currentDay;
-        lastWateredDay = -1; // Not watered yet
+        lastWateredDay = -1;
         isWatered = false;
         daysWithoutWater = 0;
 
@@ -180,9 +197,6 @@ public class CropBlock
         return true;
     }
 
-    /// <summary>
-    /// Harvest the crop at this block - Part 3 Requirement
-    /// </summary>
     public GameObject HarvestPlant()
     {
         if (!isPlanted)
@@ -212,13 +226,17 @@ public class CropBlock
             Vector3 spawnPos = worldPosition;
             harvestable = Object.Instantiate(seedPacket.harvestablePrefab, spawnPos, Quaternion.identity);
 
-            // === ADD THIS: Initialize the harvestable ===
+            // Initialize the harvestable with the InventoryItem
             HarvestablePlant harvestScript = harvestable.GetComponent<HarvestablePlant>();
             if (harvestScript != null)
             {
-                // TODO: You'll need to create an InventoryItem for each crop and assign it
-                // For now, pass null - we'll fix this properly in the next step
-                harvestScript.Initialize(seedPacket.harvestIcon, seedPacket.cropName, null, seedPacket.harvestYield);
+                // Pass the InventoryItem from the SeedPacket
+                harvestScript.Initialize(
+                    seedPacket.harvestIcon,
+                    seedPacket.cropName,
+                    seedPacket.harvestedItem,  // ← Now passing the actual InventoryItem
+                    seedPacket.harvestYield
+                );
             }
         }
 

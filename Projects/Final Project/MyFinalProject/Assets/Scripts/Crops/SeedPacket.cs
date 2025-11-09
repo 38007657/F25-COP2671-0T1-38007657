@@ -49,4 +49,7 @@ public class SeedPacket : ScriptableObject
     [Tooltip("How many crops does one seed yield when harvested?")]
     [Range(1, 10)]
     public int harvestYield = 1;
+
+    [Tooltip("The inventory item created when this crop is harvested")]
+    public InventoryItem harvestedItem;
 }
