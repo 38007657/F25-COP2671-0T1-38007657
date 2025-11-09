@@ -209,8 +209,17 @@ public class CropBlock
         GameObject harvestable = null;
         if (seedPacket.harvestablePrefab != null)
         {
-            Vector3 spawnPos = worldPosition + new Vector3(0, -0.3f, 0);
-            harvestable = Object.Instantiate(seedPacket.harvestablePrefab, worldPosition, Quaternion.identity);
+            Vector3 spawnPos = worldPosition;
+            harvestable = Object.Instantiate(seedPacket.harvestablePrefab, spawnPos, Quaternion.identity);
+
+            // === ADD THIS: Initialize the harvestable ===
+            HarvestablePlant harvestScript = harvestable.GetComponent<HarvestablePlant>();
+            if (harvestScript != null)
+            {
+                // TODO: You'll need to create an InventoryItem for each crop and assign it
+                // For now, pass null - we'll fix this properly in the next step
+                harvestScript.Initialize(seedPacket.harvestIcon, seedPacket.cropName, null, seedPacket.harvestYield);
+            }
         }
 
         UnityEngine.Debug.Log($"[CropBlock] Harvested {seedPacket.cropName} at {gridPosition}");

@@ -25,3 +25,7 @@ MonoBehaviour:
   harvestReadyParticles: {fileID: 2729097628113087799, guid: 8a4f9363235204070bb5c639bf2bf1bd, type: 3}
   totalGrowthDays: 3
   requiresWater: 1
+  seedsPerPacket: 5
+  packetCost: 10
+  isAvailableInShop: 1
+  harvestYield: 5

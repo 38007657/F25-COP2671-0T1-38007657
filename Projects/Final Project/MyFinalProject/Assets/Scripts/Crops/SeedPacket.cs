@@ -34,4 +34,19 @@ public class SeedPacket : ScriptableObject
     [Header("Requirements")]
     [Tooltip("Crop must be watered each day to advance to next stage")]
     public bool requiresWater = true;
+
+    // === ECONOMY FIELDS ===
+    [Header("Economy")]
+    [Tooltip("Number of seeds in one packet")]
+    public int seedsPerPacket = 5;
+
+    [Tooltip("Cost to purchase this seed packet")]
+    public int packetCost = 50;
+
+    [Tooltip("Is this seed packet available for purchase in the shop?")]
+    public bool isAvailableInShop = true;
+
+    [Tooltip("How many crops does one seed yield when harvested?")]
+    [Range(1, 10)]
+    public int harvestYield = 1;
 }

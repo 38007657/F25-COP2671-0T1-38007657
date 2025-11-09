@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd8999e50f4a473a89876c49da38e59, type: 3}
+  m_Name: StrawberryInventoryItem
+  m_EditorClassIdentifier: 
+  itemName: Strawberry
+  itemIcon: {fileID: 6179586033448826104, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
+  sellValue: 10
+  isAvailableInShop: 1
+  sourceSeedPacket: {fileID: 11400000, guid: 852a994dcae364665ae6a4c03ccc2eef, type: 2}

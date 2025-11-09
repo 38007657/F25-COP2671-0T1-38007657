@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -13,22 +11,25 @@ public class HarvestablePlant : MonoBehaviour
     [SerializeField] private float pickupRange = 1.5f;
     [SerializeField] private bool autoPickup = true;
 
+    [Header("Pickup Delay")]
+    [Tooltip("Delay in seconds before item can be picked up")]
+    [SerializeField] private float pickupDelay = 3f;
+
     [Header("Visual")]
     [SerializeField] private SpriteRenderer spriteRenderer;
 
-    [Header("Bounce Animation")]
-    [SerializeField] private float bounceHeight = 0.8f;
-    [SerializeField] private float bounceDuration = 0.5f;
-    [SerializeField] private AnimationCurve bounceCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [Header("Inventory")]
+    [Tooltip("The inventory item this pickup represents")]
+    [SerializeField] private InventoryItem inventoryItem;
 
     private Transform playerTransform;
     private bool canBePickedUp = false;
-    private Vector3 groundPosition;
+    private float pickupTimer = 0f;
 
     /// <summary>
-    /// Initialize the harvestable pickup with icon sprite
+    /// Initialize the harvestable pickup with icon sprite and inventory item
     /// </summary>
-    public void Initialize(Sprite iconSprite, string cropName, int amount = 1)
+    public void Initialize(Sprite iconSprite, string cropName, InventoryItem item, int amount = 1)
     {
         if (spriteRenderer != null && iconSprite != null)
         {
@@ -37,12 +38,12 @@ public class HarvestablePlant : MonoBehaviour
 
         plantName = cropName;
         quantity = amount;
+        inventoryItem = item;
 
-        // Store ground position
-        groundPosition = transform.position;
+        // Start pickup delay timer
+        pickupTimer = pickupDelay;
 
-        // Start bounce animation
-        StartCoroutine(BounceAnimation());
+        Debug.Log($"[HarvestablePlant] Initialized {cropName}, will be pickupable in {pickupDelay}s");
     }
 
     private void Start()
@@ -55,39 +56,23 @@ public class HarvestablePlant : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Bounce animation when spawned
-    /// </summary>
-    private IEnumerator BounceAnimation()
-    {
-        float elapsed = 0f;
-        Vector3 startPos = groundPosition + Vector3.up * bounceHeight;
-        transform.position = startPos;
-
-        while (elapsed < bounceDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / bounceDuration;
-            float curveValue = bounceCurve.Evaluate(t);
-
-            // Move from high position down to ground
-            transform.position = Vector3.Lerp(startPos, groundPosition, curveValue);
-
-            yield return null;
-        }
-
-        // Ensure we end exactly at ground position
-        transform.position = groundPosition;
-
-        // Enable pickup after bounce completes
-        canBePickedUp = true;
-    }
-
     private void Update()
     {
-        if (!canBePickedUp || playerTransform == null) return;
+        // Handle pickup delay timer
+        if (!canBePickedUp)
+        {
+            pickupTimer -= Time.deltaTime;
+            if (pickupTimer <= 0f)
+            {
+                canBePickedUp = true;
+                Debug.Log($"[HarvestablePlant] {plantName} can now be picked up!");
+            }
+            return;
+        }
 
-        // Check distance to player
+        // Check if player is in range
+        if (playerTransform == null) return;
+
         float distance = Vector2.Distance(transform.position, playerTransform.position);
 
         if (distance <= pickupRange && autoPickup)
@@ -101,10 +86,17 @@ public class HarvestablePlant : MonoBehaviour
     /// </summary>
     public void Pickup()
     {
+        if (inventoryItem == null)
+        {
+            Debug.LogWarning($"[HarvestablePlant] No InventoryItem assigned for {plantName}!");
+            Destroy(gameObject);
+            return;
+        }
+
         Debug.Log($"[HarvestablePlant] Picked up {quantity}x {plantName}");
 
-        // TODO: Add to inventory here
-        // Example: InventoryManager.Instance.AddItem(plantName, quantity);
+        // TODO: Add to player inventory here (we'll do this in the next step)
+        // Example: PlayerInventory.Instance.AddItem(inventoryItem, quantity);
 
         // Destroy pickup
         Destroy(gameObject);
