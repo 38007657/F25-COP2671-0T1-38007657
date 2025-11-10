@@ -172,6 +172,26 @@ public class InventoryUIManager : MonoBehaviour
         RefreshShopTab();
     }
 
+    /// <summary>
+    /// Refresh whichever tab is currently active
+    /// </summary>
+    public void RefreshCurrentTab()
+    {
+        // Determine which tab is active and refresh it
+        if (inventoryTabContent.activeSelf)
+        {
+            RefreshInventoryTab();
+        }
+        else if (moneyTabContent.activeSelf)
+        {
+            RefreshMoneyTab();
+        }
+        else if (shopTabContent.activeSelf)
+        {
+            RefreshShopTab();
+        }
+    }
+
     //// <summary>
     /// Refresh Inventory Tab
     /// </summary>
@@ -250,17 +270,76 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     private void RefreshShopTab()
     {
-        if (PlayerInventory.Instance == null) return;
+        if (ShopInventory.Instance == null)
+        {
+            Debug.LogWarning("[InventoryUI] ShopInventory not found!");
+            return;
+        }
+
+        if (PlayerInventory.Instance == null)
+        {
+            Debug.LogWarning("[InventoryUI] PlayerInventory not found!");
+            return;
+        }
+
+        Debug.Log("[InventoryUI] Refreshing Shop Tab");
 
         // Clear existing items
         ClearContainer(buyContentParent);
         ClearContainer(sellContentParent);
 
-        // TODO: We'll populate shop items in the next step when we create ShopInventory
-        // For now, we can show all available seed packets and harvested items
+        // === POPULATE BUY SECTION (Seeds for sale) ===
+        List<SeedPacket> availableSeeds = ShopInventory.Instance.GetAvailableSeedPackets();
 
-        // Temporary: Show all seed packets that are available in shop
-        // You'll replace this with ShopInventory data later
+        Debug.Log($"[InventoryUI] Shop has {availableSeeds.Count} seed types for sale");
+
+        foreach (SeedPacket packet in availableSeeds)
+        {
+            GameObject slot = Instantiate(shopItemBuySlotPrefab, buyContentParent);
+            ShopItemBuySlot slotScript = slot.GetComponent<ShopItemBuySlot>();
+
+            if (slotScript != null)
+            {
+                slotScript.Setup(packet);
+                Debug.Log($"[InventoryUI] Created buy slot for {packet.cropName}");
+            }
+            else
+            {
+                Debug.LogError("[InventoryUI] ShopItemBuySlot script not found on prefab!");
+            }
+        }
+
+        // === POPULATE SELL SECTION (Player's harvested crops) ===
+        // Only show crops that the shop will buy AND player actually has
+        List<InventoryItem> buyableCrops = ShopInventory.Instance.GetBuyableCrops();
+
+        Debug.Log($"[InventoryUI] Shop buys {buyableCrops.Count} crop types");
+
+        foreach (InventoryItem crop in buyableCrops)
+        {
+            // Check if player has any of this crop
+            int playerQuantity = PlayerInventory.Instance.GetHarvestedItemCount(crop);
+
+            // Only show if player has at least 1
+            if (playerQuantity > 0)
+            {
+                GameObject slot = Instantiate(shopItemSellSlotPrefab, sellContentParent);
+                ShopItemSellSlot slotScript = slot.GetComponent<ShopItemSellSlot>();
+
+                if (slotScript != null)
+                {
+                    slotScript.Setup(crop, playerQuantity);
+                    Debug.Log($"[InventoryUI] Created sell slot for {crop.itemName} (player has {playerQuantity})");
+                }
+                else
+                {
+                    Debug.LogError("[InventoryUI] ShopItemSellSlot script not found on prefab!");
+                }
+            }
+        }
+
+        // Update money display
+        UpdateMoneyDisplay(PlayerInventory.Instance.CurrentMoney);
     }
 
     /// <summary>
