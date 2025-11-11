@@ -3,25 +3,32 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// UI slot for selling harvested crops to shop
+/// UI slot for selling harvested crops to shop (with quantity selector)
 /// </summary>
 public class ShopItemSellSlot : MonoBehaviour
 {
     [SerializeField] private Image itemIcon;
     [SerializeField] private TextMeshProUGUI itemNameText;
     [SerializeField] private TextMeshProUGUI priceText; // Price per unit
-    [SerializeField] private TextMeshProUGUI quantityText; // How many player has
-    [SerializeField] private Button sellButton;
+    [SerializeField] private TextMeshProUGUI availableText; // "You have: X"
+    [SerializeField] private TextMeshProUGUI quantityText; // Shows selected amount
+    [SerializeField] private Button decreaseButton; // ← arrow
+    [SerializeField] private Button increaseButton; // → arrow
 
     private InventoryItem inventoryItem;
-    private int playerQuantity;
+    private int availableQuantity;
+    private int selectedQuantity = 0;
+
+    // Event to notify when quantity changes
+    public System.Action OnQuantityChanged;
 
     private void Start()
     {
-        if (sellButton != null)
-        {
-            sellButton.onClick.AddListener(OnSellButtonClicked);
-        }
+        if (decreaseButton != null)
+            decreaseButton.onClick.AddListener(DecreaseQuantity);
+
+        if (increaseButton != null)
+            increaseButton.onClick.AddListener(IncreaseQuantity);
     }
 
     /// <summary>
@@ -29,8 +36,11 @@ public class ShopItemSellSlot : MonoBehaviour
     /// </summary>
     public void Setup(InventoryItem item, int quantity)
     {
+        Debug.Log($"[ShopItemSellSlot] Setup called for {item?.itemName ?? "NULL"} with quantity {quantity}");
+
         inventoryItem = item;
-        playerQuantity = quantity;
+        availableQuantity = quantity;
+        selectedQuantity = 0; // Start at 0
 
         if (itemIcon != null && item.itemIcon != null)
             itemIcon.sprite = item.itemIcon;
@@ -41,74 +51,109 @@ public class ShopItemSellSlot : MonoBehaviour
         if (priceText != null)
             priceText.text = $"${item.sellValue} each";
 
+        if (availableText != null)
+        {
+            availableText.text = $"You have: {quantity}";
+            Debug.Log($"[ShopItemSellSlot] Set availableText to: You have: {quantity}");
+        }
+        else
+        {
+            Debug.LogError("[ShopItemSellSlot] availableText is NULL!");
+        }
+
+        UpdateQuantityDisplay();
+    }
+
+    /// <summary>
+    /// Decrease selected quantity
+    /// </summary>
+    private void DecreaseQuantity()
+    {
+        if (selectedQuantity > 0)
+        {
+            selectedQuantity--;
+            UpdateQuantityDisplay();
+            OnQuantityChanged?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Increase selected quantity
+    /// </summary>
+    private void IncreaseQuantity()
+    {
+        if (selectedQuantity < availableQuantity)
+        {
+            selectedQuantity++;
+            UpdateQuantityDisplay();
+            OnQuantityChanged?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Update the quantity display and button states
+    /// </summary>
+    private void UpdateQuantityDisplay()
+    {
         if (quantityText != null)
-            quantityText.text = $"You have: {quantity}";
+        {
+            quantityText.text = selectedQuantity.ToString();
+            Debug.Log($"[ShopItemSellSlot] Updated quantityText to: {selectedQuantity}");
+        }
+        else
+        {
+            Debug.LogError("[ShopItemSellSlot] quantityText is NULL!");
+        }
 
-        UpdateButtonState();
+        // Update button interactability
+        if (decreaseButton != null)
+            decreaseButton.interactable = selectedQuantity > 0;
+
+        if (increaseButton != null)
+            increaseButton.interactable = selectedQuantity < availableQuantity;
+
+        Debug.Log($"[ShopItemSellSlot] availableQuantity = {availableQuantity}, selectedQuantity = {selectedQuantity}");
     }
 
     /// <summary>
-    /// Update button state based on if player has items
+    /// Get the selected quantity for this item
     /// </summary>
-    private void UpdateButtonState()
+    public int GetSelectedQuantity()
     {
-        if (sellButton == null) return;
-
-        bool hasItems = playerQuantity > 0;
-        sellButton.interactable = hasItems;
-
-        // Update button text
-        TextMeshProUGUI buttonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
-        if (buttonText != null)
-        {
-            if (hasItems)
-            {
-                int totalValue = inventoryItem.sellValue * playerQuantity;
-                buttonText.text = $"Sell All (${totalValue})";
-            }
-            else
-            {
-                buttonText.text = "None to Sell";
-                buttonText.color = Color.gray;
-            }
-        }
+        return selectedQuantity;
     }
 
     /// <summary>
-    /// Called when sell button is clicked
+    /// Get the inventory item
     /// </summary>
-    private void OnSellButtonClicked()
+    public InventoryItem GetInventoryItem()
     {
-        if (inventoryItem == null || playerQuantity <= 0) return;
+        return inventoryItem;
+    }
 
-        if (ShopInventory.Instance != null)
-        {
-            // Sell ALL of this crop type
-            bool success = ShopInventory.Instance.SellCropToShop(inventoryItem, playerQuantity);
+    /// <summary>
+    /// Get total value of selected quantity
+    /// </summary>
+    public int GetTotalValue()
+    {
+        return selectedQuantity * inventoryItem.sellValue;
+    }
 
-            if (success)
-            {
-                int totalEarned = inventoryItem.sellValue * playerQuantity;
-                Debug.Log($"[ShopItemSellSlot] Sold {playerQuantity}x {inventoryItem.itemName} for ${totalEarned}!");
-
-                // Refresh the shop UI
-                if (InventoryUIManager.Instance != null)
-                {
-                    InventoryUIManager.Instance.RefreshCurrentTab();
-                }
-            }
-            else
-            {
-                Debug.Log($"[ShopItemSellSlot] Failed to sell {inventoryItem.itemName}");
-            }
-        }
+    /// <summary>
+    /// Reset quantity to 0
+    /// </summary>
+    public void ResetQuantity()
+    {
+        selectedQuantity = 0;
+        UpdateQuantityDisplay();
     }
 
     private void OnDestroy()
     {
-        if (sellButton != null)
-        {
-            sellButton.onClick.RemoveListener(OnSellButtonClicked);
-        }
+        if (decreaseButton != null)
+            decreaseButton.onClick.RemoveListener(DecreaseQuantity);
+
+        if (increaseButton != null)
+            increaseButton.onClick.RemoveListener(IncreaseQuantity);
     }
 }

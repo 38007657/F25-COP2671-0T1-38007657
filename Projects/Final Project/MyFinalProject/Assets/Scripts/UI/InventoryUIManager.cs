@@ -10,6 +10,9 @@ public class InventoryUIManager : MonoBehaviour
 {
     public static InventoryUIManager Instance { get; private set; }
 
+    [Header("Shop Sell Controller")]
+    [SerializeField] private ShopSellController shopSellController;
+
     [Header("Main Panel")]
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private KeyCode toggleKey = KeyCode.I;
@@ -192,7 +195,40 @@ public class InventoryUIManager : MonoBehaviour
         }
     }
 
-    //// <summary>
+    /// <summary>
+    /// Called when inventory changes
+    /// </summary>
+    private void OnInventoryChanged(InventoryItem item, int quantity)
+    {
+        if (isOpen && inventoryTabContent.activeSelf)
+        {
+            RefreshInventoryTab();
+        }
+    }
+
+    /// <summary>
+    /// Called when seed packets change
+    /// </summary>
+    private void OnInventoryChanged(SeedPacket packet, int quantity)
+    {
+        if (isOpen && inventoryTabContent.activeSelf)
+        {
+            RefreshInventoryTab();
+        }
+    }
+
+    /// <summary>
+    /// Clear all children from a container
+    /// </summary>
+    private void ClearContainer(Transform container)
+    {
+        foreach (Transform child in container)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+    /// <summary>
     /// Refresh Inventory Tab
     /// </summary>
     private void RefreshInventoryTab()
@@ -288,6 +324,12 @@ public class InventoryUIManager : MonoBehaviour
         ClearContainer(buyContentParent);
         ClearContainer(sellContentParent);
 
+        // Clear sell controller slots FIRST
+        if (shopSellController != null)
+        {
+            shopSellController.ClearSellSlots();
+        }
+
         // === POPULATE BUY SECTION (Seeds for sale) ===
         List<SeedPacket> availableSeeds = ShopInventory.Instance.GetAvailableSeedPackets();
 
@@ -329,6 +371,13 @@ public class InventoryUIManager : MonoBehaviour
                 if (slotScript != null)
                 {
                     slotScript.Setup(crop, playerQuantity);
+
+                    // ← THIS IS THE KEY FIX - Register the slot with the controller
+                    if (shopSellController != null)
+                    {
+                        shopSellController.RegisterSellSlot(slotScript);
+                    }
+
                     Debug.Log($"[InventoryUI] Created sell slot for {crop.itemName} (player has {playerQuantity})");
                 }
                 else
@@ -350,39 +399,6 @@ public class InventoryUIManager : MonoBehaviour
         if (currentMoneyText != null)
         {
             currentMoneyText.text = $"Money: ${amount}";
-        }
-    }
-
-    /// <summary>
-    /// Called when inventory changes
-    /// </summary>
-    private void OnInventoryChanged(InventoryItem item, int quantity)
-    {
-        if (isOpen && inventoryTabContent.activeSelf)
-        {
-            RefreshInventoryTab();
-        }
-    }
-
-    /// <summary>
-    /// Called when seed packets change
-    /// </summary>
-    private void OnInventoryChanged(SeedPacket packet, int quantity)
-    {
-        if (isOpen && inventoryTabContent.activeSelf)
-        {
-            RefreshInventoryTab();
-        }
-    }
-
-    /// <summary>
-    /// Clear all children from a container
-    /// </summary>
-    private void ClearContainer(Transform container)
-    {
-        foreach (Transform child in container)
-        {
-            Destroy(child.gameObject);
         }
     }
 }
