@@ -464,4 +464,59 @@ public class CropBlock
     {
         return isPlanted && !isWilted && currentGrowthStage >= 3;
     }
+
+    /// <summary>
+    /// Clear this block for loading a save
+    /// </summary>
+    public void ClearForLoad()
+    {
+        isPlanted = false;
+        isWilted = false;
+        isTilled = false;
+        isWatered = false;
+        seedPacket = null;
+        currentGrowthStage = 0;
+        growthTimer = 0f;
+        dayPlanted = 0;
+        lastWateredDay = -1;
+        daysWithoutWater = 0;
+
+        HideHarvestReadyParticles();
+        UpdateTileVisual();
+    }
+
+    /// <summary>
+    /// Restore state from saved data
+    /// </summary>
+    public void RestoreState(SavedCropBlock savedBlock, SeedPacket packet)
+    {
+        // Restore all state
+        isTilled = savedBlock.isTilled;
+        isWatered = savedBlock.isWatered;
+        isPlanted = savedBlock.isPlanted;
+        isWilted = savedBlock.isWilted;
+        seedPacket = packet;
+        currentGrowthStage = savedBlock.currentGrowthStage;
+        growthTimer = savedBlock.growthTimer;
+        dayPlanted = savedBlock.dayPlanted;
+        lastWateredDay = savedBlock.lastWateredDay;
+        daysWithoutWater = savedBlock.daysWithoutWater;
+
+        // Add to planted crops if needed
+        if (isPlanted)
+        {
+            cropManager.AddToPlantedCrops(this);
+        }
+
+        // Show particles if harvestable
+        if (currentGrowthStage >= 3 && !isWilted)
+        {
+            ShowHarvestReadyParticles();
+        }
+
+        // Update visual
+        UpdateTileVisual();
+
+        UnityEngine.Debug.Log($"[CropBlock] Restored {packet?.cropName ?? "crop"} at stage {currentGrowthStage}");
+    }
 }

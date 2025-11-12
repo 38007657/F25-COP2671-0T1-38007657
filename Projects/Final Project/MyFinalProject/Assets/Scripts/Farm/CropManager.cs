@@ -384,6 +384,56 @@ public class CropManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Get all planted crops (for saving)
+    /// </summary>
+    public List<CropBlock> GetAllPlantedCrops()
+    {
+        return new List<CropBlock>(plantedCrops);
+    }
+
+    /// <summary>
+    /// Clear all crops (for loading)
+    /// </summary>
+    public void ClearAllCrops()
+    {
+        // Clear planted crops list
+        plantedCrops.Clear();
+
+        // Reset all blocks in grid
+        if (cropGrid != null)
+        {
+            for (int x = 0; x < gridSize.x; x++)
+            {
+                for (int y = 0; y < gridSize.y; y++)
+                {
+                    if (cropGrid[x, y] != null)
+                    {
+                        cropGrid[x, y].ClearForLoad();
+                    }
+                }
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            Debug.Log("[CropManager] Cleared all crops for loading");
+        }
+    }
+
+    /// <summary>
+    /// Set the current day (for loading)
+    /// </summary>
+    public void SetCurrentDay(int day)
+    {
+        currentDay = day;
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"[CropManager] Set current day to {day}");
+        }
+    }
+
+    /// <summary>
     /// Debug: Show grid info
     /// </summary>
     [ContextMenu("Debug Grid Info")]

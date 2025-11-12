@@ -21,11 +21,13 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField] private Button inventoryTabButton;
     [SerializeField] private Button moneyTabButton;
     [SerializeField] private Button shopTabButton;
+    [SerializeField] private Button saveLoadTabButton;
 
     [Header("Tab Contents")]
     [SerializeField] private GameObject inventoryTabContent;
     [SerializeField] private GameObject moneyTabContent;
     [SerializeField] private GameObject shopTabContent;
+    [SerializeField] private GameObject saveLoadTabContent;
 
     [Header("Inventory Tab - Scroll View Contents")]
     [SerializeField] private Transform seedsContentParent;
@@ -47,6 +49,7 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField] private Color activeTabColor = Color.white;
     [SerializeField] private Color inactiveTabColor = Color.gray;
 
+
     private bool isOpen = false;
 
     private void Awake()
@@ -65,6 +68,7 @@ public class InventoryUIManager : MonoBehaviour
         inventoryTabButton.onClick.AddListener(() => SwitchTab(0));
         moneyTabButton.onClick.AddListener(() => SwitchTab(1));
         shopTabButton.onClick.AddListener(() => SwitchTab(2));
+        saveLoadTabButton.onClick.AddListener(() => SwitchTab(3));
 
         // Subscribe to inventory events
         if (PlayerInventory.Instance != null)
@@ -124,11 +128,13 @@ public class InventoryUIManager : MonoBehaviour
         inventoryTabContent.SetActive(false);
         moneyTabContent.SetActive(false);
         shopTabContent.SetActive(false);
+        saveLoadTabContent.SetActive(false);
 
         // Reset all button colors
         SetButtonColor(inventoryTabButton, inactiveTabColor);
         SetButtonColor(moneyTabButton, inactiveTabColor);
         SetButtonColor(shopTabButton, inactiveTabColor);
+        SetButtonColor(saveLoadTabButton, inactiveTabColor);
 
         // Show selected tab and highlight button
         switch (tabIndex)
@@ -148,8 +154,7 @@ public class InventoryUIManager : MonoBehaviour
             case 2: // Shop
                 Debug.Log("[InventoryUI] Activating Shop Tab");
                 shopTabContent.SetActive(true);
-                SetButtonColor(shopTabButton, activeTabColor);
-                RefreshShopTab();
+                SetButtonColor(shopTabButton, activeTabColor);                
                 break;
         }
     }

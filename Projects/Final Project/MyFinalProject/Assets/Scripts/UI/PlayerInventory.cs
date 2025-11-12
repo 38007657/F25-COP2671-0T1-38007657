@@ -346,6 +346,34 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Set money directly (for loading saves)
+    /// </summary>
+    public void SetMoney(int amount)
+    {
+        currentMoney = amount;
+        OnMoneyChanged?.Invoke(currentMoney);
+
+        if (showDebugLogs)
+        {
+            Debug.Log($"[PlayerInventory] Set money to ${amount}");
+        }
+    }
+
+    /// <summary>
+    /// Clear all inventory (for loading saves)
+    /// </summary>
+    public void ClearInventory()
+    {
+        harvestedItems.Clear();
+        seedPackets.Clear();
+
+        if (showDebugLogs)
+        {
+            Debug.Log("[PlayerInventory] Cleared inventory");
+        }
+    }
+
     // ===== DEBUG =====
 
     [ContextMenu("Debug Inventory")]

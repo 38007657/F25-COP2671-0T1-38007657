@@ -190,6 +190,7 @@ public class TimeManager : MonoBehaviour
         return $"{timeSpeedMultiplier}x";
     }
 
+
     // For save/load functionality
     public float GetCurrentTime() => currentTime;
     public void LoadTime(float time) => SetTime(time);
