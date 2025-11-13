@@ -32,18 +32,33 @@ public class SaveLoadManager : MonoBehaviour
 
     private void Awake()
     {
+        UnityEngine.Debug.Log("========================================");
+        UnityEngine.Debug.Log("[SaveLoadManager] Awake() called");
+
         if (Instance != null && Instance != this)
         {
+            UnityEngine.Debug.LogWarning("[SaveLoadManager] Duplicate instance detected - destroying");
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        UnityEngine.Debug.Log($"[SaveLoadManager] Singleton initialized successfully");
+        UnityEngine.Debug.Log($"[SaveLoadManager] GameObject: {gameObject.name}");
+        UnityEngine.Debug.Log($"[SaveLoadManager] Scene: {gameObject.scene.name}");
+        UnityEngine.Debug.Log("========================================");
 
         // Create save folder if it doesn't exist
         if (!Directory.Exists(SaveFolderPath))
         {
             Directory.CreateDirectory(SaveFolderPath);
+            UnityEngine.Debug.Log($"[SaveLoadManager] Created save folder: {SaveFolderPath}");
+        }
+        else
+        {
+            UnityEngine.Debug.Log($"[SaveLoadManager] Save folder exists: {SaveFolderPath}");
         }
 
         sessionStartTime = Time.time;
@@ -185,53 +200,72 @@ public class SaveLoadManager : MonoBehaviour
 
     private void SaveCropData(SaveData data)
     {
-        if (CropManager.Instance == null) return;
+        if (CropManager.Instance == null)
+        {
+            UnityEngine.Debug.LogWarning("[SaveLoadManager] CropManager.Instance is null, cannot save crops");
+            return;
+        }
 
         data.plantedCrops.Clear();
 
-        // Get all planted crops - we'll need to add a public method to CropManager
+        // Get all planted crops
         List<CropBlock> plantedCrops = CropManager.Instance.GetAllPlantedCrops();
+
+        UnityEngine.Debug.Log($"[SaveLoadManager] Saving {plantedCrops.Count} planted crops");
 
         foreach (CropBlock block in plantedCrops)
         {
-            if (block != null && block.isPlanted && block.seedPacket != null)
+            // IMPORTANT: Only save if actually planted with a seed packet
+            if (block == null)
             {
-                SavedCropBlock savedBlock = new SavedCropBlock
-                {
-                    gridPositionX = block.gridPosition.x,
-                    gridPositionY = block.gridPosition.y,
-                    isTilled = block.isTilled,
-                    isWatered = block.isWatered,
-                    isPlanted = block.isPlanted,
-                    isWilted = block.isWilted,
-                    seedPacketName = block.seedPacket.cropName,
-                    currentGrowthStage = block.currentGrowthStage,
-                    growthTimer = block.growthTimer,
-                    dayPlanted = block.dayPlanted,
-                    lastWateredDay = block.lastWateredDay,
-                    daysWithoutWater = block.daysWithoutWater
-                };
-
-                data.plantedCrops.Add(savedBlock);
+                UnityEngine.Debug.LogWarning("[SaveLoadManager] Null block in plantedCrops list!");
+                continue;
             }
+
+            if (!block.isPlanted)
+            {
+                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Block at {block.gridPosition} in plantedCrops but not planted!");
+                continue;
+            }
+
+            if (block.seedPacket == null)
+            {
+                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Block at {block.gridPosition} planted but no seed packet!");
+                continue;
+            }
+
+            SavedCropBlock savedBlock = new SavedCropBlock
+            {
+                gridPositionX = block.gridPosition.x,
+                gridPositionY = block.gridPosition.y,
+                isTilled = block.isTilled,
+                isWatered = block.isWatered,
+                isPlanted = block.isPlanted,
+                isWilted = block.isWilted,
+                seedPacketName = block.seedPacket.cropName,
+                currentGrowthStage = block.currentGrowthStage,
+                growthTimer = block.growthTimer,
+                dayPlanted = block.dayPlanted,
+                lastWateredDay = block.lastWateredDay,
+                daysWithoutWater = block.daysWithoutWater
+            };
+
+            data.plantedCrops.Add(savedBlock);
         }
 
         if (showDebugLogs)
         {
-            Debug.Log($"[SaveLoadManager] Saved {data.plantedCrops.Count} planted crops");
+            UnityEngine.Debug.Log($"[SaveLoadManager] Successfully saved {data.plantedCrops.Count} planted crops");
         }
     }
 
     // ===== LOAD GAME =====
 
-    /// <summary>
-    /// Load a specific save by ID
-    /// </summary>
     public bool LoadGame(string saveId)
     {
         if (!SaveExists(saveId))
         {
-            Debug.LogError($"[SaveLoadManager] Save not found: {saveId}");
+            UnityEngine.Debug.LogError($"[SaveLoadManager] Save not found: {saveId}");
             return false;
         }
 
@@ -243,7 +277,9 @@ public class SaveLoadManager : MonoBehaviour
             LoadPlayerData(data);
             LoadTimeData(data);
             LoadInventoryData(data);
-            LoadCropData(data);
+
+            // Delay crop loading slightly to ensure grid is ready
+            StartCoroutine(LoadCropsDelayed(data));
 
             // Set current save and playtime
             currentSaveId = saveId;
@@ -252,16 +288,26 @@ public class SaveLoadManager : MonoBehaviour
 
             if (showDebugLogs)
             {
-                Debug.Log($"[SaveLoadManager] Game loaded: {data.saveName} (Day {data.currentDay})");
+                UnityEngine.Debug.Log($"[SaveLoadManager] Game loaded: {data.saveName} (Day {data.currentDay})");
             }
 
             return true;
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"[SaveLoadManager] Failed to load game: {e.Message}");
+            UnityEngine.Debug.LogError($"[SaveLoadManager] Failed to load game: {e.Message}");
             return false;
         }
+    }
+
+    private System.Collections.IEnumerator LoadCropsDelayed(SaveData data)
+    {
+        // Wait 2 frames to ensure everything is initialized
+        yield return null;
+        yield return null;
+
+        UnityEngine.Debug.Log("[SaveLoadManager] Loading crops after delay...");
+        LoadCropData(data);
     }
 
     /// <summary>
@@ -365,35 +411,83 @@ public class SaveLoadManager : MonoBehaviour
 
     private void LoadCropData(SaveData data)
     {
-        if (CropManager.Instance == null) return;
+        if (CropManager.Instance == null)
+        {
+            UnityEngine.Debug.LogError("[SaveLoadManager] CropManager.Instance is null!");
+            return;
+        }
 
-        // Clear all existing crops
+        UnityEngine.Debug.Log($"[SaveLoadManager] === LOADING {data.plantedCrops.Count} CROPS ===");
+
+        // Clear all existing crops first
         CropManager.Instance.ClearAllCrops();
+
+        // Wait one frame to ensure everything is cleared
+        // We'll do this synchronously for now but could use coroutine
+
+        int successCount = 0;
+        int failCount = 0;
 
         // Restore saved crops
         foreach (SavedCropBlock savedBlock in data.plantedCrops)
         {
+            // Validate saved data
+            if (savedBlock == null)
+            {
+                UnityEngine.Debug.LogWarning("[SaveLoadManager] Null savedBlock in data!");
+                failCount++;
+                continue;
+            }
+
             Vector2Int gridPos = new Vector2Int(savedBlock.gridPositionX, savedBlock.gridPositionY);
+
+            // Get the block at this position
             CropBlock block = CropManager.Instance.GetBlockAtPosition(gridPos);
 
-            if (block != null)
+            if (block == null)
             {
-                SeedPacket packet = FindSeedPacketByName(savedBlock.seedPacketName);
+                UnityEngine.Debug.LogWarning($"[SaveLoadManager] No block found at grid position {gridPos}");
+                failCount++;
+                continue;
+            }
 
-                if (packet != null)
+            // Validate seed packet name
+            if (string.IsNullOrEmpty(savedBlock.seedPacketName))
+            {
+                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Empty seed packet name at {gridPos}");
+                failCount++;
+                continue;
+            }
+
+            // Find the seed packet
+            SeedPacket packet = FindSeedPacketByName(savedBlock.seedPacketName);
+
+            if (packet == null)
+            {
+                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Could not find seed packet: {savedBlock.seedPacketName}");
+                failCount++;
+                continue;
+            }
+
+            // Only restore if the block was actually planted
+            if (savedBlock.isPlanted)
+            {
+                try
                 {
-                    // Restore block state
-                    block.RestoreState(
-                        savedBlock,
-                        packet
-                    );
+                    block.RestoreState(savedBlock, packet);
+                    successCount++;
+                }
+                catch (System.Exception e)
+                {
+                    UnityEngine.Debug.LogError($"[SaveLoadManager] Error restoring block at {gridPos}: {e.Message}");
+                    failCount++;
                 }
             }
         }
 
         if (showDebugLogs)
         {
-            Debug.Log($"[SaveLoadManager] Loaded {data.plantedCrops.Count} planted crops");
+            UnityEngine.Debug.Log($"[SaveLoadManager] Crop load complete: {successCount} success, {failCount} failed");
         }
     }
 

@@ -1,11 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
-using System.Linq;
 
 /// <summary>
-/// Manages the Save/Load menu UI tab
+/// UI Manager for Save/Load menu tab
+/// Simplified version - no refresh button, no delete confirmation
 /// </summary>
 public class SaveLoadMenuUI : MonoBehaviour
 {
@@ -13,7 +13,6 @@ public class SaveLoadMenuUI : MonoBehaviour
     [SerializeField] private Transform saveSlotContainer;
     [SerializeField] private GameObject saveSlotPrefab;
     [SerializeField] private Button newSaveButton;
-    [SerializeField] private Button refreshButton;
 
     [Header("New Save Panel")]
     [SerializeField] private GameObject newSavePanel;
@@ -21,27 +20,15 @@ public class SaveLoadMenuUI : MonoBehaviour
     [SerializeField] private Button confirmSaveButton;
     [SerializeField] private Button cancelSaveButton;
 
-    [Header("Confirmation Panel")]
-    [SerializeField] private GameObject confirmationPanel;
-    [SerializeField] private TextMeshProUGUI confirmationText;
-    [SerializeField] private Button confirmYesButton;
-    [SerializeField] private Button confirmNoButton;
-
     [Header("Info Display")]
     [SerializeField] private TextMeshProUGUI currentPlayTimeText;
     [SerializeField] private TextMeshProUGUI totalSavesText;
 
-    private List<SaveSlotUI> activeSlots = new List<SaveSlotUI>();
-    private SaveSlotInfo pendingDeleteSlot;
-
     private void Start()
     {
-        // Setup buttons
+        // Setup button listeners
         if (newSaveButton != null)
             newSaveButton.onClick.AddListener(ShowNewSavePanel);
-
-        if (refreshButton != null)
-            refreshButton.onClick.AddListener(RefreshSaveList);
 
         if (confirmSaveButton != null)
             confirmSaveButton.onClick.AddListener(CreateNewSave);
@@ -49,96 +36,114 @@ public class SaveLoadMenuUI : MonoBehaviour
         if (cancelSaveButton != null)
             cancelSaveButton.onClick.AddListener(HideNewSavePanel);
 
-        if (confirmYesButton != null)
-            confirmYesButton.onClick.AddListener(ConfirmDelete);
-
-        if (confirmNoButton != null)
-            confirmNoButton.onClick.AddListener(CancelDelete);
-
-        // Hide panels initially
+        // Make sure new save panel is hidden at start
         if (newSavePanel != null)
             newSavePanel.SetActive(false);
-
-        if (confirmationPanel != null)
-            confirmationPanel.SetActive(false);
-
-        // Initial refresh
-        RefreshSaveList();
     }
 
     private void OnEnable()
     {
+        UnityEngine.Debug.Log("========================================");
+        UnityEngine.Debug.Log("[SaveLoadMenuUI] OnEnable called");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] SaveLoadManager.Instance exists: {SaveLoadManager.Instance != null}");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer assigned: {saveSlotContainer != null}");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab assigned: {saveSlotPrefab != null}");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] currentPlayTimeText assigned: {currentPlayTimeText != null}");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] totalSavesText assigned: {totalSavesText != null}");
+        UnityEngine.Debug.Log("========================================");
+
         RefreshSaveList();
-        UpdatePlayTimeDisplay();
+        UpdateInfoDisplay();
     }
 
-    /// <summary>
-    /// Refresh the list of save slots
-    /// </summary>
     public void RefreshSaveList()
     {
+        UnityEngine.Debug.Log("[SaveLoadMenuUI] === RefreshSaveList START ===");
+
         if (SaveLoadManager.Instance == null)
         {
-            Debug.LogError("[SaveLoadMenuUI] SaveLoadManager not found!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] SaveLoadManager.Instance is NULL!");
             return;
         }
+        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found ✓");
+
+        if (saveSlotContainer == null)
+        {
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotContainer is NULL!");
+            return;
+        }
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name} ✓");
+
+        if (saveSlotPrefab == null)
+        {
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotPrefab is NULL!");
+            return;
+        }
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name} ✓");
 
         // Clear existing slots
-        ClearSlots();
+        int childCount = saveSlotContainer.childCount;
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Clearing {childCount} existing children");
+        foreach (Transform child in saveSlotContainer)
+        {
+            Destroy(child.gameObject);
+        }
 
         // Get all saves
         List<SaveSlotInfo> saves = SaveLoadManager.Instance.GetAllSaves();
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] GetAllSaves returned {saves.Count} saves");
 
-        // Sort by date (most recent first)
-        saves = saves.OrderByDescending(s => s.saveDate).ToList();
-
-        // Create slot UI for each save
-        foreach (SaveSlotInfo save in saves)
+        if (saves.Count == 0)
         {
+            UnityEngine.Debug.LogWarning("[SaveLoadMenuUI] No saves found - list will be empty");
+        }
+
+        // Create UI for each save
+        for (int i = 0; i < saves.Count; i++)
+        {
+            SaveSlotInfo save = saves[i];
+            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Creating slot {i}: {save.saveName}");
+
             GameObject slotObj = Instantiate(saveSlotPrefab, saveSlotContainer);
+            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Instantiated slot object: {slotObj.name}");
+
             SaveSlotUI slotUI = slotObj.GetComponent<SaveSlotUI>();
 
             if (slotUI != null)
             {
+                UnityEngine.Debug.Log($"[SaveLoadMenuUI] SaveSlotUI component found, calling Setup");
                 slotUI.Setup(save, this);
-                activeSlots.Add(slotUI);
+            }
+            else
+            {
+                UnityEngine.Debug.LogError($"[SaveLoadMenuUI] SaveSlotUI component missing on slot {i}!");
             }
         }
 
-        // Update info display
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Container now has {saveSlotContainer.childCount} children");
+        UnityEngine.Debug.Log("[SaveLoadMenuUI] === RefreshSaveList END ===");
+
+        UpdateInfoDisplay();
+    }
+
+    /// <summary>
+    /// Update info text display
+    /// </summary>
+    private void UpdateInfoDisplay()
+    {
+        if (SaveLoadManager.Instance == null) return;
+
+        // Update playtime
+        if (currentPlayTimeText != null)
+        {
+            currentPlayTimeText.text = $"Playtime: {SaveLoadManager.Instance.GetFormattedPlayTime()}";
+        }
+
+        // Update total saves count
         if (totalSavesText != null)
         {
-            totalSavesText.text = $"Total Saves: {saves.Count}";
-        }
-
-        UpdatePlayTimeDisplay();
-
-        Debug.Log($"[SaveLoadMenuUI] Refreshed save list - {saves.Count} saves found");
-    }
-
-    /// <summary>
-    /// Clear all slot UIs
-    /// </summary>
-    private void ClearSlots()
-    {
-        foreach (SaveSlotUI slot in activeSlots)
-        {
-            if (slot != null)
-            {
-                Destroy(slot.gameObject);
-            }
-        }
-        activeSlots.Clear();
-    }
-
-    /// <summary>
-    /// Update playtime display
-    /// </summary>
-    private void UpdatePlayTimeDisplay()
-    {
-        if (currentPlayTimeText != null && SaveLoadManager.Instance != null)
-        {
-            currentPlayTimeText.text = $"Current Session: {SaveLoadManager.Instance.GetFormattedPlayTime()}";
+            int saveCount = SaveLoadManager.Instance.GetAllSaves().Count;
+            totalSavesText.text = $"Total Saves: {saveCount}";
         }
     }
 
@@ -151,12 +156,12 @@ public class SaveLoadMenuUI : MonoBehaviour
         {
             newSavePanel.SetActive(true);
 
-            // Set default name
+            // Clear previous input and focus
             if (saveNameInput != null)
             {
-                int saveCount = SaveLoadManager.Instance.GetAllSaves().Count;
-                saveNameInput.text = $"Save {saveCount + 1}";
+                saveNameInput.text = $"Save {System.DateTime.Now:MMdd_HHmm}";
                 saveNameInput.Select();
+                saveNameInput.ActivateInputField();
             }
         }
     }
@@ -173,30 +178,35 @@ public class SaveLoadMenuUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Create a new save
+    /// Create a new save with the entered name
     /// </summary>
     private void CreateNewSave()
     {
-        if (SaveLoadManager.Instance == null) return;
-
-        string saveName = saveNameInput != null ? saveNameInput.text : "New Save";
-
-        if (string.IsNullOrWhiteSpace(saveName))
+        if (SaveLoadManager.Instance == null)
         {
-            saveName = "Unnamed Save";
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot create save - SaveLoadManager is null!");
+            return;
         }
 
+        string saveName = "New Save";
+
+        if (saveNameInput != null && !string.IsNullOrWhiteSpace(saveNameInput.text))
+        {
+            saveName = saveNameInput.text.Trim();
+        }
+
+        // Create the save
         bool success = SaveLoadManager.Instance.SaveGame(saveName);
 
         if (success)
         {
-            Debug.Log($"[SaveLoadMenuUI] Created new save: {saveName}");
+            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Created new save: {saveName}");
             HideNewSavePanel();
             RefreshSaveList();
         }
         else
         {
-            Debug.LogError("[SaveLoadMenuUI] Failed to create save!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Failed to create save!");
         }
     }
 
@@ -205,96 +215,60 @@ public class SaveLoadMenuUI : MonoBehaviour
     /// </summary>
     public void LoadSave(string saveId)
     {
-        if (SaveLoadManager.Instance == null) return;
+        if (SaveLoadManager.Instance == null)
+        {
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot load - SaveLoadManager is null!");
+            return;
+        }
 
         bool success = SaveLoadManager.Instance.LoadGame(saveId);
 
         if (success)
         {
-            Debug.Log($"[SaveLoadMenuUI] Loaded save: {saveId}");
+            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Loaded save: {saveId}");
+            RefreshSaveList();
+            UpdateInfoDisplay();
+        }
+        else
+        {
+            UnityEngine.Debug.LogError($"[SaveLoadMenuUI] Failed to load save: {saveId}");
+        }
+    }
 
-            // Close the menu
-            if (InventoryUIManager.Instance != null)
-            {
-                InventoryUIManager.Instance.ToggleInventory();
-            }
+    /// <summary>
+    /// Delete a save immediately (no confirmation)
+    /// </summary>
+    public void DeleteSave(SaveSlotInfo slotInfo)
+    {
+        if (SaveLoadManager.Instance == null)
+        {
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot delete - SaveLoadManager is null!");
+            return;
+        }
 
+        bool success = SaveLoadManager.Instance.DeleteSave(slotInfo.saveId);
+
+        if (success)
+        {
+            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Deleted save: {slotInfo.saveName}");
             RefreshSaveList();
         }
         else
         {
-            Debug.LogError("[SaveLoadMenuUI] Failed to load save!");
-        }
-    }
-
-    /// <summary>
-    /// Delete a save (with confirmation)
-    /// </summary>
-    public void DeleteSave(SaveSlotInfo slotInfo)
-    {
-        pendingDeleteSlot = slotInfo;
-
-        if (confirmationPanel != null)
-        {
-            confirmationPanel.SetActive(true);
-
-            if (confirmationText != null)
-            {
-                confirmationText.text = $"Delete save '{slotInfo.saveName}'?\n\nThis cannot be undone!";
-            }
-        }
-    }
-
-    /// <summary>
-    /// Confirm deletion
-    /// </summary>
-    private void ConfirmDelete()
-    {
-        if (SaveLoadManager.Instance != null && pendingDeleteSlot != null)
-        {
-            bool success = SaveLoadManager.Instance.DeleteSave(pendingDeleteSlot.saveId);
-
-            if (success)
-            {
-                Debug.Log($"[SaveLoadMenuUI] Deleted save: {pendingDeleteSlot.saveName}");
-                RefreshSaveList();
-            }
-        }
-
-        CancelDelete();
-    }
-
-    /// <summary>
-    /// Cancel deletion
-    /// </summary>
-    private void CancelDelete()
-    {
-        pendingDeleteSlot = null;
-
-        if (confirmationPanel != null)
-        {
-            confirmationPanel.SetActive(false);
+            UnityEngine.Debug.LogError($"[SaveLoadMenuUI] Failed to delete save: {slotInfo.saveName}");
         }
     }
 
     private void OnDestroy()
     {
+        // Clean up listeners
         if (newSaveButton != null)
             newSaveButton.onClick.RemoveListener(ShowNewSavePanel);
-
-        if (refreshButton != null)
-            refreshButton.onClick.RemoveListener(RefreshSaveList);
 
         if (confirmSaveButton != null)
             confirmSaveButton.onClick.RemoveListener(CreateNewSave);
 
         if (cancelSaveButton != null)
             cancelSaveButton.onClick.RemoveListener(HideNewSavePanel);
-
-        if (confirmYesButton != null)
-            confirmYesButton.onClick.RemoveListener(ConfirmDelete);
-
-        if (confirmNoButton != null)
-            confirmNoButton.onClick.RemoveListener(CancelDelete);
     }
 }

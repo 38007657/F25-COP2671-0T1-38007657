@@ -396,27 +396,34 @@ public class CropManager : MonoBehaviour
     /// </summary>
     public void ClearAllCrops()
     {
-        // Clear planted crops list
-        plantedCrops.Clear();
+        UnityEngine.Debug.Log("========================================");
+        UnityEngine.Debug.Log($"[CropManager] ClearAllCrops called");
+        UnityEngine.Debug.Log($"[CropManager] Planted crops: {plantedCrops.Count}");
+        UnityEngine.Debug.Log($"[CropManager] Grid size: {gridSize.x} x {gridSize.y} = {gridSize.x * gridSize.y} total blocks");
+        UnityEngine.Debug.Log("========================================");
 
-        // Reset all blocks in grid
-        if (cropGrid != null)
+        // IMPORTANT: Only clear the blocks that were actually planted!
+        List<CropBlock> blocksToClean = new List<CropBlock>(plantedCrops);
+
+        UnityEngine.Debug.Log($"[CropManager] Clearing {blocksToClean.Count} planted blocks only");
+
+        foreach (CropBlock block in blocksToClean)
         {
-            for (int x = 0; x < gridSize.x; x++)
+            if (block != null)
             {
-                for (int y = 0; y < gridSize.y; y++)
-                {
-                    if (cropGrid[x, y] != null)
-                    {
-                        cropGrid[x, y].ClearForLoad();
-                    }
-                }
+                block.ClearForLoad();
             }
         }
 
+        // Clear the planted crops list
+        plantedCrops.Clear();
+
+        // DON'T iterate through the entire grid!
+        // The untilled blocks should stay invisible/empty
+
         if (showDebugInfo)
         {
-            Debug.Log("[CropManager] Cleared all crops for loading");
+            UnityEngine.Debug.Log("[CropManager] Cleared all planted crops for loading");
         }
     }
 

@@ -485,11 +485,22 @@ public class CropBlock
         UpdateTileVisual();
     }
 
-    /// <summary>
-    /// Restore state from saved data
-    /// </summary>
     public void RestoreState(SavedCropBlock savedBlock, SeedPacket packet)
     {
+        if (savedBlock == null)
+        {
+            UnityEngine.Debug.LogError("[CropBlock] RestoreState called with null savedBlock!");
+            return;
+        }
+
+        if (packet == null)
+        {
+            UnityEngine.Debug.LogError("[CropBlock] RestoreState called with null packet!");
+            return;
+        }
+
+        UnityEngine.Debug.Log($"[CropBlock] Restoring {packet.cropName} at grid {gridPosition}");
+
         // Restore all state
         isTilled = savedBlock.isTilled;
         isWatered = savedBlock.isWatered;
@@ -502,8 +513,11 @@ public class CropBlock
         lastWateredDay = savedBlock.lastWateredDay;
         daysWithoutWater = savedBlock.daysWithoutWater;
 
+        // Update visual BEFORE adding to planted crops
+        UpdateTileVisual();
+
         // Add to planted crops if needed
-        if (isPlanted)
+        if (isPlanted && cropManager != null)
         {
             cropManager.AddToPlantedCrops(this);
         }
@@ -514,9 +528,6 @@ public class CropBlock
             ShowHarvestReadyParticles();
         }
 
-        // Update visual
-        UpdateTileVisual();
-
-        UnityEngine.Debug.Log($"[CropBlock] Restored {packet?.cropName ?? "crop"} at stage {currentGrowthStage}");
+        UnityEngine.Debug.Log($"[CropBlock] Successfully restored {packet.cropName} at stage {currentGrowthStage}");
     }
 }

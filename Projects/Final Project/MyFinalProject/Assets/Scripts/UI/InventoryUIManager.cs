@@ -117,44 +117,52 @@ public class InventoryUIManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Switch between tabs (0=Inventory, 1=Money, 2=Shop)
-    /// </summary>
     public void SwitchTab(int tabIndex)
     {
-        Debug.Log($"[InventoryUI] Switching to tab {tabIndex}");
+        UnityEngine.Debug.Log($"[InventoryUI] Switching to tab {tabIndex}");
 
         // Hide all tabs
         inventoryTabContent.SetActive(false);
         moneyTabContent.SetActive(false);
         shopTabContent.SetActive(false);
-        saveLoadTabContent.SetActive(false);
+        saveLoadTabContent.SetActive(false); // ← MAKE SURE THIS LINE EXISTS
 
         // Reset all button colors
         SetButtonColor(inventoryTabButton, inactiveTabColor);
         SetButtonColor(moneyTabButton, inactiveTabColor);
         SetButtonColor(shopTabButton, inactiveTabColor);
-        SetButtonColor(saveLoadTabButton, inactiveTabColor);
+        SetButtonColor(saveLoadTabButton, inactiveTabColor); // ← MAKE SURE THIS LINE EXISTS
 
         // Show selected tab and highlight button
         switch (tabIndex)
         {
             case 0: // Inventory
-                Debug.Log("[InventoryUI] Activating Inventory Tab");
                 inventoryTabContent.SetActive(true);
                 SetButtonColor(inventoryTabButton, activeTabColor);
                 RefreshInventoryTab();
                 break;
+
             case 1: // Money
-                Debug.Log("[InventoryUI] Activating Money Tab");
                 moneyTabContent.SetActive(true);
                 SetButtonColor(moneyTabButton, activeTabColor);
                 RefreshMoneyTab();
                 break;
+
             case 2: // Shop
-                Debug.Log("[InventoryUI] Activating Shop Tab");
                 shopTabContent.SetActive(true);
-                SetButtonColor(shopTabButton, activeTabColor);                
+                SetButtonColor(shopTabButton, activeTabColor);
+                RefreshShopTab();
+                break;
+
+            case 3: // Save/Load ← MAKE SURE THIS CASE EXISTS
+                UnityEngine.Debug.Log("[InventoryUI] Activating SaveLoadTabContent");
+                saveLoadTabContent.SetActive(true);
+                UnityEngine.Debug.Log($"[InventoryUI] SaveLoadTabContent.activeSelf = {saveLoadTabContent.activeSelf}");
+                SetButtonColor(saveLoadTabButton, activeTabColor);
+                break;
+
+            default:
+                UnityEngine.Debug.LogWarning($"[InventoryUI] Invalid tab index: {tabIndex}");
                 break;
         }
     }
