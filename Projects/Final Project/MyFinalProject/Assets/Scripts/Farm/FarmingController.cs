@@ -9,7 +9,6 @@ public class FarmingController : MonoBehaviour
     [Header("Interaction Settings")]
     [SerializeField] private float interactionRange = 2.5f;
     [Tooltip("Y-axis offset for 64x64 player interacting with 16x16 tiles")]
-    [SerializeField] private float playerYOffset = -1.5f; // ← Start with -1.5
 
     [Header("Test Seed")]
     [SerializeField] private SeedPacket testSeedPacket;

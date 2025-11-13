@@ -55,7 +55,7 @@ public class TorchController : MonoBehaviour
         baseIntensity = lightIntensity;
 
         // Subscribe to day/night events
-        DayNightEvents events = FindObjectOfType<DayNightEvents>();
+        DayNightEvents events = FindFirstObjectByType<DayNightEvents>();
         if (events != null)
         {
             events.OnSunset += LightTorch;
@@ -164,7 +164,7 @@ public class TorchController : MonoBehaviour
     private void OnDestroy()
     {
         // Unsubscribe from events
-        DayNightEvents events = FindObjectOfType<DayNightEvents>();
+        DayNightEvents events = FindFirstObjectByType<DayNightEvents>();
         if (events != null)
         {
             events.OnSunset -= LightTorch;

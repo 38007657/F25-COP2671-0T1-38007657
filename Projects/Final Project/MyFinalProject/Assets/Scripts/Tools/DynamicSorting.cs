@@ -4,7 +4,6 @@ public class DynamicSorting : MonoBehaviour
 {
     private SpriteRenderer spriteRenderer;
     [SerializeField] private float sortingOrderScale = -100f;
-    [SerializeField] private int sortingOrderOffset = 5000;
     [SerializeField] private Transform sortingReference;
 
     private void Awake()
