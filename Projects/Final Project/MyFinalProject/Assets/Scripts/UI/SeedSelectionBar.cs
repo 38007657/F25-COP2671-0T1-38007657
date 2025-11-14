@@ -5,6 +5,7 @@ using System.Linq;
 
 /// <summary>
 /// Vertical collapsible seed selection bar on the left side of the screen
+/// CLICK ONLY - No number keys or scroll wheel selection
 /// </summary>
 public class SeedSelectionBar : MonoBehaviour
 {
@@ -87,11 +88,8 @@ public class SeedSelectionBar : MonoBehaviour
             rectTransform.sizeDelta = Vector2.Lerp(rectTransform.sizeDelta, targetSize, Time.deltaTime * animationSpeed);
         }
 
-        // Number key selection
-        HandleNumberKeySelection();
-
-        // Scroll wheel selection (when collapsed or expanded)
-        HandleScrollWheelSelection();
+        // REMOVED: Number key selection - Click only!
+        // REMOVED: Scroll wheel selection - Click only!
     }
 
     private void OnDestroy()
@@ -132,6 +130,9 @@ public class SeedSelectionBar : MonoBehaviour
     /// </summary>
     private void RefreshSeedSlots()
     {
+        // REMEMBER which seed packet was selected before clearing
+        SeedPacket previouslySelectedSeed = selectedSlot?.SeedPacket;
+
         // Clear existing slots
         foreach (var slot in seedSlots)
         {
@@ -139,6 +140,7 @@ public class SeedSelectionBar : MonoBehaviour
                 Destroy(slot.gameObject);
         }
         seedSlots.Clear();
+        selectedSlot = null; // Clear the reference since we destroyed the GameObject
 
         // Get player's seeds
         if (PlayerInventory.Instance == null) return;
@@ -148,6 +150,8 @@ public class SeedSelectionBar : MonoBehaviour
             .OrderBy(kvp => kvp.Key.cropName);
 
         int index = 0;
+        SeedSelectionSlot slotToReselect = null;
+
         foreach (var seedKvp in playerSeeds)
         {
             GameObject slotObj = Instantiate(seedSlotPrefab, seedSlotsContainer);
@@ -159,14 +163,26 @@ public class SeedSelectionBar : MonoBehaviour
                 slot.OnSlotClicked += HandleSlotClick;
                 seedSlots.Add(slot);
 
-                // Select first slot by default if nothing selected
-                if (selectedSlot == null && index == 0)
+                // Check if this is the previously selected seed
+                if (previouslySelectedSeed != null && seedKvp.Key == previouslySelectedSeed)
                 {
-                    SelectSlot(slot);
+                    slotToReselect = slot;
+                }
+
+                // Remember first slot as fallback
+                if (index == 0 && slotToReselect == null && previouslySelectedSeed == null)
+                {
+                    slotToReselect = slot;
                 }
 
                 index++;
             }
+        }
+
+        // Reselect the appropriate slot
+        if (slotToReselect != null)
+        {
+            SelectSlot(slotToReselect);
         }
 
         // Always ensure the first slot shows in collapsed view
@@ -174,7 +190,7 @@ public class SeedSelectionBar : MonoBehaviour
     }
 
     /// <summary>
-    /// Handle clicking a seed slot
+    /// Handle clicking a seed slot - ONLY selection method now!
     /// </summary>
     private void HandleSlotClick(SeedSelectionSlot slot)
     {
@@ -217,53 +233,6 @@ public class SeedSelectionBar : MonoBehaviour
         {
             // This could be done by reordering, or having a separate display
             // For now, we'll rely on the layout to show the first slot
-        }
-    }
-
-    /// <summary>
-    /// Handle number key selection (1-9)
-    /// </summary>
-    private void HandleNumberKeySelection()
-    {
-        for (int i = 1; i <= 9; i++)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha0 + i))
-            {
-                int slotIndex = i - 1;
-                if (slotIndex < seedSlots.Count)
-                {
-                    SelectSlot(seedSlots[slotIndex]);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Handle scroll wheel selection
-    /// </summary>
-    private void HandleScrollWheelSelection()
-    {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (Mathf.Abs(scroll) > 0.01f)
-        {
-            if (seedSlots.Count == 0) return;
-
-            int currentIndex = selectedSlot != null ? seedSlots.IndexOf(selectedSlot) : 0;
-
-            if (scroll > 0) // Scroll up
-            {
-                currentIndex--;
-                if (currentIndex < 0)
-                    currentIndex = seedSlots.Count - 1;
-            }
-            else // Scroll down
-            {
-                currentIndex++;
-                if (currentIndex >= seedSlots.Count)
-                    currentIndex = 0;
-            }
-
-            SelectSlot(seedSlots[currentIndex]);
         }
     }
 

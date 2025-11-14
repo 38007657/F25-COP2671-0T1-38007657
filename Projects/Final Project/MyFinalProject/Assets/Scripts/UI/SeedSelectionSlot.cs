@@ -56,18 +56,11 @@ public class SeedSelectionSlot : MonoBehaviour, IPointerClickHandler, IPointerEn
             quantityText.text = qty.ToString();
         }
 
-        // Show number key hint for slots 1-9
-        if (numberKeyHint != null && numberKeyText != null)
+        // REMOVED: Number key hints - Click only selection!
+        // Hide number key hints (optional UI elements)
+        if (numberKeyHint != null)
         {
-            if (index < 9)
-            {
-                numberKeyHint.SetActive(true);
-                numberKeyText.text = (index + 1).ToString();
-            }
-            else
-            {
-                numberKeyHint.SetActive(false);
-            }
+            numberKeyHint.SetActive(false);
         }
 
         UpdateVisualState();

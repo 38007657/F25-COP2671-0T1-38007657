@@ -3,24 +3,17 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Manages player's seed inventory and selection
+/// UPDATED: Stores selected seed directly instead of by index
 /// </summary>
 public class SeedInventory : MonoBehaviour
 {
     public static SeedInventory Instance { get; private set; }
 
-    [Header("Available Seeds")]
-    [SerializeField] private List<SeedPacket> allSeeds = new List<SeedPacket>();
-
     [Header("Current Selection")]
-    private int selectedSeedIndex = 0;
+    private SeedPacket selectedSeed = null;
 
     // Properties
-    public SeedPacket SelectedSeed => allSeeds.Count > 0 && selectedSeedIndex < allSeeds.Count
-        ? allSeeds[selectedSeedIndex]
-        : null;
-
-    public int SelectedIndex => selectedSeedIndex;
-    public List<SeedPacket> AllSeeds => allSeeds;
+    public SeedPacket SelectedSeed => selectedSeed;
 
     // Events
     public delegate void SeedSelectionChanged(SeedPacket newSeed, int index);
@@ -38,47 +31,51 @@ public class SeedInventory : MonoBehaviour
     }
 
     /// <summary>
-    /// Select seed by index (called from UI)
-    /// </summary>
-    public void SelectSeed(int index)
-    {
-        if (index < 0 || index >= allSeeds.Count) return;
-
-        selectedSeedIndex = index;
-        OnSeedChanged?.Invoke(SelectedSeed, selectedSeedIndex);
-
-        Debug.Log($"[SeedInventory] Selected: {SelectedSeed.cropName}");
-    }
-
-    /// <summary>
     /// Select seed by SeedPacket reference (called from UI)
+    /// This is the PRIMARY method now - no more index confusion!
     /// </summary>
     public void SelectSeed(SeedPacket seed)
     {
-        int index = allSeeds.IndexOf(seed);
-        if (index >= 0)
+        if (seed == null)
         {
-            SelectSeed(index);
+            Debug.LogWarning("[SeedInventory] Tried to select null seed!");
+            return;
         }
+
+        selectedSeed = seed;
+
+        // Fire event with -1 index since we're not using indexes anymore
+        OnSeedChanged?.Invoke(selectedSeed, -1);
+
+        Debug.Log($"[SeedInventory] Selected: {selectedSeed.cropName}");
     }
 
     /// <summary>
-    /// Add a new seed type to inventory
+    /// Select seed by index (DEPRECATED - kept for backwards compatibility)
     /// </summary>
-    public void AddSeedType(SeedPacket seed)
+    public void SelectSeed(int index)
     {
-        if (!allSeeds.Contains(seed))
-        {
-            allSeeds.Add(seed);
-            Debug.Log($"[SeedInventory] Added seed type: {seed.cropName}");
-        }
+        Debug.LogWarning("[SeedInventory] SelectSeed(int) is deprecated - use SelectSeed(SeedPacket) instead");
+
+        // This method is no longer reliable since we don't maintain a master list
+        // If you need to use it, you must pass the actual SeedPacket reference
     }
 
     /// <summary>
-    /// Remove a seed type from inventory
+    /// Clear the current selection
     /// </summary>
-    public void RemoveSeedType(SeedPacket seed)
+    public void ClearSelection()
     {
-        allSeeds.Remove(seed);
+        selectedSeed = null;
+        OnSeedChanged?.Invoke(null, -1);
+        Debug.Log("[SeedInventory] Selection cleared");
+    }
+
+    /// <summary>
+    /// Check if a specific seed is currently selected
+    /// </summary>
+    public bool IsSelected(SeedPacket seed)
+    {
+        return selectedSeed == seed;
     }
 }

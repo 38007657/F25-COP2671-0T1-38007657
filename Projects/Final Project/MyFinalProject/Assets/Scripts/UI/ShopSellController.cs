@@ -13,6 +13,10 @@ public class ShopSellController : MonoBehaviour
     [SerializeField] private Button sellSelectedButton;
     [SerializeField] private Transform sellContentParent;
 
+    [Header("Button Text")]
+    [SerializeField] private string noItemsText = "Sell Items";
+    [SerializeField] private string hasItemsText = "Sell ({0} items)";
+
     private List<ShopItemSellSlot> sellSlots = new List<ShopItemSellSlot>();
 
     private void Start()
@@ -82,7 +86,15 @@ public class ShopSellController : MonoBehaviour
             TextMeshProUGUI buttonText = sellSelectedButton.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
             {
-                buttonText.text = totalItems > 0 ? $"Sell ({totalItems} items)" : "Select Items";
+                // Show different text based on selection
+                if (totalItems > 0)
+                {
+                    buttonText.text = string.Format(hasItemsText, totalItems);
+                }
+                else
+                {
+                    buttonText.text = noItemsText;
+                }
             }
         }
     }
