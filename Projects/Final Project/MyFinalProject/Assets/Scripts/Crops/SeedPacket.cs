@@ -28,7 +28,7 @@ public class SeedPacket : ScriptableObject
 
     [Header("Growth Settings")]
     [Tooltip("Total days from seed to harvest (minimum 3 days if watered each day)")]
-    [Range(3, 10)]
+    [Range(1, 10)]
     public int totalGrowthDays = 3;
 
     [Header("Requirements")]

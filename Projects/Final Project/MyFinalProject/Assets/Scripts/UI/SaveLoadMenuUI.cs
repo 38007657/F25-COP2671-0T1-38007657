@@ -5,7 +5,7 @@ using TMPro;
 
 /// <summary>
 /// UI Manager for Save/Load menu tab
-/// Simplified version - no refresh button, no delete confirmation
+/// UPDATED: Added Load button functionality
 /// </summary>
 public class SaveLoadMenuUI : MonoBehaviour
 {
@@ -13,6 +13,7 @@ public class SaveLoadMenuUI : MonoBehaviour
     [SerializeField] private Transform saveSlotContainer;
     [SerializeField] private GameObject saveSlotPrefab;
     [SerializeField] private Button newSaveButton;
+    [SerializeField] private Button loadButton; // NEW: Load button
 
     [Header("New Save Panel")]
     [SerializeField] private GameObject newSavePanel;
@@ -23,6 +24,9 @@ public class SaveLoadMenuUI : MonoBehaviour
     [Header("Info Display")]
     [SerializeField] private TextMeshProUGUI currentPlayTimeText;
     [SerializeField] private TextMeshProUGUI totalSavesText;
+
+    private SaveSlotUI selectedSlot = null; // Track which slot is selected
+    private List<SaveSlotUI> allSlots = new List<SaveSlotUI>();
 
     private void Start()
     {
@@ -36,6 +40,13 @@ public class SaveLoadMenuUI : MonoBehaviour
         if (cancelSaveButton != null)
             cancelSaveButton.onClick.AddListener(HideNewSavePanel);
 
+        // NEW: Setup load button
+        if (loadButton != null)
+        {
+            loadButton.onClick.AddListener(LoadSelectedSave);
+            loadButton.interactable = false; // Disabled by default (nothing selected)
+        }
+
         // Make sure new save panel is hidden at start
         if (newSavePanel != null)
             newSavePanel.SetActive(false);
@@ -43,15 +54,7 @@ public class SaveLoadMenuUI : MonoBehaviour
 
     private void OnEnable()
     {
-        UnityEngine.Debug.Log("========================================");
         UnityEngine.Debug.Log("[SaveLoadMenuUI] OnEnable called");
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] SaveLoadManager.Instance exists: {SaveLoadManager.Instance != null}");
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer assigned: {saveSlotContainer != null}");
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab assigned: {saveSlotPrefab != null}");
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] currentPlayTimeText assigned: {currentPlayTimeText != null}");
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] totalSavesText assigned: {totalSavesText != null}");
-        UnityEngine.Debug.Log("========================================");
-
         RefreshSaveList();
         UpdateInfoDisplay();
     }
@@ -65,38 +68,34 @@ public class SaveLoadMenuUI : MonoBehaviour
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] SaveLoadManager.Instance is NULL!");
             return;
         }
-        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found ✓");
 
         if (saveSlotContainer == null)
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotContainer is NULL!");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name} ✓");
 
         if (saveSlotPrefab == null)
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotPrefab is NULL!");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name} ✓");
 
         // Clear existing slots
-        int childCount = saveSlotContainer.childCount;
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Clearing {childCount} existing children");
-        foreach (Transform child in saveSlotContainer)
+        foreach (SaveSlotUI slot in allSlots)
         {
-            Destroy(child.gameObject);
+            if (slot != null)
+                Destroy(slot.gameObject);
         }
+        allSlots.Clear();
+        selectedSlot = null;
+
+        // Update load button state (nothing selected now)
+        UpdateLoadButtonState();
 
         // Get all saves
         List<SaveSlotInfo> saves = SaveLoadManager.Instance.GetAllSaves();
         UnityEngine.Debug.Log($"[SaveLoadMenuUI] GetAllSaves returned {saves.Count} saves");
-
-        if (saves.Count == 0)
-        {
-            UnityEngine.Debug.LogWarning("[SaveLoadMenuUI] No saves found - list will be empty");
-        }
 
         // Create UI for each save
         for (int i = 0; i < saves.Count; i++)
@@ -105,14 +104,16 @@ public class SaveLoadMenuUI : MonoBehaviour
             UnityEngine.Debug.Log($"[SaveLoadMenuUI] Creating slot {i}: {save.saveName}");
 
             GameObject slotObj = Instantiate(saveSlotPrefab, saveSlotContainer);
-            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Instantiated slot object: {slotObj.name}");
-
             SaveSlotUI slotUI = slotObj.GetComponent<SaveSlotUI>();
 
             if (slotUI != null)
             {
-                UnityEngine.Debug.Log($"[SaveLoadMenuUI] SaveSlotUI component found, calling Setup");
                 slotUI.Setup(save, this);
+
+                // Subscribe to selection events
+                slotUI.OnSlotSelected += OnSlotSelected;
+
+                allSlots.Add(slotUI);
             }
             else
             {
@@ -121,9 +122,96 @@ public class SaveLoadMenuUI : MonoBehaviour
         }
 
         UnityEngine.Debug.Log($"[SaveLoadMenuUI] Container now has {saveSlotContainer.childCount} children");
-        UnityEngine.Debug.Log("[SaveLoadMenuUI] === RefreshSaveList END ===");
-
         UpdateInfoDisplay();
+    }
+
+    /// <summary>
+    /// Called when a save slot is selected/clicked
+    /// </summary>
+    private void OnSlotSelected(SaveSlotUI slot)
+    {
+        // Deselect previous slot
+        if (selectedSlot != null)
+        {
+            selectedSlot.SetSelected(false);
+        }
+
+        // Select new slot
+        selectedSlot = slot;
+        selectedSlot.SetSelected(true);
+
+        // Update load button state
+        UpdateLoadButtonState();
+
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Selected save: {slot.SaveSlotInfo.saveName}");
+    }
+
+    /// <summary>
+    /// Update the load button's interactable state
+    /// </summary>
+    private void UpdateLoadButtonState()
+    {
+        if (loadButton != null)
+        {
+            // Enable load button only if a slot is selected
+            loadButton.interactable = (selectedSlot != null);
+
+            // Optional: Update button text to show what will be loaded
+            TextMeshProUGUI buttonText = loadButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (buttonText != null)
+            {
+                if (selectedSlot != null)
+                {
+                    buttonText.text = $"Load: {selectedSlot.SaveSlotInfo.saveName}";
+                }
+                else
+                {
+                    buttonText.text = "Load Save";
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Load the currently selected save
+    /// </summary>
+    private void LoadSelectedSave()
+    {
+        if (selectedSlot == null)
+        {
+            UnityEngine.Debug.LogWarning("[SaveLoadMenuUI] No save selected to load!");
+            return;
+        }
+
+        if (SaveLoadManager.Instance == null)
+        {
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot load - SaveLoadManager is null!");
+            return;
+        }
+
+        string saveId = selectedSlot.SaveSlotInfo.saveId;
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Loading save: {saveId}");
+
+        bool success = SaveLoadManager.Instance.LoadGame(saveId);
+
+        if (success)
+        {
+            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Successfully loaded save: {selectedSlot.SaveSlotInfo.saveName}");
+
+            // Optional: Close the menu after loading
+            // if (InventoryUIManager.Instance != null)
+            // {
+            //     InventoryUIManager.Instance.ToggleInventory();
+            // }
+
+            // Refresh display
+            RefreshSaveList();
+            UpdateInfoDisplay();
+        }
+        else
+        {
+            UnityEngine.Debug.LogError($"[SaveLoadMenuUI] Failed to load save: {saveId}");
+        }
     }
 
     /// <summary>
@@ -211,32 +299,7 @@ public class SaveLoadMenuUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Load a save by ID
-    /// </summary>
-    public void LoadSave(string saveId)
-    {
-        if (SaveLoadManager.Instance == null)
-        {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot load - SaveLoadManager is null!");
-            return;
-        }
-
-        bool success = SaveLoadManager.Instance.LoadGame(saveId);
-
-        if (success)
-        {
-            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Loaded save: {saveId}");
-            RefreshSaveList();
-            UpdateInfoDisplay();
-        }
-        else
-        {
-            UnityEngine.Debug.LogError($"[SaveLoadMenuUI] Failed to load save: {saveId}");
-        }
-    }
-
-    /// <summary>
-    /// Delete a save immediately (no confirmation)
+    /// Delete a save (called by SaveSlotUI)
     /// </summary>
     public void DeleteSave(SaveSlotInfo slotInfo)
     {
@@ -251,6 +314,14 @@ public class SaveLoadMenuUI : MonoBehaviour
         if (success)
         {
             UnityEngine.Debug.Log($"[SaveLoadMenuUI] Deleted save: {slotInfo.saveName}");
+
+            // Clear selection if we deleted the selected save
+            if (selectedSlot != null && selectedSlot.SaveSlotInfo.saveId == slotInfo.saveId)
+            {
+                selectedSlot = null;
+                UpdateLoadButtonState();
+            }
+
             RefreshSaveList();
         }
         else
@@ -270,5 +341,17 @@ public class SaveLoadMenuUI : MonoBehaviour
 
         if (cancelSaveButton != null)
             cancelSaveButton.onClick.RemoveListener(HideNewSavePanel);
+
+        if (loadButton != null)
+            loadButton.onClick.RemoveListener(LoadSelectedSave);
+
+        // Unsubscribe from all slot events
+        foreach (SaveSlotUI slot in allSlots)
+        {
+            if (slot != null)
+            {
+                slot.OnSlotSelected -= OnSlotSelected;
+            }
+        }
     }
 }

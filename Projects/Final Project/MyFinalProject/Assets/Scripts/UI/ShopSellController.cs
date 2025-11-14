@@ -38,6 +38,9 @@ public class ShopSellController : MonoBehaviour
         {
             sellSlots.Add(slot);
             slot.OnQuantityChanged += UpdateTotalValue;
+
+            // Update immediately when slot is registered to ensure button state is correct
+            UpdateTotalValue();
         }
     }
 
@@ -54,6 +57,9 @@ public class ShopSellController : MonoBehaviour
             }
         }
         sellSlots.Clear();
+
+        // Update button immediately after clearing to reset it
+        UpdateTotalValue();
     }
 
     /// <summary>
@@ -139,7 +145,7 @@ public class ShopSellController : MonoBehaviour
         {
             Debug.Log($"[ShopSellController] Total sale: {totalItemsSold} items for ${totalEarned}");
 
-            // Refresh the shop UI
+            // Refresh the shop UI (which will clear and re-register slots, updating the button)
             if (InventoryUIManager.Instance != null)
             {
                 InventoryUIManager.Instance.RefreshCurrentTab();

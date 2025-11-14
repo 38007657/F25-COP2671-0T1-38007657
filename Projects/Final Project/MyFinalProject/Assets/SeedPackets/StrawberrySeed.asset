@@ -23,7 +23,7 @@ MonoBehaviour:
   harvestIcon: {fileID: 6179586033448826104, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
   harvestablePrefab: {fileID: 8243805681713857550, guid: ee577bbd116cf477e864fed146761290, type: 3}
   harvestReadyParticles: {fileID: 2729097628113087799, guid: 8a4f9363235204070bb5c639bf2bf1bd, type: 3}
-  totalGrowthDays: 3
+  totalGrowthDays: 4
   requiresWater: 1
   seedsPerPacket: 2
   packetCost: 10
