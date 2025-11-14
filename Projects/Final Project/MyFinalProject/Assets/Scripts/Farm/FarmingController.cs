@@ -75,7 +75,8 @@ public class FarmingController : MonoBehaviour
         }
 
         // Find and subscribe to toolbar events - Part 4 Requirement
-        toolbarController = FindFirstObjectByType<ToolbarController>();
+        // Use Include inactive so we find it even when start menu is showing
+        toolbarController = FindFirstObjectByType<ToolbarController>(FindObjectsInactive.Include);
 
         if (toolbarController != null)
         {

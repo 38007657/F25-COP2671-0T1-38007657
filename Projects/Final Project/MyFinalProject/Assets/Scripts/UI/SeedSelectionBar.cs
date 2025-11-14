@@ -76,8 +76,11 @@ public class SeedSelectionBar : MonoBehaviour
 
     private void Update()
     {
-        // Toggle with key
-        if (Input.GetKeyDown(toggleKey))
+        // Hide seed bar when start menu or pause menu is active
+        CheckMenuState();
+
+        // Toggle with key (only if not in menus)
+        if (Input.GetKeyDown(toggleKey) && seedBarPanel.activeSelf)
         {
             ToggleExpanded();
         }
@@ -90,6 +93,29 @@ public class SeedSelectionBar : MonoBehaviour
 
         // REMOVED: Number key selection - Click only!
         // REMOVED: Scroll wheel selection - Click only!
+    }
+
+    /// <summary>
+    /// Check if menus are active and hide/show seed bar accordingly
+    /// </summary>
+    private void CheckMenuState()
+    {
+        if (seedBarPanel == null) return;
+
+        // Hide seed bar when start menu or pause menu is active
+        bool shouldHide = false;
+
+        if (StartMenuManager.Instance != null && StartMenuManager.Instance.IsInStartMenu)
+        {
+            shouldHide = true;
+        }
+
+        if (PauseMenuManager.Instance != null && PauseMenuManager.Instance.IsPaused)
+        {
+            shouldHide = true;
+        }
+
+        seedBarPanel.SetActive(!shouldHide);
     }
 
     private void OnDestroy()

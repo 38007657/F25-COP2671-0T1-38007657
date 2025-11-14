@@ -14,6 +14,9 @@ public class ToolbarController : MonoBehaviour
     [SerializeField] private Button waterButton;
     [SerializeField] private Button harvestButton;
 
+    [Header("Toolbar Panel")]
+    [SerializeField] private GameObject toolbarPanel; // Drag the entire toolbar panel here
+
     [Header("Farming Events - These auto-populate")]
     [Space(10)]
     public UnityEvent OnHoe = new UnityEvent();
@@ -24,7 +27,61 @@ public class ToolbarController : MonoBehaviour
     private void Start()
     {
         SetupButtons();
+
+        // Debug logging
+        UnityEngine.Debug.Log($"[ToolbarController] toolbarPanel assigned: {toolbarPanel != null}");
+        UnityEngine.Debug.Log($"[ToolbarController] StartMenuManager exists: {StartMenuManager.Instance != null}");
+        if (StartMenuManager.Instance != null)
+        {
+            UnityEngine.Debug.Log($"[ToolbarController] IsInStartMenu: {StartMenuManager.Instance.IsInStartMenu}");
+        }
+
+        // Hide toolbar if start menu is active
+        CheckMenuState();
+
         UnityEngine.Debug.Log("[ToolbarController] Initialized with event-driven system");
+    }
+
+    private void Update()
+    {
+        // Check if start menu is active and hide/show toolbar accordingly
+        CheckMenuState();
+    }
+
+    private void CheckMenuState()
+    {
+        if (toolbarPanel == null)
+        {
+            UnityEngine.Debug.LogWarning("[ToolbarController] toolbarPanel is NULL! Please assign it in the Inspector.");
+            return;
+        }
+
+        // Show toolbar ONLY when not in any menu
+        bool shouldShow = true;
+
+        if (StartMenuManager.Instance != null)
+        {
+            bool inStartMenu = StartMenuManager.Instance.IsInStartMenu;
+            if (inStartMenu)
+            {
+                shouldShow = false;
+                UnityEngine.Debug.Log("[ToolbarController] Should hide - in start menu");
+            }
+        }
+
+        if (PauseMenuManager.Instance != null && PauseMenuManager.Instance.IsPaused)
+        {
+            shouldShow = false;
+            UnityEngine.Debug.Log("[ToolbarController] Should hide - paused");
+        }
+
+        // Log state changes
+        if (toolbarPanel.activeSelf != shouldShow)
+        {
+            UnityEngine.Debug.Log($"[ToolbarController] Changing toolbar visibility: {toolbarPanel.activeSelf} -> {shouldShow}");
+        }
+
+        toolbarPanel.SetActive(shouldShow);
     }
 
     private void SetupButtons()
