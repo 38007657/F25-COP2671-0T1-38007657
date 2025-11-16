@@ -12,7 +12,6 @@ public class PauseMenuManager : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private GameObject pauseMenuPanel;
-    [SerializeField] private Image darkOverlay;
 
     [Header("Buttons")]
     [SerializeField] private Button returnToGameButton;
@@ -20,7 +19,6 @@ public class PauseMenuManager : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private KeyCode pauseKey = KeyCode.Escape;
-    [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.7f);
 
     private bool isPaused = false;
 
@@ -53,8 +51,7 @@ public class PauseMenuManager : MonoBehaviour
         if (Input.GetKeyDown(pauseKey))
         {
             // Don't allow pausing if we're in start menu
-            if (StartMenuManager.Instance != null &&
-                StartMenuManager.Instance.gameObject.activeInHierarchy)
+            if (StartMenuManager.Instance != null && StartMenuManager.Instance.IsInStartMenu)
             {
                 return;
             }
@@ -88,16 +85,10 @@ public class PauseMenuManager : MonoBehaviour
             pauseMenuPanel.SetActive(true);
         }
 
-        if (darkOverlay != null)
-        {
-            darkOverlay.gameObject.SetActive(true);
-            darkOverlay.color = overlayColor;
-        }
-
         isPaused = true;
         Time.timeScale = 0f; // Pause game
 
-        Debug.Log("[PauseMenu] Game paused");
+        UnityEngine.Debug.Log("[PauseMenu] Game paused");
     }
 
     /// <summary>
@@ -110,15 +101,10 @@ public class PauseMenuManager : MonoBehaviour
             pauseMenuPanel.SetActive(false);
         }
 
-        if (darkOverlay != null)
-        {
-            darkOverlay.gameObject.SetActive(false);
-        }
-
         isPaused = false;
         Time.timeScale = 1f; // Resume game
 
-        Debug.Log("[PauseMenu] Game resumed");
+        UnityEngine.Debug.Log("[PauseMenu] Game resumed");
     }
 
     /// <summary>
@@ -143,7 +129,7 @@ public class PauseMenuManager : MonoBehaviour
             StartMenuManager.Instance.ShowStartMenu();
         }
 
-        Debug.Log("[PauseMenu] Returned to main menu");
+        UnityEngine.Debug.Log("[PauseMenu] Returned to main menu");
     }
 
     // Property

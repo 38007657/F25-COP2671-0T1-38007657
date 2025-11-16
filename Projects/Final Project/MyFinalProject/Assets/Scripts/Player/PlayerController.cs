@@ -22,10 +22,35 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 positionBefore = transform.position;
 
-        // Get input in Update
-        movementInput.x = Input.GetAxisRaw("Horizontal");
-        movementInput.y = Input.GetAxisRaw("Vertical");
-        movementInput.Normalize();
+        // Don't allow movement if seed selection bar is expanded OR inventory is open OR if it just closed this frame
+        bool canMove = true;
+
+        // Block if seed bar is expanded
+        if (SeedSelectionBar.Instance != null && SeedSelectionBar.Instance.IsExpanded)
+        {
+            canMove = false;
+            movementInput = Vector2.zero; // Clear input
+        }
+        // Block if inventory is open
+        else if (InventoryUIManager.Instance != null && InventoryUIManager.Instance.IsOpen)
+        {
+            canMove = false;
+            movementInput = Vector2.zero; // Clear input
+        }
+        // Also block movement if S key is being pressed (seed bar toggle key)
+        else if (Input.GetKey(KeyCode.S) && SeedSelectionBar.Instance != null)
+        {
+            canMove = false;
+            movementInput = Vector2.zero; // Clear input
+        }
+
+        // Get input in Update (only if allowed to move)
+        if (canMove)
+        {
+            movementInput.x = Input.GetAxisRaw("Horizontal");
+            movementInput.y = Input.GetAxisRaw("Vertical");
+            movementInput.Normalize();
+        }
 
         // Check if farming action is locking facing direction
         bool facingIsLocked = farmingInteraction != null && farmingInteraction.IsFacingLocked;

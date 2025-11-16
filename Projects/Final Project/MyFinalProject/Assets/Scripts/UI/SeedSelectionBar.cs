@@ -9,6 +9,8 @@ using System.Linq;
 /// </summary>
 public class SeedSelectionBar : MonoBehaviour
 {
+    public static SeedSelectionBar Instance { get; private set; }
+
     [Header("UI References")]
     [SerializeField] private GameObject seedBarPanel;
     [SerializeField] private Transform seedSlotsContainer;
@@ -36,8 +38,19 @@ public class SeedSelectionBar : MonoBehaviour
     private RectTransform rectTransform;
     private Vector2 targetSize;
 
+    // Public property to check if expanded
+    public bool IsExpanded => isExpanded;
+
     private void Awake()
     {
+        // Singleton setup
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         rectTransform = seedBarPanel.GetComponent<RectTransform>();
 
         // Set initial state

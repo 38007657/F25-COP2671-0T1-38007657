@@ -49,49 +49,49 @@ public class CropBlock
     }
 
     public bool TillSoil()
-{
-    // NEW: Check if this position is farmable
-    if (!cropManager.IsGridPositionFarmable(gridPosition))
     {
-        UnityEngine.Debug.Log($"[CropBlock] ❌ Cannot till - not in farmable area at {gridPosition}!");
-        return false;
-    }
-    
-    // CHECK FOR PLANTED CROPS FIRST (before checking isTilled)
-    if (isPlanted)
-    {
-        // Allow hoeing if crop is wilted (to remove it)
-        if (isWilted)
+        // NEW: Check if this position is farmable
+        if (!cropManager.IsGridPositionFarmable(gridPosition))
         {
-            UnityEngine.Debug.Log($"[CropBlock] Removing wilted crop at {gridPosition}");
-            ClearCrop();
-            // Now till the soil
-            isTilled = true;
-            isWatered = false;
-            UpdateTileVisual();
-            return true;
+            UnityEngine.Debug.Log($"[CropBlock] âŒ Cannot till - not in farmable area at {gridPosition}!");
+            return false;
         }
 
-        UnityEngine.Debug.Log($"[CropBlock] Cannot till - crop already planted!");
-        return false;
+        // CHECK FOR PLANTED CROPS FIRST (before checking isTilled)
+        if (isPlanted)
+        {
+            // Allow hoeing if crop is wilted (to remove it)
+            if (isWilted)
+            {
+                UnityEngine.Debug.Log($"[CropBlock] Removing wilted crop at {gridPosition}");
+                ClearCrop();
+                // Now till the soil
+                isTilled = true;
+                isWatered = false;
+                UpdateTileVisual();
+                return true;
+            }
+
+            UnityEngine.Debug.Log($"[CropBlock] Cannot till - crop already planted!");
+            return false;
+        }
+
+        // NOW check if already tilled (moved this down)
+        if (isTilled)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
+            return false;
+        }
+
+        isTilled = true;
+        isWatered = false;
+
+        // Update tilemap visual
+        UpdateTileVisual();
+
+        UnityEngine.Debug.Log($"[CropBlock] âœ… Tilled soil at {gridPosition}");
+        return true;
     }
-
-    // NOW check if already tilled (moved this down)
-    if (isTilled)
-    {
-        UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
-        return false;
-    }
-
-    isTilled = true;
-    isWatered = false;
-
-    // Update tilemap visual
-    UpdateTileVisual();
-
-    UnityEngine.Debug.Log($"[CropBlock] ✅ Tilled soil at {gridPosition}");
-    return true;
-}
 
     /// <summary>
     /// Water the soil/crop at this block - Part 3 Requirement
@@ -234,7 +234,7 @@ public class CropBlock
                 harvestScript.Initialize(
                     seedPacket.harvestIcon,
                     seedPacket.cropName,
-                    seedPacket.harvestedItem,  // ← Now passing the actual InventoryItem
+                    seedPacket.harvestedItem,  // â† Now passing the actual InventoryItem
                     seedPacket.harvestYield
                 );
             }
@@ -335,14 +335,14 @@ public class CropBlock
             if (currentGrowthStage > 0)
             {
                 isWilted = true;
-                UnityEngine.Debug.Log($"[CropBlock] ☠️ {seedPacket.cropName} has WILTED!");
+                UnityEngine.Debug.Log($"[CropBlock] â˜ ï¸ {seedPacket.cropName} has WILTED!");
                 UpdateTileVisual();
                 return; // Exit - crop is dead
             }
             else
             {
                 // Seeds (stage 0) don't wilt, just don't grow
-                UnityEngine.Debug.Log($"[CropBlock] 🌱 Seed remains at stage 0 (needs water to grow)");
+                UnityEngine.Debug.Log($"[CropBlock] ðŸŒ± Seed remains at stage 0 (needs water to grow)");
                 return; // Exit - no growth
             }
         }
@@ -356,17 +356,34 @@ public class CropBlock
         // === ADVANCE STAGE if watered and not fully grown ===
         if (wasWateredYesterday && currentGrowthStage < 3)
         {
-            currentGrowthStage++;
-            growthTimer = 0f; // Reset timer (not used but kept for compatibility)
+            // Calculate how many days have passed since planting
+            int daysSincePlanted = currentDay - dayPlanted;
 
-            UnityEngine.Debug.Log($"[CropBlock] ✅ {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}!");
+            // Determine which stage we should be at based on totalGrowthDays
+            // totalGrowthDays is the TOTAL days to reach harvest (stage 3)
+            // Divide the growth period into 4 equal stages (0, 1, 2, 3)
+            float daysPerStage = seedPacket.totalGrowthDays / 4f;
+            int targetStage = Mathf.Min(3, Mathf.FloorToInt(daysSincePlanted / daysPerStage));
 
-            // Update visual to show new stage
-            UpdateTileVisual();
-
-            if (currentGrowthStage >= 3)
+            // Advance to target stage (we might skip stages if growth is fast)
+            if (targetStage > currentGrowthStage)
             {
-                UnityEngine.Debug.Log($"[CropBlock] 🌾 {seedPacket.cropName} is now HARVESTABLE!");
+                currentGrowthStage = targetStage;
+                growthTimer = 0f; // Reset timer (not used but kept for compatibility)
+
+                UnityEngine.Debug.Log($"[CropBlock] âœ… {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}! (Days since planted: {daysSincePlanted}/{seedPacket.totalGrowthDays})");
+
+                // Update visual to show new stage
+                UpdateTileVisual();
+
+                if (currentGrowthStage >= 3)
+                {
+                    UnityEngine.Debug.Log($"[CropBlock] ðŸŒ¾ {seedPacket.cropName} is now HARVESTABLE!");
+                }
+            }
+            else
+            {
+                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} staying at stage {currentGrowthStage} (needs more time, {daysSincePlanted}/{seedPacket.totalGrowthDays} days)");
             }
         }
         else if (currentGrowthStage >= 3)

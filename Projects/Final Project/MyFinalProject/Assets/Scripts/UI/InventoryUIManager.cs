@@ -52,6 +52,9 @@ public class InventoryUIManager : MonoBehaviour
 
     private bool isOpen = false;
 
+    // Public property to check if inventory is open
+    public bool IsOpen => isOpen;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -112,8 +115,19 @@ public class InventoryUIManager : MonoBehaviour
 
         if (isOpen)
         {
+            // Pause the game when inventory opens
+            Time.timeScale = 0f;
+
             // Always refresh when opening (don't rely on Start)
             RefreshAllTabs();
+        }
+        else
+        {
+            // Resume the game when inventory closes (only if not in pause menu)
+            if (PauseMenuManager.Instance == null || !PauseMenuManager.Instance.IsPaused)
+            {
+                Time.timeScale = 1f;
+            }
         }
     }
 
@@ -125,13 +139,13 @@ public class InventoryUIManager : MonoBehaviour
         inventoryTabContent.SetActive(false);
         moneyTabContent.SetActive(false);
         shopTabContent.SetActive(false);
-        saveLoadTabContent.SetActive(false); // ← MAKE SURE THIS LINE EXISTS
+        saveLoadTabContent.SetActive(false); // â† MAKE SURE THIS LINE EXISTS
 
         // Reset all button colors
         SetButtonColor(inventoryTabButton, inactiveTabColor);
         SetButtonColor(moneyTabButton, inactiveTabColor);
         SetButtonColor(shopTabButton, inactiveTabColor);
-        SetButtonColor(saveLoadTabButton, inactiveTabColor); // ← MAKE SURE THIS LINE EXISTS
+        SetButtonColor(saveLoadTabButton, inactiveTabColor); // â† MAKE SURE THIS LINE EXISTS
 
         // Show selected tab and highlight button
         switch (tabIndex)
@@ -154,7 +168,7 @@ public class InventoryUIManager : MonoBehaviour
                 RefreshShopTab();
                 break;
 
-            case 3: // Save/Load ← MAKE SURE THIS CASE EXISTS
+            case 3: // Save/Load â† MAKE SURE THIS CASE EXISTS
                 UnityEngine.Debug.Log("[InventoryUI] Activating SaveLoadTabContent");
                 saveLoadTabContent.SetActive(true);
                 UnityEngine.Debug.Log($"[InventoryUI] SaveLoadTabContent.activeSelf = {saveLoadTabContent.activeSelf}");
@@ -385,7 +399,7 @@ public class InventoryUIManager : MonoBehaviour
                 {
                     slotScript.Setup(crop, playerQuantity);
 
-                    // ← THIS IS THE KEY FIX - Register the slot with the controller
+                    // â† THIS IS THE KEY FIX - Register the slot with the controller
                     if (shopSellController != null)
                     {
                         shopSellController.RegisterSellSlot(slotScript);
