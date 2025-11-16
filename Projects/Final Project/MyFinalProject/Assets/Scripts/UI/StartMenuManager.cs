@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Main menu shown when game starts
-/// Appears over the inactive game scene
+/// Covers the game world with a dark overlay
 /// </summary>
 public class StartMenuManager : MonoBehaviour
 {
@@ -12,21 +12,25 @@ public class StartMenuManager : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private GameObject startMenuPanel;
-    [SerializeField] private GameObject errorMessagePanel; // Panel with error text
+    [SerializeField] private Image darkOverlay;
+    [SerializeField] private Canvas startMenuCanvas; // Reference to the Canvas component
 
     [Header("Buttons")]
     [SerializeField] private Button continueButton;
     [SerializeField] private Button newGameButton;
+    [SerializeField] private Button loadGameButton;
     [SerializeField] private Button quitButton;
 
+    [Header("Other Panels")]
+    [SerializeField] private GameObject loadGamePanel; // Your existing SaveLoadTab
+
     [Header("Settings")]
+    [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.85f); // Dark overlay
     [SerializeField] private float fadeSpeed = 2f;
-    [SerializeField] private float errorMessageDuration = 2f; // How long to show error
 
     private bool isInStartMenu = true;
-    private float errorMessageTimer = 0f;
 
-    // Public property to check if we're in the start menu
+    // Public property for other scripts to check
     public bool IsInStartMenu => isInStartMenu;
 
     private void Awake()
@@ -37,6 +41,12 @@ public class StartMenuManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        // Get Canvas component if not assigned
+        if (startMenuCanvas == null)
+        {
+            startMenuCanvas = GetComponent<Canvas>();
+        }
     }
 
     private void Start()
@@ -48,12 +58,11 @@ public class StartMenuManager : MonoBehaviour
         if (newGameButton != null)
             newGameButton.onClick.AddListener(OnNewGameClicked);
 
+        if (loadGameButton != null)
+            loadGameButton.onClick.AddListener(OnLoadGameClicked);
+
         if (quitButton != null)
             quitButton.onClick.AddListener(OnQuitClicked);
-
-        // Hide error message initially
-        if (errorMessagePanel != null)
-            errorMessagePanel.SetActive(false);
 
         // Show start menu on game start
         ShowStartMenu();
@@ -65,34 +74,32 @@ public class StartMenuManager : MonoBehaviour
         UpdateContinueButton();
     }
 
-    private void Update()
-    {
-        // Handle error message timer
-        if (errorMessageTimer > 0f)
-        {
-            errorMessageTimer -= Time.unscaledDeltaTime; // Use unscaled time since game is paused
-
-            if (errorMessageTimer <= 0f)
-            {
-                HideErrorMessage();
-            }
-        }
-    }
-
     /// <summary>
     /// Show the start menu
     /// </summary>
     public void ShowStartMenu()
     {
+        // Enable the canvas to make everything visible
+        if (startMenuCanvas != null)
+        {
+            startMenuCanvas.enabled = true;
+        }
+
         if (startMenuPanel != null)
         {
             startMenuPanel.SetActive(true);
         }
 
+        if (darkOverlay != null)
+        {
+            darkOverlay.gameObject.SetActive(true);
+            darkOverlay.color = overlayColor;
+        }
+
         isInStartMenu = true;
         Time.timeScale = 0f; // Pause game
 
-        UnityEngine.Debug.Log("[StartMenu] Start menu shown");
+        Debug.Log("[StartMenu] Start menu shown");
     }
 
     /// <summary>
@@ -100,17 +107,36 @@ public class StartMenuManager : MonoBehaviour
     /// </summary>
     public void HideStartMenu()
     {
-        UnityEngine.Debug.Log("[StartMenu] HideStartMenu() called");
+        Debug.Log("[StartMenu] ===== HideStartMenu called =====");
 
         if (startMenuPanel != null)
         {
             startMenuPanel.SetActive(false);
+            Debug.Log("[StartMenu] startMenuPanel deactivated");
+        }
+
+        if (darkOverlay != null)
+        {
+            darkOverlay.gameObject.SetActive(false);
+            Debug.Log("[StartMenu] darkOverlay deactivated");
         }
 
         isInStartMenu = false;
         Time.timeScale = 1f; // Resume game
+        Debug.Log("[StartMenu] isInStartMenu = false, Time.timeScale = 1");
 
-        UnityEngine.Debug.Log($"[StartMenu] Start menu hidden - isInStartMenu is now: {isInStartMenu}");
+        // Disable the canvas to make it completely inactive
+        if (startMenuCanvas != null)
+        {
+            startMenuCanvas.enabled = false;
+            Debug.Log($"[StartMenu] Canvas disabled. Canvas.enabled is now: {startMenuCanvas.enabled}");
+        }
+        else
+        {
+            Debug.LogError("[StartMenu] startMenuCanvas is NULL!");
+        }
+
+        Debug.Log("[StartMenu] ===== HideStartMenu complete =====");
     }
 
     /// <summary>
@@ -118,31 +144,14 @@ public class StartMenuManager : MonoBehaviour
     /// </summary>
     private void UpdateContinueButton()
     {
-        if (continueButton == null)
-        {
-            UnityEngine.Debug.LogWarning("[StartMenu] Continue button is not assigned!");
-            return;
-        }
+        if (continueButton == null) return;
 
-        bool hasSave = false;
-
-        if (SaveLoadManager.Instance != null)
-        {
-            hasSave = SaveLoadManager.Instance.AnySavesExist();
-            UnityEngine.Debug.Log($"[StartMenu] SaveLoadManager found. AnySavesExist() = {hasSave}");
-
-            // Also log how many saves exist
-            var saves = SaveLoadManager.Instance.GetAllSaves();
-            UnityEngine.Debug.Log($"[StartMenu] Number of saves found: {saves.Count}");
-        }
-        else
-        {
-            UnityEngine.Debug.LogError("[StartMenu] SaveLoadManager.Instance is NULL!");
-        }
+        bool hasSave = SaveLoadManager.Instance != null &&
+                       SaveLoadManager.Instance.AnySavesExist();
 
         continueButton.interactable = hasSave;
 
-        UnityEngine.Debug.Log($"[StartMenu] Continue button: {(hasSave ? "Enabled" : "Disabled")}");
+        Debug.Log($"[StartMenu] Continue button: {(hasSave ? "Enabled" : "Disabled")}");
     }
 
     /// <summary>
@@ -150,35 +159,15 @@ public class StartMenuManager : MonoBehaviour
     /// </summary>
     private void OnContinueClicked()
     {
-        UnityEngine.Debug.Log("[StartMenu] Continue button clicked");
-
-        if (SaveLoadManager.Instance == null)
+        if (SaveLoadManager.Instance != null)
         {
-            UnityEngine.Debug.LogError("[StartMenu] SaveLoadManager not found!");
-            ShowErrorMessage("Error: Save system not found!");
-            return;
-        }
-
-        // Check if saves exist
-        if (!SaveLoadManager.Instance.AnySavesExist())
-        {
-            UnityEngine.Debug.Log("[StartMenu] No saves exist!");
-            ShowErrorMessage("No save files found!");
-            return;
-        }
-
-        // Load the most recent save
-        bool success = SaveLoadManager.Instance.LoadLatestSave();
-
-        if (success)
-        {
+            // Load the most recent save
+            SaveLoadManager.Instance.LoadLatestSave();
             HideStartMenu();
-            UnityEngine.Debug.Log("[StartMenu] Successfully loaded latest save");
         }
         else
         {
-            UnityEngine.Debug.LogError("[StartMenu] Failed to load latest save!");
-            ShowErrorMessage("Failed to load save file!");
+            Debug.LogError("[StartMenu] SaveLoadManager not found!");
         }
     }
 
@@ -191,7 +180,45 @@ public class StartMenuManager : MonoBehaviour
         // The game should already be initialized
         HideStartMenu();
 
-        UnityEngine.Debug.Log("[StartMenu] New game started");
+        Debug.Log("[StartMenu] New game started");
+    }
+
+    /// <summary>
+    /// Show the load game panel
+    /// </summary>
+    private void OnLoadGameClicked()
+    {
+        if (loadGamePanel != null)
+        {
+            // Hide start menu buttons but keep overlay
+            if (startMenuPanel != null)
+            {
+                startMenuPanel.SetActive(false);
+            }
+
+            // Show load panel
+            loadGamePanel.SetActive(true);
+
+            Debug.Log("[StartMenu] Load game panel opened");
+        }
+    }
+
+    /// <summary>
+    /// Return from load panel to start menu
+    /// </summary>
+    public void ReturnToStartMenu()
+    {
+        if (loadGamePanel != null)
+        {
+            loadGamePanel.SetActive(false);
+        }
+
+        if (startMenuPanel != null)
+        {
+            startMenuPanel.SetActive(true);
+        }
+
+        Debug.Log("[StartMenu] Returned to start menu");
     }
 
     /// <summary>
@@ -199,45 +226,13 @@ public class StartMenuManager : MonoBehaviour
     /// </summary>
     private void OnQuitClicked()
     {
-        UnityEngine.Debug.Log("[StartMenu] Quitting game");
+        Debug.Log("[StartMenu] Quitting game");
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
             Application.Quit();
 #endif
-    }
-
-    /// <summary>
-    /// Show error message for a duration
-    /// </summary>
-    private void ShowErrorMessage(string message)
-    {
-        if (errorMessagePanel != null)
-        {
-            errorMessagePanel.SetActive(true);
-            errorMessageTimer = errorMessageDuration;
-
-            // Optionally update the text if you have a TextMeshProUGUI component
-            var textComponent = errorMessagePanel.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            if (textComponent != null)
-            {
-                textComponent.text = message;
-            }
-
-            UnityEngine.Debug.Log($"[StartMenu] Showing error: {message}");
-        }
-    }
-
-    /// <summary>
-    /// Hide error message
-    /// </summary>
-    private void HideErrorMessage()
-    {
-        if (errorMessagePanel != null)
-        {
-            errorMessagePanel.SetActive(false);
-        }
     }
 
     private void OnDestroy()
@@ -248,6 +243,9 @@ public class StartMenuManager : MonoBehaviour
 
         if (newGameButton != null)
             newGameButton.onClick.RemoveListener(OnNewGameClicked);
+
+        if (loadGameButton != null)
+            loadGameButton.onClick.RemoveListener(OnLoadGameClicked);
 
         if (quitButton != null)
             quitButton.onClick.RemoveListener(OnQuitClicked);
