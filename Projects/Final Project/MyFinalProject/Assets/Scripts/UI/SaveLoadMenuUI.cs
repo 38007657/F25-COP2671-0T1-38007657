@@ -14,8 +14,6 @@ public class SaveLoadMenuUI : MonoBehaviour
     [SerializeField] private GameObject saveSlotPrefab;
     [SerializeField] private Button newSaveButton;
     [SerializeField] private Button backButton;
-    [SerializeField] private Button loadButton; // Main load button
-    [SerializeField] private TextMeshProUGUI loadButtonText; // Text component on load button
 
     [Header("New Save Panel")]
     [SerializeField] private GameObject newSavePanel;
@@ -26,8 +24,6 @@ public class SaveLoadMenuUI : MonoBehaviour
     [Header("Info Display")]
     [SerializeField] private TextMeshProUGUI currentPlayTimeText;
     [SerializeField] private TextMeshProUGUI totalSavesText;
-
-    private SaveSlotInfo selectedSave = null; // Track which save is selected
 
     private void Start()
     {
@@ -44,15 +40,9 @@ public class SaveLoadMenuUI : MonoBehaviour
         if (backButton != null)
             backButton.onClick.AddListener(OnBackClicked);
 
-        if (loadButton != null)
-            loadButton.onClick.AddListener(OnLoadButtonClicked);
-
         // Make sure new save panel is hidden at start
         if (newSavePanel != null)
             newSavePanel.SetActive(false);
-
-        // Disable load button initially (no save selected)
-        UpdateLoadButton();
     }
 
     private void OnEnable()
@@ -79,25 +69,21 @@ public class SaveLoadMenuUI : MonoBehaviour
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] SaveLoadManager.Instance is NULL!");
             return;
         }
-        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found âœ“");
+        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found ✓");
 
         if (saveSlotContainer == null)
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotContainer is NULL!");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name} âœ“");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name} ✓");
 
         if (saveSlotPrefab == null)
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotPrefab is NULL!");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name} âœ“");
-
-        // Clear selection when refreshing
-        selectedSave = null;
-        UpdateLoadButton();
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name} ✓");
 
         // Clear existing slots
         int childCount = saveSlotContainer.childCount;
@@ -229,7 +215,7 @@ public class SaveLoadMenuUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Load a save by ID
+    /// Load a save by ID (called from SaveSlotUI when clicking load button on a slot)
     /// </summary>
     public void LoadSave(string saveId)
     {
@@ -252,7 +238,11 @@ public class SaveLoadMenuUI : MonoBehaviour
         {
             UnityEngine.Debug.Log($"[SaveLoadMenuUI] ✅ Loaded save: {saveId}");
 
-            // Close the save/load panel and pause menu, resume game
+            // Hide this panel first
+            gameObject.SetActive(false);
+            UnityEngine.Debug.Log("[SaveLoadMenuUI] ✅ Closed save/load panel");
+
+            // Close the pause menu, resume game
             if (PauseMenuManager.Instance != null)
             {
                 UnityEngine.Debug.Log("[SaveLoadMenuUI] PauseMenuManager found, calling HidePauseMenu...");
@@ -297,6 +287,17 @@ public class SaveLoadMenuUI : MonoBehaviour
     }
 
     /// <summary>
+    /// Select a save (called when clicking a save slot)
+    /// </summary>
+    public void SelectSave(SaveSlotInfo saveInfo)
+    {
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Save slot clicked: {saveInfo.saveName}");
+
+        // Instead of just selecting, we load immediately when slot is clicked
+        LoadSave(saveInfo.saveId);
+    }
+
+    /// <summary>
     /// Handle back button - return to pause menu
     /// </summary>
     private void OnBackClicked()
@@ -308,62 +309,6 @@ public class SaveLoadMenuUI : MonoBehaviour
         else
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] PauseMenuManager not found!");
-        }
-    }
-
-    /// <summary>
-    /// Handle main Load button click
-    /// </summary>
-    private void OnLoadButtonClicked()
-    {
-        UnityEngine.Debug.Log("[SaveLoadMenuUI] Main Load button clicked");
-
-        if (selectedSave == null)
-        {
-            UnityEngine.Debug.LogWarning("[SaveLoadMenuUI] No save selected!");
-            return;
-        }
-
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Loading selected save: {selectedSave.saveName}");
-        LoadSave(selectedSave.saveId);
-    }
-
-    /// <summary>
-    /// Called when a save slot is clicked - selects that save
-    /// </summary>
-    public void SelectSave(SaveSlotInfo saveInfo)
-    {
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Save selected: {saveInfo.saveName}");
-        selectedSave = saveInfo;
-        UpdateLoadButton();
-    }
-
-    /// <summary>
-    /// Update the load button text and state
-    /// </summary>
-    private void UpdateLoadButton()
-    {
-        if (loadButton == null) return;
-
-        if (selectedSave == null)
-        {
-            // No save selected - disable button
-            loadButton.interactable = false;
-
-            if (loadButtonText != null)
-            {
-                loadButtonText.text = "Select a Save";
-            }
-        }
-        else
-        {
-            // Save selected - enable button and show save name
-            loadButton.interactable = true;
-
-            if (loadButtonText != null)
-            {
-                loadButtonText.text = $"Load {selectedSave.saveName}";
-            }
         }
     }
 
@@ -381,8 +326,5 @@ public class SaveLoadMenuUI : MonoBehaviour
 
         if (backButton != null)
             backButton.onClick.RemoveListener(OnBackClicked);
-
-        if (loadButton != null)
-            loadButton.onClick.RemoveListener(OnLoadButtonClicked);
     }
 }

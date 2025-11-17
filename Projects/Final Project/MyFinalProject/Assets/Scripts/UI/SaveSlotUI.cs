@@ -13,6 +13,7 @@ public class SaveSlotUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dayText;
     [SerializeField] private TextMeshProUGUI moneyText;
     [SerializeField] private TextMeshProUGUI playTimeText;
+    [SerializeField] private Button loadButton;
     [SerializeField] private Button deleteButton;
 
     [Header("Visual")]
@@ -27,6 +28,10 @@ public class SaveSlotUI : MonoBehaviour
     {
         slotInfo = info;
         menuUI = menu;
+
+        UnityEngine.Debug.Log($"[SaveSlotUI] Setting up save slot: {info.saveName} (ID: {info.saveId})");
+        UnityEngine.Debug.Log($"[SaveSlotUI] menuUI is null: {menuUI == null}");
+        UnityEngine.Debug.Log($"[SaveSlotUI] loadButton is null: {loadButton == null}");
 
         // Set text
         if (saveNameText != null)
@@ -44,30 +49,47 @@ public class SaveSlotUI : MonoBehaviour
         if (playTimeText != null)
             playTimeText.text = $"Playtime: {info.playTime}";
 
+        // Setup load button
+        if (loadButton != null)
+        {
+            loadButton.onClick.AddListener(OnLoadClicked);
+            UnityEngine.Debug.Log($"[SaveSlotUI] Load button listener added successfully");
+        }
+        else
+        {
+            UnityEngine.Debug.LogError($"[SaveSlotUI] Load button is NULL! Cannot add listener.");
+        }
+
         // Setup delete button
         if (deleteButton != null)
             deleteButton.onClick.AddListener(OnDeleteClicked);
-
-        // Make the whole slot clickable to select this save
-        Button slotButton = GetComponent<Button>();
-        if (slotButton != null)
-        {
-            slotButton.onClick.AddListener(OnSlotClicked);
-        }
     }
 
-    private void OnSlotClicked()
+    private void OnLoadClicked()
     {
-        UnityEngine.Debug.Log($"[SaveSlotUI] Slot clicked: {slotInfo.saveName}");
+        UnityEngine.Debug.Log($"[SaveSlotUI] === LOAD BUTTON CLICKED ===");
+        UnityEngine.Debug.Log($"[SaveSlotUI] slotInfo is null: {slotInfo == null}");
+        UnityEngine.Debug.Log($"[SaveSlotUI] menuUI is null: {menuUI == null}");
+
+        if (slotInfo != null)
+        {
+            UnityEngine.Debug.Log($"[SaveSlotUI] Attempting to load save: {slotInfo.saveName} (ID: {slotInfo.saveId})");
+        }
 
         if (menuUI != null)
         {
-            menuUI.SelectSave(slotInfo);
+            menuUI.LoadSave(slotInfo.saveId);
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("[SaveSlotUI] menuUI is NULL! Cannot load save.");
         }
     }
 
     private void OnDeleteClicked()
     {
+        UnityEngine.Debug.Log($"[SaveSlotUI] Delete button clicked for: {slotInfo?.saveName}");
+
         if (menuUI != null)
         {
             menuUI.DeleteSave(slotInfo);
@@ -84,13 +106,10 @@ public class SaveSlotUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (loadButton != null)
+            loadButton.onClick.RemoveListener(OnLoadClicked);
+
         if (deleteButton != null)
             deleteButton.onClick.RemoveListener(OnDeleteClicked);
-
-        Button slotButton = GetComponent<Button>();
-        if (slotButton != null)
-        {
-            slotButton.onClick.RemoveListener(OnSlotClicked);
-        }
     }
 }

@@ -52,7 +52,7 @@ public class ToolbarController : MonoBehaviour
     {
         if (toolbarPanel == null)
         {
-            UnityEngine.Debug.LogWarning("[ToolbarController] toolbarPanel is NULL! Please assign it in the Inspector.");
+            //UnityEngine.Debug.LogWarning("[ToolbarController] toolbarPanel is NULL! Please assign it in the Inspector.");
             return;
         }
 
@@ -65,20 +65,20 @@ public class ToolbarController : MonoBehaviour
             if (inStartMenu)
             {
                 shouldShow = false;
-                UnityEngine.Debug.Log("[ToolbarController] Should hide - in start menu");
+                //UnityEngine.Debug.Log("[ToolbarController] Should hide - in start menu");
             }
         }
 
         if (PauseMenuManager.Instance != null && PauseMenuManager.Instance.IsPaused)
         {
             shouldShow = false;
-            UnityEngine.Debug.Log("[ToolbarController] Should hide - paused");
+            //UnityEngine.Debug.Log("[ToolbarController] Should hide - paused");
         }
 
         // Log state changes
         if (toolbarPanel.activeSelf != shouldShow)
         {
-            UnityEngine.Debug.Log($"[ToolbarController] Changing toolbar visibility: {toolbarPanel.activeSelf} -> {shouldShow}");
+            //UnityEngine.Debug.Log($"[ToolbarController] Changing toolbar visibility: {toolbarPanel.activeSelf} -> {shouldShow}");
         }
 
         toolbarPanel.SetActive(shouldShow);
