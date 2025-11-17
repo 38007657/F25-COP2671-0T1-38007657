@@ -105,7 +105,7 @@ MonoBehaviour:
   quantity: 1
   pickupRange: 1
   autoPickup: 1
-  pickupDelay: 2
+  pickupDelay: 1
   spriteRenderer: {fileID: 0}
   inventoryItem: {fileID: 0}
 --- !u!58 &-6010007188040947036

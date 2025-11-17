@@ -281,15 +281,44 @@ public class CropBlock
     // NEW METHOD
     private void ShowHarvestReadyParticles()
     {
-        if (seedPacket == null || seedPacket.harvestReadyParticles == null) return;
+        UnityEngine.Debug.Log($"[CropBlock] === ShowHarvestReadyParticles called ===");
+        UnityEngine.Debug.Log($"[CropBlock] seedPacket: {seedPacket?.cropName ?? "NULL"}");
+        UnityEngine.Debug.Log($"[CropBlock] harvestReadyParticles prefab: {seedPacket?.harvestReadyParticles?.name ?? "NULL"}");
 
-        if (activeParticleInstance == null)
+        if (seedPacket == null || seedPacket.harvestReadyParticles == null)
         {
-            activeParticleInstance = Object.Instantiate(
-                seedPacket.harvestReadyParticles,
-                worldPosition + new Vector3(0, 0.5f, 0), // Above crop
-                Quaternion.identity
-            );
+            UnityEngine.Debug.LogWarning($"[CropBlock] ⚠️ No particle prefab assigned for {seedPacket?.cropName ?? "null crop"}");
+            return;
+        }
+
+        // Don't create duplicate particles
+        if (activeParticleInstance != null)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] Particles already active for {seedPacket.cropName}");
+            return;
+        }
+
+        Vector3 spawnPos = worldPosition + new Vector3(0, 0.5f, 0);
+        spawnPos.z = 0; // Force to camera's view plane
+        activeParticleInstance = Object.Instantiate(
+            seedPacket.harvestReadyParticles,
+            spawnPos,
+            Quaternion.identity
+        );
+
+        UnityEngine.Debug.Log($"[CropBlock] ✨ Spawned harvest particles for {seedPacket.cropName} at {spawnPos}");
+        UnityEngine.Debug.Log($"[CropBlock] Particle GameObject name: {activeParticleInstance.name}");
+        UnityEngine.Debug.Log($"[CropBlock] Particle active: {activeParticleInstance.activeSelf}");
+
+        // Check if it has a ParticleSystem component
+        ParticleSystem ps = activeParticleInstance.GetComponent<ParticleSystem>();
+        if (ps != null)
+        {
+            UnityEngine.Debug.Log($"[CropBlock] ParticleSystem found - Playing: {ps.isPlaying}, Particle Count: {ps.particleCount}");
+        }
+        else
+        {
+            UnityEngine.Debug.LogError($"[CropBlock] ⚠️ NO ParticleSystem component on instantiated prefab!");
         }
     }
 
@@ -298,6 +327,7 @@ public class CropBlock
     {
         if (activeParticleInstance != null)
         {
+            UnityEngine.Debug.Log($"[CropBlock] 💨 Destroying harvest particles for {seedPacket?.cropName}");
             Object.Destroy(activeParticleInstance);
             activeParticleInstance = null;
         }
@@ -331,6 +361,13 @@ public class CropBlock
 
             UnityEngine.Debug.Log($"[CropBlock] NOT watered - {daysWithoutWater} day(s) without water");
 
+            // NEW: Harvestable crops (stage 3) never wilt - they stay harvestable forever
+            if (currentGrowthStage >= 3)
+            {
+                UnityEngine.Debug.Log($"[CropBlock] Crop is harvestable - no wilting!");
+                return; // Exit - harvestable crops don't wilt
+            }
+
             // Wilt if past seed stage (stage > 0) and not watered
             if (currentGrowthStage > 0)
             {
@@ -356,34 +393,19 @@ public class CropBlock
         // === ADVANCE STAGE if watered and not fully grown ===
         if (wasWateredYesterday && currentGrowthStage < 3)
         {
-            // Calculate how many days have passed since planting
-            int daysSincePlanted = currentDay - dayPlanted;
+            currentGrowthStage++;
+            growthTimer = 0f; // Reset timer (not used but kept for compatibility)
 
-            // Determine which stage we should be at based on totalGrowthDays
-            // totalGrowthDays is the TOTAL days to reach harvest (stage 3)
-            // Divide the growth period into 4 equal stages (0, 1, 2, 3)
-            float daysPerStage = seedPacket.totalGrowthDays / 4f;
-            int targetStage = Mathf.Min(3, Mathf.FloorToInt(daysSincePlanted / daysPerStage));
+            UnityEngine.Debug.Log($"[CropBlock] âœ… {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}!");
 
-            // Advance to target stage (we might skip stages if growth is fast)
-            if (targetStage > currentGrowthStage)
+            // Update visual to show new stage
+            UpdateTileVisual();
+
+            if (currentGrowthStage >= 3)
             {
-                currentGrowthStage = targetStage;
-                growthTimer = 0f; // Reset timer (not used but kept for compatibility)
-
-                UnityEngine.Debug.Log($"[CropBlock] âœ… {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}! (Days since planted: {daysSincePlanted}/{seedPacket.totalGrowthDays})");
-
-                // Update visual to show new stage
-                UpdateTileVisual();
-
-                if (currentGrowthStage >= 3)
-                {
-                    UnityEngine.Debug.Log($"[CropBlock] ðŸŒ¾ {seedPacket.cropName} is now HARVESTABLE!");
-                }
-            }
-            else
-            {
-                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} staying at stage {currentGrowthStage} (needs more time, {daysSincePlanted}/{seedPacket.totalGrowthDays} days)");
+                UnityEngine.Debug.Log($"[CropBlock] ðŸŒ¾ {seedPacket.cropName} is now HARVESTABLE!");
+                UnityEngine.Debug.Log($"[CropBlock] About to call ShowHarvestReadyParticles()...");
+                ShowHarvestReadyParticles();
             }
         }
         else if (currentGrowthStage >= 3)
