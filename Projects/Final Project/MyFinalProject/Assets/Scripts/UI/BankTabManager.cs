@@ -4,7 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 
 /// <summary>
-/// Manages the Bank/Money tab showing balance, transaction history, and stats
+/// Manages the Bank/Money tab showing balance
 /// </summary>
 public class BankTabManager : MonoBehaviour
 {
@@ -182,7 +182,7 @@ public class BankTabManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Add a transaction (call this when money changes)
+    /// Add a transaction (called when money changes)
     /// </summary>
     public void AddTransaction(string description, int amount, bool isIncome, string itemName = "")
     {

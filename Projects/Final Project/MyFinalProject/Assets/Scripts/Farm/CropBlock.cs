@@ -281,44 +281,15 @@ public class CropBlock
     // NEW METHOD
     private void ShowHarvestReadyParticles()
     {
-        UnityEngine.Debug.Log($"[CropBlock] === ShowHarvestReadyParticles called ===");
-        UnityEngine.Debug.Log($"[CropBlock] seedPacket: {seedPacket?.cropName ?? "NULL"}");
-        UnityEngine.Debug.Log($"[CropBlock] harvestReadyParticles prefab: {seedPacket?.harvestReadyParticles?.name ?? "NULL"}");
+        if (seedPacket == null || seedPacket.harvestReadyParticles == null) return;
 
-        if (seedPacket == null || seedPacket.harvestReadyParticles == null)
+        if (activeParticleInstance == null)
         {
-            UnityEngine.Debug.LogWarning($"[CropBlock] ⚠️ No particle prefab assigned for {seedPacket?.cropName ?? "null crop"}");
-            return;
-        }
-
-        // Don't create duplicate particles
-        if (activeParticleInstance != null)
-        {
-            UnityEngine.Debug.Log($"[CropBlock] Particles already active for {seedPacket.cropName}");
-            return;
-        }
-
-        Vector3 spawnPos = worldPosition + new Vector3(0, 0.5f, 0);
-        spawnPos.z = 0; // Force to camera's view plane
-        activeParticleInstance = Object.Instantiate(
-            seedPacket.harvestReadyParticles,
-            spawnPos,
-            Quaternion.identity
-        );
-
-        UnityEngine.Debug.Log($"[CropBlock] ✨ Spawned harvest particles for {seedPacket.cropName} at {spawnPos}");
-        UnityEngine.Debug.Log($"[CropBlock] Particle GameObject name: {activeParticleInstance.name}");
-        UnityEngine.Debug.Log($"[CropBlock] Particle active: {activeParticleInstance.activeSelf}");
-
-        // Check if it has a ParticleSystem component
-        ParticleSystem ps = activeParticleInstance.GetComponent<ParticleSystem>();
-        if (ps != null)
-        {
-            UnityEngine.Debug.Log($"[CropBlock] ParticleSystem found - Playing: {ps.isPlaying}, Particle Count: {ps.particleCount}");
-        }
-        else
-        {
-            UnityEngine.Debug.LogError($"[CropBlock] ⚠️ NO ParticleSystem component on instantiated prefab!");
+            activeParticleInstance = Object.Instantiate(
+                seedPacket.harvestReadyParticles,
+                worldPosition + new Vector3(0, 0.5f, 0), // Above crop
+                Quaternion.identity
+            );
         }
     }
 
@@ -327,7 +298,6 @@ public class CropBlock
     {
         if (activeParticleInstance != null)
         {
-            UnityEngine.Debug.Log($"[CropBlock] 💨 Destroying harvest particles for {seedPacket?.cropName}");
             Object.Destroy(activeParticleInstance);
             activeParticleInstance = null;
         }
@@ -360,13 +330,6 @@ public class CropBlock
             daysWithoutWater++;
 
             UnityEngine.Debug.Log($"[CropBlock] NOT watered - {daysWithoutWater} day(s) without water");
-
-            // NEW: Harvestable crops (stage 3) never wilt - they stay harvestable forever
-            if (currentGrowthStage >= 3)
-            {
-                UnityEngine.Debug.Log($"[CropBlock] Crop is harvestable - no wilting!");
-                return; // Exit - harvestable crops don't wilt
-            }
 
             // Wilt if past seed stage (stage > 0) and not watered
             if (currentGrowthStage > 0)
@@ -404,8 +367,6 @@ public class CropBlock
             if (currentGrowthStage >= 3)
             {
                 UnityEngine.Debug.Log($"[CropBlock] ðŸŒ¾ {seedPacket.cropName} is now HARVESTABLE!");
-                UnityEngine.Debug.Log($"[CropBlock] About to call ShowHarvestReadyParticles()...");
-                ShowHarvestReadyParticles();
             }
         }
         else if (currentGrowthStage >= 3)
@@ -568,5 +529,36 @@ public class CropBlock
         }
 
         UnityEngine.Debug.Log($"[CropBlock] Successfully restored {packet.cropName} at stage {currentGrowthStage}");
+    }
+
+    /// <summary>
+    /// Restore tilled-but-not-planted state (for save/load)
+    /// </summary>
+    public void RestoreTilledState(SavedCropBlock savedBlock)
+    {
+        if (savedBlock == null)
+        {
+            UnityEngine.Debug.LogError("[CropBlock] RestoreTilledState called with null savedBlock!");
+            return;
+        }
+
+        UnityEngine.Debug.Log($"[CropBlock] Restoring tilled state at grid {gridPosition}");
+
+        // Restore tilled state
+        isTilled = savedBlock.isTilled;
+        isWatered = savedBlock.isWatered;
+        isPlanted = false; // Not planted
+        isWilted = false;
+        seedPacket = null; // No crop
+        currentGrowthStage = 0;
+        growthTimer = 0;
+        dayPlanted = 0;
+        lastWateredDay = -1;
+        daysWithoutWater = 0;
+
+        // Update visual to show tilled soil
+        UpdateTileVisual();
+
+        UnityEngine.Debug.Log($"[CropBlock] Successfully restored tilled state (watered: {isWatered})");
     }
 }

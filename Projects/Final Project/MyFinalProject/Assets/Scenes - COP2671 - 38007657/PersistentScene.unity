@@ -408,12 +408,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseMenuPanel: {fileID: 1749823646}
+  pauseButtonContainer: {fileID: 0}
+  saveLoadPanel: {fileID: 0}
   darkOverlay: {fileID: 0}
   returnToGameButton: {fileID: 954021799}
+  saveLoadButton: {fileID: 0}
   returnToMenuButton: {fileID: 1343529078}
-  saveLoadGameButton: {fileID: 0}
-  saveLoadPanel: {fileID: 1346729190}
-  saveLoadTabContent: {fileID: 0}
   pauseKey: 27
   overlayColor: {r: 0, g: 0, b: 0, a: 0.7}
 --- !u!4 &63071610
@@ -9798,7 +9798,6 @@ GameObject:
   m_Component:
   - component: {fileID: 553080679}
   - component: {fileID: 553080680}
-  - component: {fileID: 553080681}
   m_Layer: 0
   m_Name: SaveLoadTabContent
   m_TagString: Untagged
@@ -9856,28 +9855,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &553080681
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 553080678}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70f507f1933d94eceb2f3fc004d58c32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  saveSlotContainer: {fileID: 498584071}
-  saveSlotPrefab: {fileID: 1869841711061355494, guid: 4297936888c22408e8d4b096a814199e, type: 3}
-  newSaveButton: {fileID: 542326309}
-  backButton: {fileID: 1517002297}
-  newSavePanel: {fileID: 1117373671}
-  saveNameInput: {fileID: 1521025081}
-  confirmSaveButton: {fileID: 584817144}
-  cancelSaveButton: {fileID: 159027709}
-  currentPlayTimeText: {fileID: 603422934}
-  totalSavesText: {fileID: 144522905}
 --- !u!1 &555784938
 GameObject:
   m_ObjectHideFlags: 0
@@ -10722,13 +10699,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startMenuPanel: {fileID: 2041797754}
   darkOverlay: {fileID: 0}
-  startMenuCanvas: {fileID: 629351673}
   continueButton: {fileID: 1868050113}
   newGameButton: {fileID: 1950982940}
   loadGameButton: {fileID: 0}
   quitButton: {fileID: 2143932795}
   loadGamePanel: {fileID: 1117373671}
   overlayColor: {r: 0, g: 0, b: 0, a: 0.85}
+  fadeSpeed: 2
 --- !u!1 &631261600
 GameObject:
   m_ObjectHideFlags: 0
@@ -12154,12 +12131,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseMenuPanel: {fileID: 1749823646}
+  pauseButtonContainer: {fileID: 681864293}
+  saveLoadPanel: {fileID: 1346729190}
   darkOverlay: {fileID: 0}
   returnToGameButton: {fileID: 954021799}
+  saveLoadButton: {fileID: 1689134088}
   returnToMenuButton: {fileID: 1343529078}
-  saveLoadGameButton: {fileID: 1689134088}
-  saveLoadPanel: {fileID: 1346729190}
-  saveLoadTabContent: {fileID: 553080678}
   pauseKey: 27
   overlayColor: {r: 0, g: 0, b: 0, a: 0.7}
 --- !u!1 &797479553
@@ -30817,7 +30794,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be7bc8aa1c6a3432ba9c89ac30b87006, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoLoadLatestSave: 1
+  autoLoadLatestSave: 0
   loadDelay: 0.5
 --- !u!4 &1759179873
 Transform:
@@ -30954,8 +30931,6 @@ MonoBehaviour:
   horizontalParameter: InputX
   verticalParameter: InputY
   facingLockDuration: 0.3
-  selectionIndicator: {fileID: 0}
-  showSelectionIndicator: 1
   showDebugInfo: 1
 --- !u!4 &1776019221
 Transform:

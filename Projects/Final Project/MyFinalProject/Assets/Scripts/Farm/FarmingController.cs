@@ -2,7 +2,6 @@ using UnityEngine;
 
 /// <summary>
 /// Handles farming actions via event system with proper range-based selection
-/// Part 4 Requirements: Use event listeners to call methods
 /// </summary>
 public class FarmingController : MonoBehaviour
 {
@@ -31,8 +30,6 @@ public class FarmingController : MonoBehaviour
     [SerializeField] private float facingLockDuration = 0.3f;
 
     [Header("Visual Feedback")]
-    [SerializeField] private GameObject selectionIndicator;
-    [SerializeField] private bool showSelectionIndicator = true;
     [SerializeField] private bool showDebugInfo = true;
 
     private CropManager cropManager;
@@ -67,12 +64,6 @@ public class FarmingController : MonoBehaviour
             playerAnimator = playerTransform.GetComponentInChildren<Animator>();
         }
 
-        // Create selection indicator if needed
-        if (showSelectionIndicator && selectionIndicator != null)
-        {
-            selectionIndicator = Instantiate(selectionIndicator);
-            selectionIndicator.SetActive(false);
-        }
 
         // Find and subscribe to toolbar events - Part 4 Requirement
         // Use Include inactive so we find it even when start menu is showing
@@ -110,9 +101,6 @@ public class FarmingController : MonoBehaviour
 
         // Find block player is facing
         UpdateSelectedBlock();
-
-        // Update selection indicator visual
-        UpdateSelectionIndicator();
     }
 
     private void OnDestroy()
@@ -126,17 +114,12 @@ public class FarmingController : MonoBehaviour
             toolbarController.OnGather.RemoveListener(HandleGatherEvent);
         }
 
-        // Destroy selection indicator
-        if (selectionIndicator != null)
-        {
-            Destroy(selectionIndicator);
-        }
     }
 
     // ===== HELPER METHODS =====
 
     /// <summary>
-    /// Find the nearest crop block to player (no facing direction needed)
+    /// Find the nearest crop block to player
     /// </summary>
     private void UpdateSelectedBlock()
     {
@@ -153,11 +136,11 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Just find the absolute closest block - period
+        // Just find the closest block 
         CropBlock closestBlock = null;
         float closestDistance = interactionRange;
 
-        // Check all blocks in the grid (or optimize by checking nearby area)
+        // Check all blocks in the grid
         for (int x = -2; x <= 2; x++)
         {
             for (int y = -2; y <= 2; y++)
@@ -230,25 +213,6 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Update visual indicator to show selected block
-    /// </summary>
-    private void UpdateSelectionIndicator()
-    {
-        if (!showSelectionIndicator || selectionIndicator == null)
-            return;
-
-        if (selectedBlock != null)
-        {
-            selectionIndicator.SetActive(true);
-            selectionIndicator.transform.position = selectedBlock.worldPosition;
-        }
-        else
-        {
-            selectionIndicator.SetActive(false);
-        }
-    }
-
     // ===== EVENT HANDLERS =====
 
     /// <summary>
@@ -262,7 +226,7 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Use player's CURRENT facing direction (not direction to block)
+        // Use player's current facing direction (not direction to block)
         Vector3 facingDir = GetPlayerFacingDirection();
 
         // Only calculate direction to block if player isn't facing anywhere
@@ -292,11 +256,11 @@ public class FarmingController : MonoBehaviour
     {
         if (selectedBlock == null)
         {
-            UnityEngine.Debug.Log("[FarmingController] No block selected to plant!");
+            UnityEngine.Debug.Log("[FarmingController] No block selected to plant");
             return;
         }
 
-        // Get selected seed from inventory instead of using testSeedPacket
+        // Get selected seed from inventory
         SeedPacket selectedSeed = SeedInventory.Instance?.SelectedSeed;
 
         if (selectedSeed == null)
@@ -305,7 +269,7 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Use player's CURRENT facing direction
+        // Use player's current facing direction
         Vector3 facingDir = GetPlayerFacingDirection();
 
         if (facingDir == Vector3.zero)
@@ -337,7 +301,7 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Use player's CURRENT facing direction
+        // Use player's current facing direction
         Vector3 facingDir = GetPlayerFacingDirection();
 
         if (facingDir == Vector3.zero)
@@ -404,7 +368,7 @@ public class FarmingController : MonoBehaviour
                 direction = new Vector3(currentX, currentY, 0);
             }
 
-            // Still no direction? Default to down (not up)
+            // Default to down
             if (direction == Vector3.zero)
             {
                 direction = Vector3.down;
@@ -466,45 +430,45 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    // ===== DEBUG VISUALIZATION =====
+    //// ===== DEBUG VISUALIZATION =====
 
-    private void OnDrawGizmos()
-    {
-        if (selectedBlock != null)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireCube(selectedBlock.worldPosition, Vector3.one * 0.9f);
-        }
+    //private void OnDrawGizmos()
+    //{
+    //    if (selectedBlock != null)
+    //    {
+    //        Gizmos.color = Color.yellow;
+    //        Gizmos.DrawWireCube(selectedBlock.worldPosition, Vector3.one * 0.9f);
+    //    }
 
-        // Draw facing direction
-        if (playerTransform != null && Application.isPlaying)
-        {
-            Vector2 facing = GetPlayerFacingDirection();
-            facing = SnapToCardinalDirection(facing);
+    //    // Draw facing direction
+    //    if (playerTransform != null && Application.isPlaying)
+    //    {
+    //        Vector2 facing = GetPlayerFacingDirection();
+    //        facing = SnapToCardinalDirection(facing);
 
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(playerTransform.position, playerTransform.position + (Vector3)(facing * 2f));
-        }
-    }
+    //        Gizmos.color = Color.cyan;
+    //        Gizmos.DrawLine(playerTransform.position, playerTransform.position + (Vector3)(facing * 2f));
+    //    }
+    //}
 
-    private void OnGUI()
-    {
-        if (!showDebugInfo) return;
+    //private void OnGUI()
+    //{
+    //    if (!showDebugInfo) return;
 
-        GUIStyle style = new GUIStyle(GUI.skin.label);
-        style.fontSize = 14;
-        style.normal.textColor = Color.white;
+    //    GUIStyle style = new GUIStyle(GUI.skin.label);
+    //    style.fontSize = 14;
+    //    style.normal.textColor = Color.white;
 
-        string debugText = selectedBlock != null
-            ? $"Selected: {selectedBlock.gridPosition} | Tilled: {selectedBlock.isTilled} | Planted: {selectedBlock.isPlanted}"
-            : "No block selected";
+    //    string debugText = selectedBlock != null
+    //        ? $"Selected: {selectedBlock.gridPosition} | Tilled: {selectedBlock.isTilled} | Planted: {selectedBlock.isPlanted}"
+    //        : "No block selected";
 
-        // Shadow
-        GUI.color = Color.black;
-        GUI.Label(new Rect(11, 71, 600, 25), debugText, style);
+    //    // Shadow
+    //    GUI.color = Color.black;
+    //    GUI.Label(new Rect(11, 71, 600, 25), debugText, style);
 
-        // Main
-        GUI.color = Color.white;
-        GUI.Label(new Rect(10, 70, 600, 25), debugText, style);
-    }
+    //    // Main
+    //    GUI.color = Color.white;
+    //    GUI.Label(new Rect(10, 70, 600, 25), debugText, style);
+    //}
 }

@@ -35,10 +35,6 @@ public static class CurrencyFormatter
     /// </summary>
     public static string FormatCoinsWithIcon(int amount)
     {
-        // You can use TextMeshPro sprite support: <sprite=0>
-        // return $"<sprite=0> {amount:N0}";
-
-        // For now, just use text
         return $"⚬ {amount:N0}"; // Using a circle symbol
     }
 }

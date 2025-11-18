@@ -18,8 +18,8 @@ public class CropManager : MonoBehaviour
     [Tooltip("FarmingVisuals tilemap for crop sprites")]
     [SerializeField] private Tilemap cropTilemap;
 
-    [Tooltip("Tilemap that defines farmable zones")] 
-    [SerializeField] private Tilemap farmZoneTilemap; 
+    [Tooltip("Tilemap that defines farmable zones")]
+    [SerializeField] private Tilemap farmZoneTilemap;
 
     [Header("Soil Tiles")]
     [SerializeField] private TileBase untilledTile;
@@ -293,11 +293,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && untilledTile != null)
         {
             soilTilemap.SetTile(tilePos, untilledTile);
-            Debug.Log($"[CropManager] ✅ Set untilled tile at {tilePos}");
+            Debug.Log($"[CropManager] âœ… Set untilled tile at {tilePos}");
         }
         else
         {
-            Debug.LogError($"[CropManager] ❌ Missing soilTilemap ({soilTilemap != null}) or untilledTile ({untilledTile != null})!");
+            Debug.LogError($"[CropManager] âŒ Missing soilTilemap ({soilTilemap != null}) or untilledTile ({untilledTile != null})!");
         }
     }
 
@@ -306,11 +306,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && drySoilTile != null)
         {
             soilTilemap.SetTile(tilePos, drySoilTile);
-            Debug.Log($"[CropManager] ✅ Set dry soil tile at {tilePos}");
+            Debug.Log($"[CropManager] âœ… Set dry soil tile at {tilePos}");
         }
         else
         {
-            Debug.LogError($"[CropManager] ❌ Missing soilTilemap ({soilTilemap != null}) or drySoilTile ({drySoilTile != null})!");
+            Debug.LogError($"[CropManager] âŒ Missing soilTilemap ({soilTilemap != null}) or drySoilTile ({drySoilTile != null})!");
         }
     }
 
@@ -319,11 +319,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && wetSoilTile != null)
         {
             soilTilemap.SetTile(tilePos, wetSoilTile);
-            Debug.Log($"[CropManager] ✅ Set wet soil tile at {tilePos}");
+            Debug.Log($"[CropManager] âœ… Set wet soil tile at {tilePos}");
         }
         else
         {
-            Debug.LogError($"[CropManager] ❌ Missing soilTilemap ({soilTilemap != null}) or wetSoilTile ({wetSoilTile != null})!");
+            Debug.LogError($"[CropManager] âŒ Missing soilTilemap ({soilTilemap != null}) or wetSoilTile ({wetSoilTile != null})!");
         }
     }
 
@@ -389,6 +389,36 @@ public class CropManager : MonoBehaviour
     public List<CropBlock> GetAllPlantedCrops()
     {
         return new List<CropBlock>(plantedCrops);
+    }
+
+    /// <summary>
+    /// Get all tilled blocks that don't have crops planted (for saving)
+    /// </summary>
+    public List<CropBlock> GetAllTilledBlocks()
+    {
+        List<CropBlock> tilledBlocks = new List<CropBlock>();
+
+        // Iterate through entire grid
+        for (int x = 0; x < gridSize.x; x++)
+        {
+            for (int y = 0; y < gridSize.y; y++)
+            {
+                CropBlock block = cropGrid[x, y];
+
+                // Only add if tilled but NOT planted
+                if (block != null && block.isTilled && !block.isPlanted)
+                {
+                    tilledBlocks.Add(block);
+                }
+            }
+        }
+
+        if (showDebugInfo)
+        {
+            UnityEngine.Debug.Log($"[CropManager] Found {tilledBlocks.Count} tilled (not planted) blocks");
+        }
+
+        return tilledBlocks;
     }
 
     /// <summary>

@@ -13,7 +13,6 @@ public class StartMenuManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private GameObject startMenuPanel;
     [SerializeField] private Image darkOverlay;
-    [SerializeField] private Canvas startMenuCanvas; // Reference to the Canvas component
 
     [Header("Buttons")]
     [SerializeField] private Button continueButton;
@@ -26,12 +25,9 @@ public class StartMenuManager : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.85f); // Dark overlay
-    //[SerializeField] private float fadeSpeed = 2f;
+    [SerializeField] private float fadeSpeed = 2f;
 
     private bool isInStartMenu = true;
-
-    // Public property for other scripts to check
-    public bool IsInStartMenu => isInStartMenu;
 
     private void Awake()
     {
@@ -41,12 +37,6 @@ public class StartMenuManager : MonoBehaviour
             return;
         }
         Instance = this;
-
-        // Get Canvas component if not assigned
-        if (startMenuCanvas == null)
-        {
-            startMenuCanvas = GetComponent<Canvas>();
-        }
     }
 
     private void Start()
@@ -79,12 +69,6 @@ public class StartMenuManager : MonoBehaviour
     /// </summary>
     public void ShowStartMenu()
     {
-        // Enable the canvas to make everything visible
-        if (startMenuCanvas != null)
-        {
-            startMenuCanvas.enabled = true;
-        }
-
         if (startMenuPanel != null)
         {
             startMenuPanel.SetActive(true);
@@ -107,36 +91,28 @@ public class StartMenuManager : MonoBehaviour
     /// </summary>
     public void HideStartMenu()
     {
-        Debug.Log("[StartMenu] ===== HideStartMenu called =====");
+        Debug.Log("[StartMenu] HideStartMenu called");
 
         if (startMenuPanel != null)
         {
             startMenuPanel.SetActive(false);
-            Debug.Log("[StartMenu] startMenuPanel deactivated");
         }
 
         if (darkOverlay != null)
         {
             darkOverlay.gameObject.SetActive(false);
-            Debug.Log("[StartMenu] darkOverlay deactivated");
+        }
+
+        // Hide the load game panel too if it's open
+        if (loadGamePanel != null)
+        {
+            loadGamePanel.SetActive(false);
         }
 
         isInStartMenu = false;
         Time.timeScale = 1f; // Resume game
-        Debug.Log("[StartMenu] isInStartMenu = false, Time.timeScale = 1");
 
-        // Disable the canvas to make it completely inactive
-        if (startMenuCanvas != null)
-        {
-            startMenuCanvas.enabled = false;
-            Debug.Log($"[StartMenu] Canvas disabled. Canvas.enabled is now: {startMenuCanvas.enabled}");
-        }
-        else
-        {
-            Debug.LogError("[StartMenu] startMenuCanvas is NULL!");
-        }
-
-        Debug.Log("[StartMenu] ===== HideStartMenu complete =====");
+        Debug.Log("[StartMenu] Start menu hidden - game started");
     }
 
     /// <summary>
@@ -250,4 +226,7 @@ public class StartMenuManager : MonoBehaviour
         if (quitButton != null)
             quitButton.onClick.RemoveListener(OnQuitClicked);
     }
+
+    // Public property to check if start menu is actually showing
+    public bool IsStartMenuShowing => isInStartMenu;
 }

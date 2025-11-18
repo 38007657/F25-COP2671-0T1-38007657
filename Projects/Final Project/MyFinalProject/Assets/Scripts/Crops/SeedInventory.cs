@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Manages player's seed inventory and selection
-/// UPDATED: Stores selected seed directly instead of by index
 /// </summary>
 public class SeedInventory : MonoBehaviour
 {
@@ -31,8 +30,7 @@ public class SeedInventory : MonoBehaviour
     }
 
     /// <summary>
-    /// Select seed by SeedPacket reference (called from UI)
-    /// This is the PRIMARY method now - no more index confusion!
+    /// Select seed by SeedPacket reference
     /// </summary>
     public void SelectSeed(SeedPacket seed)
     {
@@ -44,21 +42,9 @@ public class SeedInventory : MonoBehaviour
 
         selectedSeed = seed;
 
-        // Fire event with -1 index since we're not using indexes anymore
         OnSeedChanged?.Invoke(selectedSeed, -1);
 
         Debug.Log($"[SeedInventory] Selected: {selectedSeed.cropName}");
-    }
-
-    /// <summary>
-    /// Select seed by index (DEPRECATED - kept for backwards compatibility)
-    /// </summary>
-    public void SelectSeed(int index)
-    {
-        Debug.LogWarning("[SeedInventory] SelectSeed(int) is deprecated - use SelectSeed(SeedPacket) instead");
-
-        // This method is no longer reliable since we don't maintain a master list
-        // If you need to use it, you must pass the actual SeedPacket reference
     }
 
     /// <summary>

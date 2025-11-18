@@ -253,9 +253,37 @@ public class SaveLoadManager : MonoBehaviour
             data.plantedCrops.Add(savedBlock);
         }
 
+        // NEW: Also save tilled-but-not-planted blocks
+        List<CropBlock> tilledBlocks = CropManager.Instance.GetAllTilledBlocks();
+        UnityEngine.Debug.Log($"[SaveLoadManager] Saving {tilledBlocks.Count} tilled (not planted) blocks");
+
+        foreach (CropBlock block in tilledBlocks)
+        {
+            if (block == null || !block.isTilled || block.isPlanted)
+                continue;
+
+            SavedCropBlock savedBlock = new SavedCropBlock
+            {
+                gridPositionX = block.gridPosition.x,
+                gridPositionY = block.gridPosition.y,
+                isTilled = true,
+                isWatered = block.isWatered,
+                isPlanted = false,
+                isWilted = false,
+                seedPacketName = "", // No seed
+                currentGrowthStage = 0,
+                growthTimer = 0,
+                dayPlanted = 0,
+                lastWateredDay = -1,
+                daysWithoutWater = 0
+            };
+
+            data.plantedCrops.Add(savedBlock);
+        }
+
         if (showDebugLogs)
         {
-            UnityEngine.Debug.Log($"[SaveLoadManager] Successfully saved {data.plantedCrops.Count} planted crops");
+            UnityEngine.Debug.Log($"[SaveLoadManager] Successfully saved {data.plantedCrops.Count} total blocks (planted + tilled)");
         }
     }
 
@@ -417,7 +445,7 @@ public class SaveLoadManager : MonoBehaviour
             return;
         }
 
-        UnityEngine.Debug.Log($"[SaveLoadManager] === LOADING {data.plantedCrops.Count} CROPS ===");
+        UnityEngine.Debug.Log($"[SaveLoadManager] === LOADING {data.plantedCrops.Count} BLOCKS (planted + tilled) ===");
 
         // Clear all existing crops first
         CropManager.Instance.ClearAllCrops();
@@ -428,7 +456,7 @@ public class SaveLoadManager : MonoBehaviour
         int successCount = 0;
         int failCount = 0;
 
-        // Restore saved crops
+        // Restore saved blocks (both planted and just tilled)
         foreach (SavedCropBlock savedBlock in data.plantedCrops)
         {
             // Validate saved data
@@ -451,27 +479,28 @@ public class SaveLoadManager : MonoBehaviour
                 continue;
             }
 
-            // Validate seed packet name
-            if (string.IsNullOrEmpty(savedBlock.seedPacketName))
-            {
-                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Empty seed packet name at {gridPos}");
-                failCount++;
-                continue;
-            }
-
-            // Find the seed packet
-            SeedPacket packet = FindSeedPacketByName(savedBlock.seedPacketName);
-
-            if (packet == null)
-            {
-                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Could not find seed packet: {savedBlock.seedPacketName}");
-                failCount++;
-                continue;
-            }
-
-            // Only restore if the block was actually planted
+            // Check if this is a planted block or just tilled
             if (savedBlock.isPlanted)
             {
+                // Validate seed packet name
+                if (string.IsNullOrEmpty(savedBlock.seedPacketName))
+                {
+                    UnityEngine.Debug.LogWarning($"[SaveLoadManager] Empty seed packet name at {gridPos}");
+                    failCount++;
+                    continue;
+                }
+
+                // Find the seed packet
+                SeedPacket packet = FindSeedPacketByName(savedBlock.seedPacketName);
+
+                if (packet == null)
+                {
+                    UnityEngine.Debug.LogWarning($"[SaveLoadManager] Could not find seed packet: {savedBlock.seedPacketName}");
+                    failCount++;
+                    continue;
+                }
+
+                // Restore planted crop
                 try
                 {
                     block.RestoreState(savedBlock, packet);
@@ -479,7 +508,21 @@ public class SaveLoadManager : MonoBehaviour
                 }
                 catch (System.Exception e)
                 {
-                    UnityEngine.Debug.LogError($"[SaveLoadManager] Error restoring block at {gridPos}: {e.Message}");
+                    UnityEngine.Debug.LogError($"[SaveLoadManager] Error restoring planted block at {gridPos}: {e.Message}");
+                    failCount++;
+                }
+            }
+            else if (savedBlock.isTilled)
+            {
+                // Restore tilled-but-not-planted block
+                try
+                {
+                    block.RestoreTilledState(savedBlock);
+                    successCount++;
+                }
+                catch (System.Exception e)
+                {
+                    UnityEngine.Debug.LogError($"[SaveLoadManager] Error restoring tilled block at {gridPos}: {e.Message}");
                     failCount++;
                 }
             }
@@ -487,7 +530,7 @@ public class SaveLoadManager : MonoBehaviour
 
         if (showDebugLogs)
         {
-            UnityEngine.Debug.Log($"[SaveLoadManager] Crop load complete: {successCount} success, {failCount} failed");
+            UnityEngine.Debug.Log($"[SaveLoadManager] Block load complete: {successCount} success, {failCount} failed");
         }
     }
 

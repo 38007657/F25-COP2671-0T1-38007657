@@ -118,7 +118,7 @@ public class SeedSelectionBar : MonoBehaviour
         // Hide seed bar when start menu or pause menu is active
         bool shouldHide = false;
 
-        if (StartMenuManager.Instance != null && StartMenuManager.Instance.IsInStartMenu)
+        if (StartMenuManager.Instance != null && StartMenuManager.Instance.IsStartMenuShowing)
         {
             shouldHide = true;
         }

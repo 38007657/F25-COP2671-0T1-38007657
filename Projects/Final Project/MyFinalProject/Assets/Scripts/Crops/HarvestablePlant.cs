@@ -42,8 +42,6 @@ public class HarvestablePlant : MonoBehaviour
 
         // Start pickup delay timer
         pickupTimer = pickupDelay;
-
-        Debug.Log($"[HarvestablePlant] Initialized {cropName}, will be pickupable in {pickupDelay}s");
     }
 
     private void Start()

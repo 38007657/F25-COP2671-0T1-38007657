@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 /// <summary>
 /// Pause menu accessible during gameplay
@@ -12,16 +13,14 @@ public class PauseMenuManager : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private GameObject pauseMenuPanel;
+    [SerializeField] private GameObject pauseButtonContainer; // The container with buttons
+    [SerializeField] private GameObject saveLoadPanel; // The SaveLoadPanel from hierarchy
     [SerializeField] private Image darkOverlay;
 
     [Header("Buttons")]
     [SerializeField] private Button returnToGameButton;
+    [SerializeField] private Button saveLoadButton;
     [SerializeField] private Button returnToMenuButton;
-    [SerializeField] private Button saveLoadGameButton;
-
-    [Header("Panels")]
-    [SerializeField] private GameObject saveLoadPanel;
-    [SerializeField] private GameObject saveLoadTabContent; // The actual content inside the panel
 
     [Header("Settings")]
     [SerializeField] private KeyCode pauseKey = KeyCode.Escape;
@@ -31,53 +30,50 @@ public class PauseMenuManager : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[PauseMenuManager] Awake called");
+        Debug.Log("[PauseMenu] Awake called");
 
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[PauseMenuManager] Duplicate instance found, destroying");
+            Debug.LogWarning("[PauseMenu] Duplicate instance found, destroying");
             Destroy(gameObject);
             return;
         }
         Instance = this;
 
-        Debug.Log("[PauseMenuManager] Instance set successfully");
+        Debug.Log("[PauseMenu] Instance set successfully");
     }
 
     private void Start()
     {
         Debug.Log("========================================");
-        Debug.Log("[PauseMenuManager] Start called");
-        Debug.Log($"[PauseMenuManager] pauseMenuPanel assigned: {pauseMenuPanel != null}");
-        Debug.Log($"[PauseMenuManager] darkOverlay assigned: {darkOverlay != null}");
-        Debug.Log($"[PauseMenuManager] returnToGameButton assigned: {returnToGameButton != null}");
-        Debug.Log($"[PauseMenuManager] returnToMenuButton assigned: {returnToMenuButton != null}");
-        Debug.Log($"[PauseMenuManager] saveLoadGameButton assigned: {saveLoadGameButton != null}");
-        Debug.Log($"[PauseMenuManager] saveLoadPanel assigned: {saveLoadPanel != null}");
-        Debug.Log($"[PauseMenuManager] saveLoadTabContent assigned: {saveLoadTabContent != null}");
+        Debug.Log("[PauseMenu] Start called");
+        Debug.Log($"[PauseMenu] pauseMenuPanel assigned: {pauseMenuPanel != null}");
+        Debug.Log($"[PauseMenu] pauseButtonContainer assigned: {pauseButtonContainer != null}");
+        Debug.Log($"[PauseMenu] saveLoadPanel assigned: {saveLoadPanel != null}");
+        Debug.Log($"[PauseMenu] darkOverlay assigned: {darkOverlay != null}");
+        Debug.Log($"[PauseMenu] returnToGameButton assigned: {returnToGameButton != null}");
+        Debug.Log($"[PauseMenu] saveLoadButton assigned: {saveLoadButton != null}");
+        Debug.Log($"[PauseMenu] returnToMenuButton assigned: {returnToMenuButton != null}");
         Debug.Log("========================================");
 
         // Setup button listeners
         if (returnToGameButton != null)
             returnToGameButton.onClick.AddListener(OnReturnToGame);
 
+        if (saveLoadButton != null)
+            saveLoadButton.onClick.AddListener(OnSaveLoadClicked);
+
         if (returnToMenuButton != null)
             returnToMenuButton.onClick.AddListener(OnReturnToMenu);
-
-        if (saveLoadGameButton != null)
-            saveLoadGameButton.onClick.AddListener(OnSaveLoadClicked);
 
         // Start with pause menu hidden
         HidePauseMenu();
 
-        // Make sure save/load panel AND its content are hidden
+        // Make sure save/load panel is hidden at start
         if (saveLoadPanel != null)
             saveLoadPanel.SetActive(false);
 
-        if (saveLoadTabContent != null)
-            saveLoadTabContent.SetActive(false);
-
-        Debug.Log("[PauseMenuManager] Start complete - pause menu should be hidden");
+        Debug.Log("[PauseMenu] Start completed");
     }
 
     private void Update()
@@ -85,20 +81,36 @@ public class PauseMenuManager : MonoBehaviour
         // Toggle pause with ESC key
         if (Input.GetKeyDown(pauseKey))
         {
-            Debug.Log($"[PauseMenuManager] ESC key pressed! isPaused: {isPaused}");
+            Debug.Log($"[PauseMenu] ========== ESC PRESSED ==========");
+            Debug.Log($"[PauseMenu] isPaused: {isPaused}");
+            Debug.Log($"[PauseMenu] Time.timeScale: {Time.timeScale}");
 
             // Don't allow pausing if we're in start menu
             if (StartMenuManager.Instance != null)
             {
-                // Check if start menu canvas is enabled (not just if GameObject is active)
-                Canvas startCanvas = StartMenuManager.Instance.GetComponent<Canvas>();
-                if (startCanvas != null && startCanvas.enabled)
+                bool startMenuShowing = StartMenuManager.Instance.IsStartMenuShowing;
+                Debug.Log($"[PauseMenu] StartMenuManager exists, IsStartMenuShowing: {startMenuShowing}");
+
+                if (startMenuShowing)
                 {
-                    Debug.Log("[PauseMenuManager] Start menu canvas is enabled, ignoring ESC");
+                    Debug.Log("[PauseMenu] Start menu is showing, ignoring ESC");
                     return;
                 }
             }
+            else
+            {
+                Debug.Log("[PauseMenu] No StartMenuManager found");
+            }
 
+            // If save/load panel is open, close it instead of unpausing
+            if (saveLoadPanel != null && saveLoadPanel.activeSelf)
+            {
+                Debug.Log("[PauseMenu] Save/load panel open, hiding it");
+                HideSaveLoadPanel();
+                return;
+            }
+
+            Debug.Log("[PauseMenu] Calling TogglePause()");
             TogglePause();
         }
     }
@@ -123,33 +135,39 @@ public class PauseMenuManager : MonoBehaviour
     /// </summary>
     public void ShowPauseMenu()
     {
-        Debug.Log("[PauseMenuManager] ShowPauseMenu called");
+        Debug.Log("[PauseMenu] ShowPauseMenu called");
 
         if (pauseMenuPanel != null)
         {
             pauseMenuPanel.SetActive(true);
-            Debug.Log($"[PauseMenuManager] pauseMenuPanel set to active. Is it active? {pauseMenuPanel.activeSelf}");
+            Debug.Log("[PauseMenu] PauseMenuPanel activated");
         }
         else
         {
-            Debug.LogError("[PauseMenuManager] pauseMenuPanel is NULL!");
+            Debug.LogError("[PauseMenu] PauseMenuPanel is NULL!");
+        }
+
+        // Show main buttons, hide save/load panel
+        if (pauseButtonContainer != null)
+        {
+            pauseButtonContainer.SetActive(true);
+        }
+
+        if (saveLoadPanel != null)
+        {
+            saveLoadPanel.SetActive(false);
         }
 
         if (darkOverlay != null)
         {
             darkOverlay.gameObject.SetActive(true);
             darkOverlay.color = overlayColor;
-            Debug.Log("[PauseMenuManager] darkOverlay activated");
-        }
-        else
-        {
-            Debug.LogWarning("[PauseMenuManager] darkOverlay is NULL!");
         }
 
         isPaused = true;
         Time.timeScale = 0f; // Pause game
 
-        Debug.Log("[PauseMenuManager] Game paused - Time.timeScale set to 0");
+        Debug.Log("[PauseMenu] Game paused");
     }
 
     /// <summary>
@@ -157,6 +175,8 @@ public class PauseMenuManager : MonoBehaviour
     /// </summary>
     public void HidePauseMenu()
     {
+        Debug.Log("[PauseMenu] HidePauseMenu called");
+
         if (pauseMenuPanel != null)
         {
             pauseMenuPanel.SetActive(false);
@@ -182,6 +202,78 @@ public class PauseMenuManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Show the save/load panel
+    /// </summary>
+    private void OnSaveLoadClicked()
+    {
+        ShowSaveLoadPanel();
+    }
+
+    /// <summary>
+    /// Show save/load panel and hide main pause menu buttons
+    /// </summary>
+    public void ShowSaveLoadPanel()
+    {
+        Debug.Log("[PauseMenu] === ShowSaveLoadPanel START ===");
+
+        if (pauseButtonContainer != null)
+        {
+            pauseButtonContainer.SetActive(false);
+            Debug.Log("[PauseMenu] Hid pause button container");
+        }
+        else
+        {
+            Debug.LogError("[PauseMenu] pauseButtonContainer is NULL!");
+        }
+
+        if (saveLoadPanel != null)
+        {
+            Debug.Log($"[PauseMenu] saveLoadPanel found: {saveLoadPanel.name}");
+            Debug.Log($"[PauseMenu] saveLoadPanel was active: {saveLoadPanel.activeSelf}");
+
+            saveLoadPanel.SetActive(true);
+            Debug.Log($"[PauseMenu] saveLoadPanel is now active: {saveLoadPanel.activeSelf}");
+
+            // Refresh the save list when opening
+            SaveLoadMenuUI saveLoadUI = saveLoadPanel.GetComponent<SaveLoadMenuUI>();
+            if (saveLoadUI != null)
+            {
+                Debug.Log("[PauseMenu] SaveLoadMenuUI component found, calling RefreshSaveList()");
+                saveLoadUI.RefreshSaveList();
+            }
+            else
+            {
+                Debug.LogError("[PauseMenu] SaveLoadMenuUI component NOT FOUND on saveLoadPanel!");
+                Debug.LogError($"[PauseMenu] saveLoadPanel has these components: {string.Join(", ", saveLoadPanel.GetComponents<Component>().Select(c => c.GetType().Name))}");
+            }
+        }
+        else
+        {
+            Debug.LogError("[PauseMenu] saveLoadPanel is NULL!");
+        }
+
+        Debug.Log("[PauseMenu] === ShowSaveLoadPanel END ===");
+    }
+
+    /// <summary>
+    /// Hide save/load panel and show main pause menu buttons
+    /// </summary>
+    public void HideSaveLoadPanel()
+    {
+        if (saveLoadPanel != null)
+        {
+            saveLoadPanel.SetActive(false);
+        }
+
+        if (pauseButtonContainer != null)
+        {
+            pauseButtonContainer.SetActive(true);
+        }
+
+        Debug.Log("[PauseMenu] Save/Load panel closed");
+    }
+
+    /// <summary>
     /// Return to main menu
     /// </summary>
     private void OnReturnToMenu()
@@ -198,69 +290,6 @@ public class PauseMenuManager : MonoBehaviour
         Debug.Log("[PauseMenu] Returned to main menu");
     }
 
-    /// <summary>
-    /// Show save/load panel
-    /// </summary>
-    private void OnSaveLoadClicked()
-    {
-        Debug.Log("[PauseMenu] OnSaveLoadClicked called");
-
-        if (saveLoadPanel != null)
-        {
-            Debug.Log($"[PauseMenu] saveLoadPanel found: {saveLoadPanel.name}");
-            Debug.Log($"[PauseMenu] saveLoadPanel active BEFORE: {saveLoadPanel.activeSelf}");
-
-            // Hide pause menu buttons but keep overlay and time paused
-            if (pauseMenuPanel != null)
-            {
-                pauseMenuPanel.SetActive(false);
-                Debug.Log("[PauseMenu] pauseMenuPanel hidden");
-            }
-
-            // Show save/load panel
-            saveLoadPanel.SetActive(true);
-
-            // IMPORTANT: Also activate the content inside (leftover from tabbed system)
-            if (saveLoadTabContent != null)
-            {
-                saveLoadTabContent.SetActive(true);
-                Debug.Log("[PauseMenu] saveLoadTabContent activated");
-            }
-
-            Debug.Log($"[PauseMenu] saveLoadPanel active AFTER: {saveLoadPanel.activeSelf}");
-            Debug.Log("[PauseMenu] Save/Load panel opened");
-        }
-        else
-        {
-            Debug.LogError("[PauseMenu] Save/Load panel not assigned!");
-        }
-    }
-
-    /// <summary>
-    /// Return from save/load panel to pause menu
-    /// Called by SaveLoadMenuUI when user wants to go back
-    /// </summary>
-    public void ReturnToPauseMenu()
-    {
-        if (saveLoadPanel != null)
-        {
-            saveLoadPanel.SetActive(false);
-        }
-
-        // Also hide the tab content
-        if (saveLoadTabContent != null)
-        {
-            saveLoadTabContent.SetActive(false);
-        }
-
-        if (pauseMenuPanel != null)
-        {
-            pauseMenuPanel.SetActive(true);
-        }
-
-        Debug.Log("[PauseMenu] Returned to pause menu from save/load");
-    }
-
     // Property
     public bool IsPaused => isPaused;
 
@@ -270,10 +299,10 @@ public class PauseMenuManager : MonoBehaviour
         if (returnToGameButton != null)
             returnToGameButton.onClick.RemoveListener(OnReturnToGame);
 
+        if (saveLoadButton != null)
+            saveLoadButton.onClick.RemoveListener(OnSaveLoadClicked);
+
         if (returnToMenuButton != null)
             returnToMenuButton.onClick.RemoveListener(OnReturnToMenu);
-
-        if (saveLoadGameButton != null)
-            saveLoadGameButton.onClick.RemoveListener(OnSaveLoadClicked);
     }
 }

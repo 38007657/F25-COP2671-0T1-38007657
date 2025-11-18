@@ -13,7 +13,7 @@ public class SaveLoadMenuUI : MonoBehaviour
     [SerializeField] private Transform saveSlotContainer;
     [SerializeField] private GameObject saveSlotPrefab;
     [SerializeField] private Button newSaveButton;
-    [SerializeField] private Button backButton;
+    [SerializeField] private Button backButton; // NEW: Back to pause menu
 
     [Header("New Save Panel")]
     [SerializeField] private GameObject newSavePanel;
@@ -38,7 +38,7 @@ public class SaveLoadMenuUI : MonoBehaviour
             cancelSaveButton.onClick.AddListener(HideNewSavePanel);
 
         if (backButton != null)
-            backButton.onClick.AddListener(OnBackClicked);
+            backButton.onClick.AddListener(OnBackButtonClicked);
 
         // Make sure new save panel is hidden at start
         if (newSavePanel != null)
@@ -69,21 +69,21 @@ public class SaveLoadMenuUI : MonoBehaviour
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] SaveLoadManager.Instance is NULL!");
             return;
         }
-        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found ✓");
+        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found âœ“");
 
         if (saveSlotContainer == null)
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotContainer is NULL!");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name} ✓");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name} âœ“");
 
         if (saveSlotPrefab == null)
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotPrefab is NULL!");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name} ✓");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name} âœ“");
 
         // Clear existing slots
         int childCount = saveSlotContainer.childCount;
@@ -215,51 +215,28 @@ public class SaveLoadMenuUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Load a save by ID (called from SaveSlotUI when clicking load button on a slot)
+    /// Load a save by ID
     /// </summary>
     public void LoadSave(string saveId)
     {
-        UnityEngine.Debug.Log("========================================");
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] LoadSave called with saveId: {saveId}");
-
         if (SaveLoadManager.Instance == null)
         {
             UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot load - SaveLoadManager is null!");
             return;
         }
 
-        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found, calling LoadGame...");
-
         bool success = SaveLoadManager.Instance.LoadGame(saveId);
-
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] LoadGame returned: {success}");
 
         if (success)
         {
-            UnityEngine.Debug.Log($"[SaveLoadMenuUI] ✅ Loaded save: {saveId}");
-
-            // Hide this panel first
-            gameObject.SetActive(false);
-            UnityEngine.Debug.Log("[SaveLoadMenuUI] ✅ Closed save/load panel");
-
-            // Close the pause menu, resume game
-            if (PauseMenuManager.Instance != null)
-            {
-                UnityEngine.Debug.Log("[SaveLoadMenuUI] PauseMenuManager found, calling HidePauseMenu...");
-                PauseMenuManager.Instance.HidePauseMenu();
-                UnityEngine.Debug.Log("[SaveLoadMenuUI] ✅ Closed pause menu after loading");
-            }
-            else
-            {
-                UnityEngine.Debug.LogError("[SaveLoadMenuUI] ❌ PauseMenuManager.Instance is NULL!");
-            }
+            UnityEngine.Debug.Log($"[SaveLoadMenuUI] Loaded save: {saveId}");
+            RefreshSaveList();
+            UpdateInfoDisplay();
         }
         else
         {
-            UnityEngine.Debug.LogError($"[SaveLoadMenuUI] ❌ Failed to load save: {saveId}");
+            UnityEngine.Debug.LogError($"[SaveLoadMenuUI] Failed to load save: {saveId}");
         }
-
-        UnityEngine.Debug.Log("========================================");
     }
 
     /// <summary>
@@ -287,28 +264,14 @@ public class SaveLoadMenuUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Select a save (called when clicking a save slot)
+    /// Called when back button is clicked
     /// </summary>
-    public void SelectSave(SaveSlotInfo saveInfo)
+    private void OnBackButtonClicked()
     {
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] Save slot clicked: {saveInfo.saveName}");
-
-        // Instead of just selecting, we load immediately when slot is clicked
-        LoadSave(saveInfo.saveId);
-    }
-
-    /// <summary>
-    /// Handle back button - return to pause menu
-    /// </summary>
-    private void OnBackClicked()
-    {
+        // Hide the save/load panel and return to pause menu
         if (PauseMenuManager.Instance != null)
         {
-            PauseMenuManager.Instance.ReturnToPauseMenu();
-        }
-        else
-        {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] PauseMenuManager not found!");
+            PauseMenuManager.Instance.HideSaveLoadPanel();
         }
     }
 
@@ -325,6 +288,6 @@ public class SaveLoadMenuUI : MonoBehaviour
             cancelSaveButton.onClick.RemoveListener(HideNewSavePanel);
 
         if (backButton != null)
-            backButton.onClick.RemoveListener(OnBackClicked);
+            backButton.onClick.RemoveListener(OnBackButtonClicked);
     }
 }

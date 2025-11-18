@@ -33,7 +33,7 @@ public class ToolbarController : MonoBehaviour
         UnityEngine.Debug.Log($"[ToolbarController] StartMenuManager exists: {StartMenuManager.Instance != null}");
         if (StartMenuManager.Instance != null)
         {
-            UnityEngine.Debug.Log($"[ToolbarController] IsInStartMenu: {StartMenuManager.Instance.IsInStartMenu}");
+            UnityEngine.Debug.Log($"[ToolbarController] IsStartMenuShowing: {StartMenuManager.Instance.IsStartMenuShowing}");
         }
 
         // Hide toolbar if start menu is active
@@ -61,7 +61,7 @@ public class ToolbarController : MonoBehaviour
 
         if (StartMenuManager.Instance != null)
         {
-            bool inStartMenu = StartMenuManager.Instance.IsInStartMenu;
+            bool inStartMenu = StartMenuManager.Instance.IsStartMenuShowing;
             if (inStartMenu)
             {
                 shouldShow = false;

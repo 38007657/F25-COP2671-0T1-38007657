@@ -81,6 +81,36 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initialize a completely new game (called when New Game is clicked)
+    /// </summary>
+    public void InitializeNewGame()
+    {
+        // Clear everything
+        ClearInventory();
+
+        // Reset to starting money
+        currentMoney = startingMoney;
+        OnMoneyChanged?.Invoke(currentMoney);
+
+        // Add starting seeds
+        if (testStartingSeeds.Count > 0)
+        {
+            foreach (SeedPacket packet in testStartingSeeds)
+            {
+                if (packet != null)
+                {
+                    AddSeedPacket(packet, testSeedsPerPacket);
+                }
+            }
+        }
+
+        if (showDebugLogs)
+        {
+            Debug.Log($"[PlayerInventory] New game initialized with ${currentMoney} and {testStartingSeeds.Count} seed types");
+        }
+    }
+
     // ===== HARVESTED ITEMS =====
 
     /// <summary>

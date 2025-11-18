@@ -27,7 +27,7 @@ public class SeedPacket : ScriptableObject
     public GameObject harvestReadyParticles;
 
     [Header("Growth Settings")]
-    [Tooltip("Total days from seed to harvest (minimum 3 days if watered each day)")]
+    [Tooltip("Total days from seed to harvest (minimum 1 days if watered each day)")]
     [Range(1, 10)]
     public int totalGrowthDays = 3;
 

@@ -139,13 +139,13 @@ public class InventoryUIManager : MonoBehaviour
         inventoryTabContent.SetActive(false);
         moneyTabContent.SetActive(false);
         shopTabContent.SetActive(false);
-        saveLoadTabContent.SetActive(false); // â† MAKE SURE THIS LINE EXISTS
+        saveLoadTabContent.SetActive(false);
 
         // Reset all button colors
         SetButtonColor(inventoryTabButton, inactiveTabColor);
         SetButtonColor(moneyTabButton, inactiveTabColor);
         SetButtonColor(shopTabButton, inactiveTabColor);
-        SetButtonColor(saveLoadTabButton, inactiveTabColor); // â† MAKE SURE THIS LINE EXISTS
+        SetButtonColor(saveLoadTabButton, inactiveTabColor);
 
         // Show selected tab and highlight button
         switch (tabIndex)
@@ -166,13 +166,6 @@ public class InventoryUIManager : MonoBehaviour
                 shopTabContent.SetActive(true);
                 SetButtonColor(shopTabButton, activeTabColor);
                 RefreshShopTab();
-                break;
-
-            case 3: // Save/Load â† MAKE SURE THIS CASE EXISTS
-                UnityEngine.Debug.Log("[InventoryUI] Activating SaveLoadTabContent");
-                saveLoadTabContent.SetActive(true);
-                UnityEngine.Debug.Log($"[InventoryUI] SaveLoadTabContent.activeSelf = {saveLoadTabContent.activeSelf}");
-                SetButtonColor(saveLoadTabButton, activeTabColor);
                 break;
 
             default:
@@ -275,7 +268,7 @@ public class InventoryUIManager : MonoBehaviour
         ClearContainer(seedsContentParent);
         ClearContainer(cropsContentParent);
 
-        // Populate seeds - DON'T show value (we'll buy them in shop)
+        // Populate seeds
         foreach (var kvp in PlayerInventory.Instance.SeedPackets)
         {
             SeedPacket packet = kvp.Key;
@@ -296,7 +289,7 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
 
-        // Populate harvested crops - SHOW value (what we can sell them for)
+        // Populate harvested crops - show profit value
         foreach (var kvp in PlayerInventory.Instance.HarvestedItems)
         {
             InventoryItem item = kvp.Key;
@@ -357,7 +350,7 @@ public class InventoryUIManager : MonoBehaviour
             shopSellController.ClearSellSlots();
         }
 
-        // === POPULATE BUY SECTION (Seeds for sale) ===
+        // === Populate buy section (Seeds for sale) ===
         List<SeedPacket> availableSeeds = ShopInventory.Instance.GetAvailableSeedPackets();
 
         Debug.Log($"[InventoryUI] Shop has {availableSeeds.Count} seed types for sale");
@@ -378,8 +371,8 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
 
-        // === POPULATE SELL SECTION (Player's harvested crops) ===
-        // Only show crops that the shop will buy AND player actually has
+        // === Populate sell section (Player's harvested crops) ===
+        // Only show crops that the shop will buy and player actually has
         List<InventoryItem> buyableCrops = ShopInventory.Instance.GetBuyableCrops();
 
         Debug.Log($"[InventoryUI] Shop buys {buyableCrops.Count} crop types");
@@ -399,7 +392,7 @@ public class InventoryUIManager : MonoBehaviour
                 {
                     slotScript.Setup(crop, playerQuantity);
 
-                    // â† THIS IS THE KEY FIX - Register the slot with the controller
+                    // Register the slot with the controller
                     if (shopSellController != null)
                     {
                         shopSellController.RegisterSellSlot(slotScript);

@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 positionBefore = transform.position;
 
-        // Don't allow movement if seed selection bar is expanded OR inventory is open OR if it just closed this frame
+        // Don't allow movement if seed selection bar is expanded OR inventory is open OR if has just closed this frame
         bool canMove = true;
 
         // Block if seed bar is expanded
@@ -37,7 +37,7 @@ public class PlayerController : MonoBehaviour
             canMove = false;
             movementInput = Vector2.zero; // Clear input
         }
-        // Also block movement if S key is being pressed (seed bar toggle key)
+        // Block movement if S key is being pressed (seed bar toggle key)
         else if (Input.GetKey(KeyCode.S) && SeedSelectionBar.Instance != null)
         {
             canMove = false;
@@ -96,8 +96,6 @@ public class PlayerController : MonoBehaviour
             Debug.LogWarning($"[PlayerController] Position changed in Update from {positionBefore} to {transform.position}");
         }
     }
-
-
 
     void FixedUpdate()
     {
