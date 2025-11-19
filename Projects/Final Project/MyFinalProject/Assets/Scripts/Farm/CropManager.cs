@@ -486,26 +486,26 @@ public class CropManager : MonoBehaviour
     }
 
     // Debug display
-    private void OnGUI()
-    {
-        if (showDebugInfo)
-        {
-            GUIStyle style = new GUIStyle(GUI.skin.label);
-            style.fontSize = 14;
-            style.normal.textColor = Color.white;
-            style.fontStyle = FontStyle.Bold;
+    //private void OnGUI()
+    //{
+    //    if (showDebugInfo)
+    //    {
+    //        GUIStyle style = new GUIStyle(GUI.skin.label);
+    //        style.fontSize = 14;
+    //        style.normal.textColor = Color.white;
+    //        style.fontStyle = FontStyle.Bold;
 
-            // Shadow effect
-            GUI.color = Color.black;
-            GUI.Label(new Rect(11, 11, 400, 25), $"Day: {currentDay}", style);
-            GUI.Label(new Rect(11, 31, 400, 25), $"Planted: {plantedCrops.Count} | Harvestable: {GetHarvestableCrops().Count} | Need Water: {GetCropsNeedingWater().Count}", style);
+    //        // Shadow effect
+    //        GUI.color = Color.black;
+    //        GUI.Label(new Rect(11, 11, 400, 25), $"Day: {currentDay}", style);
+    //        GUI.Label(new Rect(11, 31, 400, 25), $"Planted: {plantedCrops.Count} | Harvestable: {GetHarvestableCrops().Count} | Need Water: {GetCropsNeedingWater().Count}", style);
 
-            // Main text
-            GUI.color = Color.white;
-            GUI.Label(new Rect(10, 10, 400, 25), $"Day: {currentDay}", style);
-            GUI.Label(new Rect(10, 30, 400, 25), $"Planted: {plantedCrops.Count} | Harvestable: {GetHarvestableCrops().Count} | Need Water: {GetCropsNeedingWater().Count}", style);
+    //        // Main text
+    //        GUI.color = Color.white;
+    //        GUI.Label(new Rect(10, 10, 400, 25), $"Day: {currentDay}", style);
+    //        GUI.Label(new Rect(10, 30, 400, 25), $"Planted: {plantedCrops.Count} | Harvestable: {GetHarvestableCrops().Count} | Need Water: {GetCropsNeedingWater().Count}", style);
 
-            GUI.color = Color.white;
-        }
-    }
+    //        GUI.color = Color.white;
+    //    }
+    //}
 }

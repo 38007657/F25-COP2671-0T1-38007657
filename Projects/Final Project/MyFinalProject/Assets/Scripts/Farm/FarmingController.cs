@@ -2,12 +2,20 @@ using UnityEngine;
 
 /// <summary>
 /// Handles farming actions via event system with proper range-based selection
+/// Part 4 Requirements: Use event listeners to call methods
 /// </summary>
 public class FarmingController : MonoBehaviour
 {
     [Header("Interaction Settings")]
     [SerializeField] private float interactionRange = 2.5f;
     [Tooltip("Y-axis offset for 64x64 player interacting with 16x16 tiles")]
+
+    [Header("Time Restrictions")]
+    [SerializeField] private bool restrictFarmingByTime = true;
+    [Tooltip("Hour after which farming is disabled (24-hour format)")]
+    [SerializeField] private float farmingCutoffTime = 18f; // 6 PM
+    [Tooltip("Message to show when trying to farm after cutoff")]
+    [SerializeField] private string afterHoursMessage = "It's too late to work on the farm. Rest until tomorrow!";
 
     [Header("Test Seed")]
     [SerializeField] private SeedPacket testSeedPacket;
@@ -30,6 +38,8 @@ public class FarmingController : MonoBehaviour
     [SerializeField] private float facingLockDuration = 0.3f;
 
     [Header("Visual Feedback")]
+    [SerializeField] private GameObject selectionIndicator;
+    [SerializeField] private bool showSelectionIndicator = true;
     [SerializeField] private bool showDebugInfo = true;
 
     private CropManager cropManager;
@@ -64,10 +74,15 @@ public class FarmingController : MonoBehaviour
             playerAnimator = playerTransform.GetComponentInChildren<Animator>();
         }
 
+        // Create selection indicator if needed
+        if (showSelectionIndicator && selectionIndicator != null)
+        {
+            selectionIndicator = Instantiate(selectionIndicator);
+            selectionIndicator.SetActive(false);
+        }
 
         // Find and subscribe to toolbar events - Part 4 Requirement
-        // Use Include inactive so we find it even when start menu is showing
-        toolbarController = FindFirstObjectByType<ToolbarController>(FindObjectsInactive.Include);
+        toolbarController = FindFirstObjectByType<ToolbarController>();
 
         if (toolbarController != null)
         {
@@ -101,6 +116,9 @@ public class FarmingController : MonoBehaviour
 
         // Find block player is facing
         UpdateSelectedBlock();
+
+        // Update selection indicator visual
+        UpdateSelectionIndicator();
     }
 
     private void OnDestroy()
@@ -114,12 +132,17 @@ public class FarmingController : MonoBehaviour
             toolbarController.OnGather.RemoveListener(HandleGatherEvent);
         }
 
+        // Destroy selection indicator
+        if (selectionIndicator != null)
+        {
+            Destroy(selectionIndicator);
+        }
     }
 
     // ===== HELPER METHODS =====
 
     /// <summary>
-    /// Find the nearest crop block to player
+    /// Find the nearest crop block to player (no facing direction needed)
     /// </summary>
     private void UpdateSelectedBlock()
     {
@@ -136,11 +159,11 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Just find the closest block 
+        // Just find the absolute closest block - period
         CropBlock closestBlock = null;
         float closestDistance = interactionRange;
 
-        // Check all blocks in the grid
+        // Check all blocks in the grid (or optimize by checking nearby area)
         for (int x = -2; x <= 2; x++)
         {
             for (int y = -2; y <= 2; y++)
@@ -213,20 +236,110 @@ public class FarmingController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Update visual indicator to show selected block
+    /// </summary>
+    private void UpdateSelectionIndicator()
+    {
+        if (!showSelectionIndicator || selectionIndicator == null)
+            return;
+
+        if (selectedBlock != null)
+        {
+            selectionIndicator.SetActive(true);
+            selectionIndicator.transform.position = selectedBlock.worldPosition;
+        }
+        else
+        {
+            selectionIndicator.SetActive(false);
+        }
+    }
+
     // ===== EVENT HANDLERS =====
+
+    /// <summary>
+    /// Check if farming is allowed based on current time
+    /// </summary>
+    private bool CanFarmAtCurrentTime()
+    {
+        if (!restrictFarmingByTime)
+            return true;
+
+        if (TimeManager.Instance == null)
+            return true; // If no TimeManager, allow farming
+
+        float currentTime = TimeManager.Instance.CurrentTime;
+
+        if (currentTime >= farmingCutoffTime)
+        {
+            Debug.Log($"[FarmingController] Cannot farm after {farmingCutoffTime}:00. Current time: {TimeManager.Instance.GetTimeString()}");
+
+            // Show notification to player
+            if (NotificationManager.Instance != null)
+            {
+                Debug.Log("[FarmingController] NotificationManager found! Showing warning...");
+                NotificationManager.Instance.ShowWarning(afterHoursMessage);
+            }
+            else
+            {
+                Debug.LogError("[FarmingController] NotificationManager.Instance is NULL! Cannot show notification.");
+            }
+
+            return false;
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Handle hoe event from toolbar
     /// </summary>
     public void HandleHoeEvent()
     {
+        // Check time restriction
+        if (!CanFarmAtCurrentTime())
+            return;
+
         if (selectedBlock == null)
         {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("No tile selected! Move closer to a tile.");
+            }
             UnityEngine.Debug.Log("[FarmingController] No block selected to hoe!");
             return;
         }
 
-        // Use player's current facing direction (not direction to block)
+        // Check if tile can be tilled
+        if (selectedBlock.isPlanted && !selectedBlock.isWilted)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("There's already a crop planted here!");
+            }
+            return;
+        }
+
+        if (selectedBlock.isTilled && !selectedBlock.isPlanted)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowInfo("This soil is already tilled.");
+            }
+            return;
+        }
+
+        // Check if in farmable area
+        if (!cropManager.IsGridPositionFarmable(selectedBlock.gridPosition))
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("You can't farm here. Find the farm plot!");
+            }
+            return;
+        }
+
+        // Use player's CURRENT facing direction (not direction to block)
         Vector3 facingDir = GetPlayerFacingDirection();
 
         // Only calculate direction to block if player isn't facing anywhere
@@ -254,22 +367,67 @@ public class FarmingController : MonoBehaviour
     /// </summary>
     public void HandleSeedEvent()
     {
+        // Check time restriction
+        if (!CanFarmAtCurrentTime())
+            return;
+
         if (selectedBlock == null)
         {
-            UnityEngine.Debug.Log("[FarmingController] No block selected to plant");
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("No tile selected! Move closer to a tile.");
+            }
+            UnityEngine.Debug.Log("[FarmingController] No block selected to plant!");
             return;
         }
 
-        // Get selected seed from inventory
+        // Get selected seed from inventory instead of using testSeedPacket
         SeedPacket selectedSeed = SeedInventory.Instance?.SelectedSeed;
 
         if (selectedSeed == null)
         {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("No seeds selected! Select seeds from the seed bar.");
+            }
             UnityEngine.Debug.LogWarning("[FarmingController] No seed selected!");
             return;
         }
 
-        // Use player's current facing direction
+        // Check if soil is tilled
+        if (!selectedBlock.isTilled)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("You need to till the soil first! Use the hoe.");
+            }
+            return;
+        }
+
+        // Check if already planted
+        if (selectedBlock.isPlanted)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("There's already a crop planted here!");
+            }
+            return;
+        }
+
+        // Check if player has seeds
+        if (PlayerInventory.Instance != null)
+        {
+            if (PlayerInventory.Instance.GetSeedPacketCount(selectedSeed) <= 0)
+            {
+                if (NotificationManager.Instance != null)
+                {
+                    NotificationManager.Instance.ShowWarning($"You don't have any {selectedSeed.cropName} seeds!");
+                }
+                return;
+            }
+        }
+
+        // Use player's CURRENT facing direction
         Vector3 facingDir = GetPlayerFacingDirection();
 
         if (facingDir == Vector3.zero)
@@ -287,6 +445,11 @@ public class FarmingController : MonoBehaviour
         if (success)
         {
             PlayAnimation(plantAnimationTrigger, facingDir);
+
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowSuccess($"Planted {selectedSeed.cropName}!");
+            }
         }
     }
 
@@ -295,13 +458,71 @@ public class FarmingController : MonoBehaviour
     /// </summary>
     public void HandleWaterEvent()
     {
+        // Check time restriction
+        if (!CanFarmAtCurrentTime())
+            return;
+
         if (selectedBlock == null)
         {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("No tile selected! Move closer to a tile.");
+            }
             UnityEngine.Debug.Log("[FarmingController] No block selected to water!");
             return;
         }
 
-        // Use player's current facing direction
+        // Check if soil is tilled
+        if (!selectedBlock.isTilled)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("You need to till the soil first! Use the hoe.");
+            }
+            return;
+        }
+
+        // Check if crop is planted
+        if (!selectedBlock.isPlanted)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("There's no crop planted here to water!");
+            }
+            return;
+        }
+
+        // Check if crop is wilted
+        if (selectedBlock.isWilted)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("This crop has wilted. Use the hoe to remove it.");
+            }
+            return;
+        }
+
+        // Check if crop is ready to harvest
+        if (selectedBlock.currentGrowthStage >= 3)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowInfo("This crop is ready to harvest! No need to water.");
+            }
+            return;
+        }
+
+        // Check if already watered today
+        if (selectedBlock.isWatered && selectedBlock.lastWateredDay == cropManager.CurrentDay)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowInfo("You already watered this crop today!");
+            }
+            return;
+        }
+
+        // Use player's CURRENT facing direction
         Vector3 facingDir = GetPlayerFacingDirection();
 
         if (facingDir == Vector3.zero)
@@ -319,28 +540,73 @@ public class FarmingController : MonoBehaviour
         if (success)
         {
             PlayAnimation(waterAnimationTrigger, facingDir);
+
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowSuccess("Crop watered!");
+            }
         }
     }
 
-    // In FarmingController.HandleGatherEvent() [3]
+    // In FarmingController.HandleGatherEvent()
     public void HandleGatherEvent()
     {
-        if (selectedBlock == null) return;
+        // Check time restriction
+        if (!CanFarmAtCurrentTime())
+            return;
 
-        Vector3 playerPosBefore = playerTransform.position;
-        Debug.Log($"[Harvest] Player position BEFORE: {playerPosBefore}");
+        if (selectedBlock == null)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("No tile selected! Move closer to a tile.");
+            }
+            return;
+        }
+
+        // Check if crop is planted
+        if (!selectedBlock.isPlanted)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("There's no crop here to harvest!");
+            }
+            return;
+        }
+
+        // Check if crop is wilted
+        if (selectedBlock.isWilted)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning("This crop has wilted. Use the hoe to remove it.");
+            }
+            return;
+        }
+
+        // Check if crop is ready to harvest
+        if (selectedBlock.currentGrowthStage < 3)
+        {
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowWarning($"This crop isn't ready yet! (Stage {selectedBlock.currentGrowthStage}/3)");
+            }
+            return;
+        }
 
         Vector3 facingDir = GetPlayerFacingDirection();
         FaceDirection(facingDir);
 
         GameObject result = selectedBlock.HarvestPlant();
 
-        Debug.Log($"[Harvest] Player position AFTER: {playerTransform.position}");
-        Debug.Log($"[Harvest] Position changed by: {playerTransform.position - playerPosBefore}");
-
         if (result != null)
         {
             PlayAnimation(harvestAnimationTrigger, facingDir);
+
+            if (NotificationManager.Instance != null)
+            {
+                NotificationManager.Instance.ShowSuccess($"Harvested {selectedBlock.seedPacket?.cropName ?? "crop"}!");
+            }
         }
     }
 
@@ -368,7 +634,7 @@ public class FarmingController : MonoBehaviour
                 direction = new Vector3(currentX, currentY, 0);
             }
 
-            // Default to down
+            // Still no direction? Default to down (not up)
             if (direction == Vector3.zero)
             {
                 direction = Vector3.down;
@@ -430,45 +696,45 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    //// ===== DEBUG VISUALIZATION =====
+    // ===== DEBUG VISUALIZATION =====
 
-    //private void OnDrawGizmos()
-    //{
-    //    if (selectedBlock != null)
-    //    {
-    //        Gizmos.color = Color.yellow;
-    //        Gizmos.DrawWireCube(selectedBlock.worldPosition, Vector3.one * 0.9f);
-    //    }
+    private void OnDrawGizmos()
+    {
+        if (selectedBlock != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(selectedBlock.worldPosition, Vector3.one * 0.9f);
+        }
 
-    //    // Draw facing direction
-    //    if (playerTransform != null && Application.isPlaying)
-    //    {
-    //        Vector2 facing = GetPlayerFacingDirection();
-    //        facing = SnapToCardinalDirection(facing);
+        // Draw facing direction
+        if (playerTransform != null && Application.isPlaying)
+        {
+            Vector2 facing = GetPlayerFacingDirection();
+            facing = SnapToCardinalDirection(facing);
 
-    //        Gizmos.color = Color.cyan;
-    //        Gizmos.DrawLine(playerTransform.position, playerTransform.position + (Vector3)(facing * 2f));
-    //    }
-    //}
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(playerTransform.position, playerTransform.position + (Vector3)(facing * 2f));
+        }
+    }
 
-    //private void OnGUI()
-    //{
-    //    if (!showDebugInfo) return;
+    private void OnGUI()
+    {
+        if (!showDebugInfo) return;
 
-    //    GUIStyle style = new GUIStyle(GUI.skin.label);
-    //    style.fontSize = 14;
-    //    style.normal.textColor = Color.white;
+        GUIStyle style = new GUIStyle(GUI.skin.label);
+        style.fontSize = 14;
+        style.normal.textColor = Color.white;
 
-    //    string debugText = selectedBlock != null
-    //        ? $"Selected: {selectedBlock.gridPosition} | Tilled: {selectedBlock.isTilled} | Planted: {selectedBlock.isPlanted}"
-    //        : "No block selected";
+        string debugText = selectedBlock != null
+            ? $"Selected: {selectedBlock.gridPosition} | Tilled: {selectedBlock.isTilled} | Planted: {selectedBlock.isPlanted}"
+            : "No block selected";
 
-    //    // Shadow
-    //    GUI.color = Color.black;
-    //    GUI.Label(new Rect(11, 71, 600, 25), debugText, style);
+        // Shadow
+        GUI.color = Color.black;
+        GUI.Label(new Rect(11, 71, 600, 25), debugText, style);
 
-    //    // Main
-    //    GUI.color = Color.white;
-    //    GUI.Label(new Rect(10, 70, 600, 25), debugText, style);
-    //}
+        // Main
+        GUI.color = Color.white;
+        GUI.Label(new Rect(10, 70, 600, 25), debugText, style);
+    }
 }
