@@ -12,7 +12,6 @@ public class StartMenuManager : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private GameObject startMenuPanel;
-    [SerializeField] private Image darkOverlay;
 
     [Header("Buttons")]
     [SerializeField] private Button continueButton;
@@ -21,11 +20,7 @@ public class StartMenuManager : MonoBehaviour
     [SerializeField] private Button quitButton;
 
     [Header("Other Panels")]
-    [SerializeField] private GameObject loadGamePanel; // Your existing SaveLoadTab
-
-    [Header("Settings")]
-    [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.85f); // Dark overlay
-    [SerializeField] private float fadeSpeed = 2f;
+    [SerializeField] private GameObject loadGamePanel; // Dedicated load-only panel
 
     private bool isInStartMenu = true;
 
@@ -74,12 +69,6 @@ public class StartMenuManager : MonoBehaviour
             startMenuPanel.SetActive(true);
         }
 
-        if (darkOverlay != null)
-        {
-            darkOverlay.gameObject.SetActive(true);
-            darkOverlay.color = overlayColor;
-        }
-
         isInStartMenu = true;
         Time.timeScale = 0f; // Pause game
 
@@ -98,11 +87,6 @@ public class StartMenuManager : MonoBehaviour
             startMenuPanel.SetActive(false);
         }
 
-        if (darkOverlay != null)
-        {
-            darkOverlay.gameObject.SetActive(false);
-        }
-
         // Hide the load game panel too if it's open
         if (loadGamePanel != null)
         {
@@ -116,18 +100,24 @@ public class StartMenuManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Check if we have a save to continue from
+    /// Check if we have saves and update button states
     /// </summary>
     private void UpdateContinueButton()
     {
-        if (continueButton == null) return;
-
         bool hasSave = SaveLoadManager.Instance != null &&
                        SaveLoadManager.Instance.AnySavesExist();
 
-        continueButton.interactable = hasSave;
+        if (continueButton != null)
+        {
+            continueButton.interactable = hasSave;
+            Debug.Log($"[StartMenu] Continue button: {(hasSave ? "Enabled" : "Disabled")}");
+        }
 
-        Debug.Log($"[StartMenu] Continue button: {(hasSave ? "Enabled" : "Disabled")}");
+        if (loadGameButton != null)
+        {
+            loadGameButton.interactable = hasSave;
+            Debug.Log($"[StartMenu] Load Game button: {(hasSave ? "Enabled" : "Disabled")}");
+        }
     }
 
     /// <summary>
@@ -160,13 +150,26 @@ public class StartMenuManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Show the load game panel
+    /// Show the load game panel or display error if no saves
     /// </summary>
     private void OnLoadGameClicked()
     {
+        // Check if there are any saves first
+        if (SaveLoadManager.Instance == null || !SaveLoadManager.Instance.AnySavesExist())
+        {
+            // Show error notification instead of opening load panel
+            NotificationManager.Instance?.ShowNotification(
+                "No saved games found! Start a New Game to begin.",
+                NotificationType.Error
+            );
+
+            Debug.Log("[StartMenu] No saves found - showing notification");
+            return;
+        }
+
         if (loadGamePanel != null)
         {
-            // Hide start menu buttons but keep overlay
+            // Hide start menu panel (since they're siblings in the same canvas)
             if (startMenuPanel != null)
             {
                 startMenuPanel.SetActive(false);
@@ -175,7 +178,23 @@ public class StartMenuManager : MonoBehaviour
             // Show load panel
             loadGamePanel.SetActive(true);
 
+            // Refresh the save list when opening
+            LoadMenuUI loadMenuUI = loadGamePanel.GetComponent<LoadMenuUI>();
+            if (loadMenuUI != null)
+            {
+                Debug.Log("[StartMenu] LoadMenuUI component found, refreshing save list");
+                loadMenuUI.RefreshSaveList();
+            }
+            else
+            {
+                Debug.LogError("[StartMenu] LoadMenuUI component NOT FOUND on loadGamePanel!");
+            }
+
             Debug.Log("[StartMenu] Load game panel opened");
+        }
+        else
+        {
+            Debug.LogError("[StartMenu] loadGamePanel is not assigned!");
         }
     }
 
@@ -193,6 +212,9 @@ public class StartMenuManager : MonoBehaviour
         {
             startMenuPanel.SetActive(true);
         }
+
+        // Update button states in case saves changed
+        UpdateContinueButton();
 
         Debug.Log("[StartMenu] Returned to start menu");
     }

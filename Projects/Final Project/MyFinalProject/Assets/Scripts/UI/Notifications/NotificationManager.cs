@@ -4,7 +4,18 @@ using TMPro;
 using System.Collections;
 
 /// <summary>
-/// Displays temporary notification messages to the player
+/// Notification types for different message styles
+/// </summary>
+public enum NotificationType
+{
+    Info,
+    Success,
+    Warning,
+    Error
+}
+
+/// <summary>
+/// Manages in-game notification popups
 /// </summary>
 public class NotificationManager : MonoBehaviour
 {
@@ -13,34 +24,25 @@ public class NotificationManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private GameObject notificationPanel;
     [SerializeField] private TextMeshProUGUI notificationText;
-    [SerializeField] private Image notificationBackground;
+    [SerializeField] private Image backgroundImage;
+    [SerializeField] private CanvasGroup canvasGroup;
 
-    [Header("Settings")]
+    [Header("Notification Settings")]
     [SerializeField] private float displayDuration = 3f;
-    [SerializeField] private float fadeInDuration = 0.2f;
-    [SerializeField] private float fadeOutDuration = 0.3f;
+    [SerializeField] private float fadeInDuration = 0.3f;
+    [SerializeField] private float fadeOutDuration = 0.5f;
 
     [Header("Colors")]
-    [SerializeField] private Color infoColor = new Color(0.2f, 0.5f, 0.8f, 0.9f);
-    [SerializeField] private Color warningColor = new Color(0.9f, 0.7f, 0.2f, 0.9f);
-    [SerializeField] private Color errorColor = new Color(0.9f, 0.2f, 0.2f, 0.9f);
-    [SerializeField] private Color successColor = new Color(0.2f, 0.8f, 0.3f, 0.9f);
-
-    [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip infoSound;
-    [SerializeField] private AudioClip warningSound;
-    [SerializeField] private AudioClip errorSound;
-    [SerializeField] private AudioClip successSound;
-    [SerializeField] private bool playSounds = true;
-    [Range(0f, 1f)]
-    [SerializeField] private float soundVolume = 0.7f;
+    [SerializeField] private Color infoColor = new Color(0.2f, 0.6f, 1f, 0.9f);      // Blue
+    [SerializeField] private Color successColor = new Color(0.2f, 0.8f, 0.2f, 0.9f);  // Green
+    [SerializeField] private Color warningColor = new Color(1f, 0.8f, 0.2f, 0.9f);    // Yellow
+    [SerializeField] private Color errorColor = new Color(1f, 0.2f, 0.2f, 0.9f);      // Red
 
     private Coroutine currentNotification;
-    private CanvasGroup canvasGroup;
 
     private void Awake()
     {
+        // Singleton setup
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -48,146 +50,144 @@ public class NotificationManager : MonoBehaviour
         }
         Instance = this;
 
-        // Get or add CanvasGroup for fading
-        canvasGroup = notificationPanel.GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
+        // Ensure notification starts hidden
+        if (notificationPanel != null)
         {
-            canvasGroup = notificationPanel.AddComponent<CanvasGroup>();
+            notificationPanel.SetActive(false);
         }
 
-        // Get or add AudioSource
-        if (audioSource == null)
+        // Create canvas group if not present
+        if (canvasGroup == null && notificationPanel != null)
         {
-            audioSource = GetComponent<AudioSource>();
-            if (audioSource == null)
+            canvasGroup = notificationPanel.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
             {
-                audioSource = gameObject.AddComponent<AudioSource>();
+                canvasGroup = notificationPanel.AddComponent<CanvasGroup>();
             }
         }
-
-        // Configure AudioSource
-        audioSource.playOnAwake = false;
-        audioSource.volume = soundVolume;
-
-        // Start hidden
-        notificationPanel.SetActive(false);
-        canvasGroup.alpha = 0f;
     }
 
     /// <summary>
-    /// Show an info notification (blue)
+    /// Show a notification message
     /// </summary>
-    public void ShowInfo(string message)
+    public void ShowNotification(string message, NotificationType type = NotificationType.Info)
     {
-        ShowNotification(message, infoColor, infoSound);
-    }
-
-    /// <summary>
-    /// Show a warning notification (yellow/orange)
-    /// </summary>
-    public void ShowWarning(string message)
-    {
-        Debug.Log($"[NotificationManager] ShowWarning called with message: '{message}'");
-        ShowNotification(message, warningColor, warningSound);
-    }
-
-    /// <summary>
-    /// Show an error notification (red)
-    /// </summary>
-    public void ShowError(string message)
-    {
-        ShowNotification(message, errorColor, errorSound);
-    }
-
-    /// <summary>
-    /// Show a success notification (green)
-    /// </summary>
-    public void ShowSuccess(string message)
-    {
-        ShowNotification(message, successColor, successSound);
-    }
-
-    /// <summary>
-    /// Show a notification with a custom color and sound
-    /// </summary>
-    public void ShowNotification(string message, Color backgroundColor, AudioClip sound = null)
-    {
-        Debug.Log($"[NotificationManager] ShowNotification called");
-        Debug.Log($"[NotificationManager] - Message: '{message}'");
-        Debug.Log($"[NotificationManager] - Panel active: {notificationPanel != null && notificationPanel.activeSelf}");
-        Debug.Log($"[NotificationManager] - CanvasGroup: {canvasGroup != null}");
+        if (notificationPanel == null || notificationText == null)
+        {
+            Debug.LogError("[NotificationManager] UI references not set!");
+            return;
+        }
 
         // Cancel any existing notification
         if (currentNotification != null)
         {
-            Debug.Log("[NotificationManager] Stopping previous notification");
             StopCoroutine(currentNotification);
         }
 
-        // Play sound if enabled
-        if (playSounds && audioSource != null && sound != null)
-        {
-            Debug.Log("[NotificationManager] Playing sound");
-            audioSource.PlayOneShot(sound, soundVolume);
-        }
-        else if (playSounds && sound == null)
-        {
-            Debug.Log("[NotificationManager] No sound assigned for this notification type");
-        }
-
-        Debug.Log("[NotificationManager] Starting DisplayNotification coroutine");
-        currentNotification = StartCoroutine(DisplayNotification(message, backgroundColor));
+        // Start new notification
+        currentNotification = StartCoroutine(DisplayNotification(message, type));
     }
 
-    private IEnumerator DisplayNotification(string message, Color backgroundColor)
+    /// <summary>
+    /// Coroutine to display notification with fade effects
+    /// </summary>
+    private IEnumerator DisplayNotification(string message, NotificationType type)
     {
-        // Set text and color
+        // Set message text
         notificationText.text = message;
-        notificationBackground.color = backgroundColor;
+
+        // Set background color based on type
+        if (backgroundImage != null)
+        {
+            switch (type)
+            {
+                case NotificationType.Info:
+                    backgroundImage.color = infoColor;
+                    break;
+                case NotificationType.Success:
+                    backgroundImage.color = successColor;
+                    break;
+                case NotificationType.Warning:
+                    backgroundImage.color = warningColor;
+                    break;
+                case NotificationType.Error:
+                    backgroundImage.color = errorColor;
+                    break;
+            }
+        }
 
         // Show panel
         notificationPanel.SetActive(true);
 
         // Fade in
-        float elapsed = 0f;
-        while (elapsed < fadeInDuration)
+        float elapsedTime = 0f;
+        while (elapsedTime < fadeInDuration)
         {
-            elapsed += Time.unscaledDeltaTime; // Use unscaled time so it works when paused
-            canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / fadeInDuration);
+            elapsedTime += Time.unscaledDeltaTime; // Use unscaled time so it works when game is paused
+            float alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeInDuration);
+
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = alpha;
+            }
+
             yield return null;
         }
-        canvasGroup.alpha = 1f;
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 1f;
+        }
 
         // Wait for display duration
         yield return new WaitForSecondsRealtime(displayDuration);
 
         // Fade out
-        elapsed = 0f;
-        while (elapsed < fadeOutDuration)
+        elapsedTime = 0f;
+        while (elapsedTime < fadeOutDuration)
         {
-            elapsed += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeOutDuration);
+            elapsedTime += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeOutDuration);
+
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = alpha;
+            }
+
             yield return null;
         }
-        canvasGroup.alpha = 0f;
 
         // Hide panel
         notificationPanel.SetActive(false);
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0f;
+        }
+
         currentNotification = null;
     }
 
     /// <summary>
-    /// Immediately hide any active notification
+    /// Quick helper methods for common notification types
     /// </summary>
-    public void HideNotification()
+    public void ShowInfo(string message)
     {
-        if (currentNotification != null)
-        {
-            StopCoroutine(currentNotification);
-            currentNotification = null;
-        }
+        ShowNotification(message, NotificationType.Info);
+    }
 
-        notificationPanel.SetActive(false);
-        canvasGroup.alpha = 0f;
+    public void ShowSuccess(string message)
+    {
+        ShowNotification(message, NotificationType.Success);
+    }
+
+    public void ShowWarning(string message)
+    {
+        ShowNotification(message, NotificationType.Warning);
+    }
+
+    public void ShowError(string message)
+    {
+        ShowNotification(message, NotificationType.Error);
     }
 }
