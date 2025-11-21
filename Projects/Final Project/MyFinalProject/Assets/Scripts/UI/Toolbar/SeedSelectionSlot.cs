@@ -10,6 +10,7 @@ public class SeedSelectionSlot : MonoBehaviour, IPointerClickHandler, IPointerEn
 {
     [Header("UI References")]
     [SerializeField] private Image seedIcon;
+    [SerializeField] private TextMeshProUGUI seedNameText;
     [SerializeField] private TextMeshProUGUI quantityText;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private Image selectionBorder;
@@ -49,6 +50,11 @@ public class SeedSelectionSlot : MonoBehaviour, IPointerClickHandler, IPointerEn
         {
             seedIcon.sprite = packet.coverImage;
             seedIcon.enabled = true;
+        }
+
+        if (seedNameText != null)
+        {
+            seedNameText.text = packet.cropName;
         }
 
         if (quantityText != null)
