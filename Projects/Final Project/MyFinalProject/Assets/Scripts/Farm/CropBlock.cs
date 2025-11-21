@@ -53,7 +53,7 @@ public class CropBlock
         // NEW: Check if this position is farmable
         if (!cropManager.IsGridPositionFarmable(gridPosition))
         {
-            UnityEngine.Debug.Log($"[CropBlock] âŒ Cannot till - not in farmable area at {gridPosition}!");
+            UnityEngine.Debug.Log($"[CropBlock] Cannot till - not in farmable area at {gridPosition}!");
             return false;
         }
 
@@ -89,7 +89,7 @@ public class CropBlock
         // Update tilemap visual
         UpdateTileVisual();
 
-        UnityEngine.Debug.Log($"[CropBlock] âœ… Tilled soil at {gridPosition}");
+        UnityEngine.Debug.Log($"[CropBlock] Tilled soil at {gridPosition}");
         return true;
     }
 
@@ -213,7 +213,7 @@ public class CropBlock
 
         if (currentGrowthStage < 3)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Crop not ready to harvest! Stage: {currentGrowthStage}/3");
+            UnityEngine.Debug.Log($"[CropBlock] Crop not ready to harvest! Stage: {currentGrowthStage}/4");
             return null;
         }
 
@@ -234,7 +234,7 @@ public class CropBlock
                 harvestScript.Initialize(
                     seedPacket.harvestIcon,
                     seedPacket.cropName,
-                    seedPacket.harvestedItem,  // â† Now passing the actual InventoryItem
+                    seedPacket.harvestedItem,  // Now passing the actual InventoryItem
                     seedPacket.harvestYield
                 );
             }
@@ -249,8 +249,8 @@ public class CropBlock
     }
 
     /// <summary>
-    /// Update growth progress - Part 3 Requirement
-    /// Growth now happens at sunrise (day-based), not frame-based
+    /// Update growth progress
+    /// Growth happens at sunrise (day-based)
     /// This method kept for compatibility but no longer advances stages
     /// </summary>
     public void UpdateGrowth(float deltaTime, int currentDay)
@@ -260,7 +260,7 @@ public class CropBlock
     }
 
     /// <summary>
-    /// Advance to next growth stage - Part 3 Requirement
+    /// Advance to next growth stage
     /// </summary>
     private void AdvanceStage()
     {
@@ -269,7 +269,7 @@ public class CropBlock
         currentGrowthStage++;
         UpdateTileVisual();
 
-        // NEW: Show harvest particles when reaching stage 3
+        // Show harvest particles when reaching last stage
         if (currentGrowthStage >= 3)
         {
             ShowHarvestReadyParticles();
@@ -277,8 +277,7 @@ public class CropBlock
 
         UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} advanced to stage {currentGrowthStage}");
     }
-
-    // NEW METHOD
+    
     private void ShowHarvestReadyParticles()
     {
         if (seedPacket == null || seedPacket.harvestReadyParticles == null) return;
@@ -292,8 +291,7 @@ public class CropBlock
             );
         }
     }
-
-    // NEW METHOD
+    
     private void HideHarvestReadyParticles()
     {
         if (activeParticleInstance != null)
@@ -312,7 +310,7 @@ public class CropBlock
         if (!isPlanted) return;
         if (isWilted) return; // Already wilted, can't grow
 
-        // Store yesterday's watered status BEFORE resetting
+        // Store yesterday's watered status before resetting
         bool wasWateredYesterday = isWatered;
 
         // Reset watered status for the new day
@@ -335,7 +333,7 @@ public class CropBlock
             if (currentGrowthStage > 0)
             {
                 isWilted = true;
-                UnityEngine.Debug.Log($"[CropBlock] â˜ ï¸ {seedPacket.cropName} has WILTED!");
+                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} has WILTED!");
                 UpdateTileVisual();
                 return; // Exit - crop is dead
             }
@@ -353,20 +351,20 @@ public class CropBlock
             daysWithoutWater = 0;
         }
 
-        // === ADVANCE STAGE if watered and not fully grown ===
+        // === Advance stage if watered and not fully grown ===
         if (wasWateredYesterday && currentGrowthStage < 3)
         {
             currentGrowthStage++;
             growthTimer = 0f; // Reset timer (not used but kept for compatibility)
 
-            UnityEngine.Debug.Log($"[CropBlock] âœ… {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}!");
+            UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}!");
 
             // Update visual to show new stage
             UpdateTileVisual();
 
             if (currentGrowthStage >= 3)
             {
-                UnityEngine.Debug.Log($"[CropBlock] ðŸŒ¾ {seedPacket.cropName} is now HARVESTABLE!");
+                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} is now HARVESTABLE!");
             }
         }
         else if (currentGrowthStage >= 3)
@@ -380,9 +378,9 @@ public class CropBlock
     }
 
     /// <summary>
-    /// Update the tilemap tiles based on current state - Part 3 Requirement: Update tile sprite
-    /// SOIL LAYER: Always shows soil state (untilled/dry/wet)
-    /// CROP LAYER: Shows crop sprite or nothing
+    /// Update the tilemap tiles based on current state
+    /// Soil layer: Always shows soil state (untilled/dry/wet)
+    /// Crop layer: Shows crop sprite or nothing
     /// </summary>
     private void UpdateTileVisual()
     {
@@ -390,7 +388,7 @@ public class CropBlock
 
         Vector3Int tilePos = soilTilemap.WorldToCell(worldPosition);
 
-        // ===== UPDATE SOIL LAYER (always visible) =====
+        // ===== Update soil layer (always visible) =====
         if (isTilled)
         {
             // Show tilled soil (watered or dry)
@@ -409,7 +407,7 @@ public class CropBlock
             cropManager.SetUntilledTile(tilePos);
         }
 
-        // ===== UPDATE CROP LAYER (only if planted) =====
+        // ===== Update crop layer (only if planted) =====
         if (cropTilemap != null)
         {
             Vector3Int cropTilePos = cropTilemap.WorldToCell(worldPosition);
@@ -513,7 +511,6 @@ public class CropBlock
         lastWateredDay = savedBlock.lastWateredDay;
         daysWithoutWater = savedBlock.daysWithoutWater;
 
-        // Update visual BEFORE adding to planted crops
         UpdateTileVisual();
 
         // Add to planted crops if needed

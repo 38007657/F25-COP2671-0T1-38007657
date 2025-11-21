@@ -25,7 +25,7 @@ public class PlantingAnimation : MonoBehaviour
         // Setup sprite
         spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = seedSprite;
-        spriteRenderer.sortingLayerName = "Default"; // Adjust if needed
+        spriteRenderer.sortingLayerName = "Default"; 
         spriteRenderer.sortingOrder = 100; // Above everything
 
         // Set positions
@@ -33,7 +33,7 @@ public class PlantingAnimation : MonoBehaviour
         endPosition = worldPosition + Vector3.up * yOffsetEnd;
         transform.position = startPosition;
 
-        // Set scale (make it small)
+        // Set scale
         startScale = Vector3.one * 0.5f; // Start at 50% size
         transform.localScale = startScale;
 

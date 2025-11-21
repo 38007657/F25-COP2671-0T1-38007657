@@ -34,7 +34,7 @@ public class SaveData
     public SaveData()
     {
         saveId = System.Guid.NewGuid().ToString();
-        saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        saveDate = System.DateTime.Now.ToString("MMM dd, yyyy • h:mm tt");
     }
 }
 
@@ -74,6 +74,10 @@ public class SavedCropBlock
     public int dayPlanted;
     public int lastWateredDay;
     public int daysWithoutWater;
+
+    // Hour-based growth tracking
+    public float timePlanted;
+    public float hoursGrown;
 }
 
 /// <summary>

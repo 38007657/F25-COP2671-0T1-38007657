@@ -39,7 +39,7 @@ public class ShopInventory : MonoBehaviour
         }
     }
 
-    // ===== BUYING SEEDS FROM SHOP =====
+    // ===== Buying Seeds From Shop =====
 
     /// <summary>
     /// Get all seed packets available for purchase
@@ -65,7 +65,7 @@ public class ShopInventory : MonoBehaviour
     {
         if (packet == null)
         {
-            Debug.LogWarning("[ShopInventory] Tried to buy null packet!");
+            Debug.LogWarning("[ShopInventory] Tried to buy null packet.");
             return false;
         }
 
@@ -80,7 +80,7 @@ public class ShopInventory : MonoBehaviour
 
         if (PlayerInventory.Instance == null)
         {
-            Debug.LogError("[ShopInventory] PlayerInventory not found!");
+            Debug.LogError("[ShopInventory] PlayerInventory not found.");
             return false;
         }
 
@@ -91,7 +91,7 @@ public class ShopInventory : MonoBehaviour
         {
             if (showDebugLogs)
             {
-                Debug.Log($"[ShopInventory] Sold {packet.cropName} seed packet to player for ${packet.packetCost}");
+                Debug.Log($"[ShopInventory] Sold {packet.cropName} seed packet to player for {packet.packetCost}");
             }
             OnShopInventoryChanged?.Invoke();
         }
@@ -99,7 +99,7 @@ public class ShopInventory : MonoBehaviour
         return success;
     }
 
-    // ===== SELLING CROPS TO SHOP =====
+    // ===== Selling Crops to Shop =====
 
     /// <summary>
     /// Get all crops the shop will buy
@@ -133,7 +133,7 @@ public class ShopInventory : MonoBehaviour
     {
         if (crop == null)
         {
-            Debug.LogWarning("[ShopInventory] Tried to sell null crop!");
+            Debug.LogWarning("[ShopInventory] Tried to sell null crop");
             return false;
         }
 
@@ -148,7 +148,7 @@ public class ShopInventory : MonoBehaviour
 
         if (PlayerInventory.Instance == null)
         {
-            Debug.LogError("[ShopInventory] PlayerInventory not found!");
+            Debug.LogError("[ShopInventory] PlayerInventory not found");
             return false;
         }
 
@@ -159,7 +159,7 @@ public class ShopInventory : MonoBehaviour
         {
             if (showDebugLogs)
             {
-                Debug.Log($"[ShopInventory] Bought {quantity}x {crop.itemName} from player for ${crop.sellValue * quantity}");
+                Debug.Log($"[ShopInventory] Bought {quantity}x {crop.itemName} from player for {crop.sellValue * quantity}");
             }
             OnShopInventoryChanged?.Invoke();
         }
@@ -167,7 +167,7 @@ public class ShopInventory : MonoBehaviour
         return success;
     }
 
-    // ===== SHOP MANAGEMENT =====
+    // ===== Shop Management =====
 
     /// <summary>
     /// Add a seed packet to shop inventory

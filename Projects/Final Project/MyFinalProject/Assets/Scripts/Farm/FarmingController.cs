@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Handles farming actions via event system with proper range-based selection
-/// Part 4 Requirements: Use event listeners to call methods
+/// Use event listeners to call methods
 /// </summary>
 public class FarmingController : MonoBehaviour
 {
@@ -81,7 +81,7 @@ public class FarmingController : MonoBehaviour
             selectionIndicator.SetActive(false);
         }
 
-        // Find and subscribe to toolbar events - Part 4 Requirement
+        // Find and subscribe to toolbar events
         toolbarController = FindFirstObjectByType<ToolbarController>();
 
         if (toolbarController != null)
@@ -139,7 +139,7 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    // ===== HELPER METHODS =====
+    // ===== Helper Methods =====
 
     /// <summary>
     /// Find the nearest crop block to player (no facing direction needed)
@@ -152,14 +152,13 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Add this check
         if (cropManager == null)
         {
             selectedBlock = null;
             return;
         }
 
-        // Just find the absolute closest block - period
+        // Just find the absolute closest block
         CropBlock closestBlock = null;
         float closestDistance = interactionRange;
 
@@ -255,7 +254,7 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    // ===== EVENT HANDLERS =====
+    // ===== Event Handlers =====
 
     /// <summary>
     /// Check if farming is allowed based on current time
@@ -277,12 +276,12 @@ public class FarmingController : MonoBehaviour
             // Show notification to player
             if (NotificationManager.Instance != null)
             {
-                Debug.Log("[FarmingController] NotificationManager found! Showing warning...");
+                Debug.Log("[FarmingController] NotificationManager found! Showing warning.");
                 NotificationManager.Instance.ShowWarning(afterHoursMessage);
             }
             else
             {
-                Debug.LogError("[FarmingController] NotificationManager.Instance is NULL! Cannot show notification.");
+                Debug.LogError("[FarmingController] NotificationManager.Instance is null. Cannot show notification.");
             }
 
             return false;
@@ -306,7 +305,7 @@ public class FarmingController : MonoBehaviour
             {
                 NotificationManager.Instance.ShowWarning("No tile selected! Move closer to a tile.");
             }
-            UnityEngine.Debug.Log("[FarmingController] No block selected to hoe!");
+            UnityEngine.Debug.Log("[FarmingController] No block selected to hoe");
             return;
         }
 
@@ -334,7 +333,7 @@ public class FarmingController : MonoBehaviour
         {
             if (NotificationManager.Instance != null)
             {
-                NotificationManager.Instance.ShowWarning("You can't farm here. Find the farm plot!");
+                NotificationManager.Instance.ShowWarning("You can't farm here. Find a farmable plot!");
             }
             return;
         }
@@ -375,9 +374,9 @@ public class FarmingController : MonoBehaviour
         {
             if (NotificationManager.Instance != null)
             {
-                NotificationManager.Instance.ShowWarning("No tile selected! Move closer to a tile.");
+                NotificationManager.Instance.ShowWarning("No tile selected. Move closer to a tile.");
             }
-            UnityEngine.Debug.Log("[FarmingController] No block selected to plant!");
+            UnityEngine.Debug.Log("[FarmingController] No block selected to plant");
             return;
         }
 
@@ -388,9 +387,9 @@ public class FarmingController : MonoBehaviour
         {
             if (NotificationManager.Instance != null)
             {
-                NotificationManager.Instance.ShowWarning("No seeds selected! Select seeds from the seed bar.");
+                NotificationManager.Instance.ShowWarning("No seeds selected. Select seeds from the seed bar!");
             }
-            UnityEngine.Debug.LogWarning("[FarmingController] No seed selected!");
+            UnityEngine.Debug.LogWarning("[FarmingController] No seed selected");
             return;
         }
 
@@ -468,7 +467,7 @@ public class FarmingController : MonoBehaviour
             {
                 NotificationManager.Instance.ShowWarning("No tile selected! Move closer to a tile.");
             }
-            UnityEngine.Debug.Log("[FarmingController] No block selected to water!");
+            UnityEngine.Debug.Log("[FarmingController] No block selected to water.");
             return;
         }
 
@@ -589,7 +588,7 @@ public class FarmingController : MonoBehaviour
         {
             if (NotificationManager.Instance != null)
             {
-                NotificationManager.Instance.ShowWarning($"This crop isn't ready yet! (Stage {selectedBlock.currentGrowthStage}/3)");
+                NotificationManager.Instance.ShowWarning($"This crop isn't ready yet! (Stage {selectedBlock.currentGrowthStage}/4)");
             }
             return;
         }
@@ -696,45 +695,45 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    // ===== DEBUG VISUALIZATION =====
+    // ===== Debug Visualization =====
 
-    private void OnDrawGizmos()
-    {
-        if (selectedBlock != null)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireCube(selectedBlock.worldPosition, Vector3.one * 0.9f);
-        }
+    //private void OnDrawGizmos()
+    //{
+    //    if (selectedBlock != null)
+    //    {
+    //        Gizmos.color = Color.yellow;
+    //        Gizmos.DrawWireCube(selectedBlock.worldPosition, Vector3.one * 0.9f);
+    //    }
 
-        // Draw facing direction
-        if (playerTransform != null && Application.isPlaying)
-        {
-            Vector2 facing = GetPlayerFacingDirection();
-            facing = SnapToCardinalDirection(facing);
+    //    // Draw facing direction
+    //    if (playerTransform != null && Application.isPlaying)
+    //    {
+    //        Vector2 facing = GetPlayerFacingDirection();
+    //        facing = SnapToCardinalDirection(facing);
 
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(playerTransform.position, playerTransform.position + (Vector3)(facing * 2f));
-        }
-    }
+    //        Gizmos.color = Color.cyan;
+    //        Gizmos.DrawLine(playerTransform.position, playerTransform.position + (Vector3)(facing * 2f));
+    //    }
+    //}
 
-    private void OnGUI()
-    {
-        if (!showDebugInfo) return;
+    //private void OnGUI()
+    //{
+    //    if (!showDebugInfo) return;
 
-        GUIStyle style = new GUIStyle(GUI.skin.label);
-        style.fontSize = 14;
-        style.normal.textColor = Color.white;
+    //    GUIStyle style = new GUIStyle(GUI.skin.label);
+    //    style.fontSize = 14;
+    //    style.normal.textColor = Color.white;
 
-        string debugText = selectedBlock != null
-            ? $"Selected: {selectedBlock.gridPosition} | Tilled: {selectedBlock.isTilled} | Planted: {selectedBlock.isPlanted}"
-            : "No block selected";
+    //    string debugText = selectedBlock != null
+    //        ? $"Selected: {selectedBlock.gridPosition} | Tilled: {selectedBlock.isTilled} | Planted: {selectedBlock.isPlanted}"
+    //        : "No block selected";
 
-        // Shadow
-        GUI.color = Color.black;
-        GUI.Label(new Rect(11, 71, 600, 25), debugText, style);
+    //    // Shadow
+    //    GUI.color = Color.black;
+    //    GUI.Label(new Rect(11, 71, 600, 25), debugText, style);
 
-        // Main
-        GUI.color = Color.white;
-        GUI.Label(new Rect(10, 70, 600, 25), debugText, style);
-    }
+    //    // Main
+    //    GUI.color = Color.white;
+    //    GUI.Label(new Rect(10, 70, 600, 25), debugText, style);
+    //}
 }

@@ -14,8 +14,8 @@ public class TimeManager : MonoBehaviour
     [SerializeField] private float sunsetTime = 18f; // 6 PM
 
     [Header("Speed Control")]
-    [SerializeField] private float timeSpeedMultiplier = 1f; // 1x, 2x, 3x, 5x
-    [SerializeField] private float[] speedOptions = { 1f, 2f, 3f, 5f };
+    [SerializeField] private float timeSpeedMultiplier = 1f; // 1x, 2x, 3x
+    [SerializeField] private float[] speedOptions = { 1f, 2f, 3f };
     private int currentSpeedIndex = 0;
 
     private float timeSpeed;
@@ -58,7 +58,20 @@ public class TimeManager : MonoBehaviour
     {
         HandleSpeedInput();
 
-        if (!pauseTime)
+        // Pause time if in start menu or pause menu
+        bool shouldPauseForMenu = false;
+
+        if (StartMenuManager.Instance != null && StartMenuManager.Instance.IsStartMenuShowing)
+        {
+            shouldPauseForMenu = true;
+        }
+
+        if (PauseMenuManager.Instance != null && PauseMenuManager.Instance.IsPaused)
+        {
+            shouldPauseForMenu = true;
+        }
+
+        if (!pauseTime && !shouldPauseForMenu)
         {
             // Advance time with speed multiplier
             float previousTime = currentTime;
@@ -84,11 +97,11 @@ public class TimeManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Handle keyboard input for speed control
+    /// Handle keyboard input for speed control and day skip
     /// </summary>
     private void HandleSpeedInput()
     {
-        // Press 1, 2, 3, or 4 keys to set speed
+        // Press 1, 2, or 3 keys to set speed
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             SetSpeed(0);
@@ -101,20 +114,45 @@ public class TimeManager : MonoBehaviour
         {
             SetSpeed(2);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            SetSpeed(3);
-        }
 
-        // Or cycle through with Tab key
+        // Tab key skips to next day at 6 AM
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            CycleSpeed();
+            SkipToNextDay();
         }
     }
 
     /// <summary>
-    /// Set time speed by index (0=1x, 1=2x, 2=3x, 3=5x)
+    /// Skip to the next day at sunrise (6 AM)
+    /// </summary>
+    public void SkipToNextDay()
+    {
+        // Don't allow skipping during menus
+        if (StartMenuManager.Instance != null && StartMenuManager.Instance.IsStartMenuShowing)
+        {
+            return;
+        }
+
+        if (PauseMenuManager.Instance != null && PauseMenuManager.Instance.IsPaused)
+        {
+            return;
+        }
+
+        Debug.Log($"[TimeManager] Skipping to next day from {GetTimeString()}");
+
+        // Set time to next sunrise (6 AM)
+        currentTime = sunriseTime;
+        lastHour = Mathf.Floor(currentTime);
+
+        // Fire events to update everything
+        OnTimeChanged?.Invoke(currentTime);
+        OnHourChanged?.Invoke(currentTime);
+
+        Debug.Log($"[TimeManager] Time skipped to {GetTimeString()}");
+    }
+
+    /// <summary>
+    /// Set time speed by index (0=1x, 1=2x, 2=3x)
     /// </summary>
     public void SetSpeed(int index)
     {

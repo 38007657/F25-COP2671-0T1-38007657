@@ -36,7 +36,7 @@ public class SeedInventory : MonoBehaviour
     {
         if (seed == null)
         {
-            Debug.LogWarning("[SeedInventory] Tried to select null seed!");
+            Debug.LogWarning("[SeedInventory] Tried to select null seed.");
             return;
         }
 

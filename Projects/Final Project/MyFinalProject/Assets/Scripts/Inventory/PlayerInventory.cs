@@ -14,7 +14,7 @@ public class PlayerInventory : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    // === NEW: Testing seeds ===
+    // === Testing seeds ===
     [Header("Testing - Starting Seeds")]
     [Tooltip("Drag your SeedPacket scriptable objects here for testing")]
     [SerializeField] private List<SeedPacket> testStartingSeeds = new List<SeedPacket>();
@@ -111,7 +111,7 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    // ===== HARVESTED ITEMS =====
+    // ===== Harvested Item =====
 
     /// <summary>
     /// Add harvested crops to inventory
@@ -120,7 +120,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (item == null)
         {
-            Debug.LogWarning("[PlayerInventory] Tried to add null item!");
+            Debug.LogWarning("[PlayerInventory] Tried to add null item");
             return;
         }
 
@@ -190,7 +190,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (packet == null)
         {
-            Debug.LogWarning("[PlayerInventory] Tried to add null seed packet!");
+            Debug.LogWarning("[PlayerInventory] Tried to add null seed packet");
             return;
         }
 
@@ -254,7 +254,7 @@ public class PlayerInventory : MonoBehaviour
         return seedPackets.ContainsKey(packet) ? seedPackets[packet] : 0;
     }
 
-    // ===== MONEY =====
+    // ===== Money =====
 
     /// <summary>
     /// Add money to player's account
@@ -266,7 +266,7 @@ public class PlayerInventory : MonoBehaviour
 
         if (showDebugLogs)
         {
-            Debug.Log($"[PlayerInventory] Added ${amount}. New balance: ${currentMoney}");
+            Debug.Log($"[PlayerInventory] Added {amount}. New balance: {currentMoney}");
         }
     }
 
@@ -279,7 +279,7 @@ public class PlayerInventory : MonoBehaviour
         {
             if (showDebugLogs)
             {
-                Debug.Log($"[PlayerInventory] Not enough money! Need ${amount}, have ${currentMoney}");
+                Debug.Log($"[PlayerInventory] Not enough money. Need {amount}, have {currentMoney}");
             }
             return false;
         }
@@ -289,7 +289,7 @@ public class PlayerInventory : MonoBehaviour
 
         if (showDebugLogs)
         {
-            Debug.Log($"[PlayerInventory] Removed ${amount}. New balance: ${currentMoney}");
+            Debug.Log($"[PlayerInventory] Removed {amount}. New balance: {currentMoney}");
         }
 
         return true;
@@ -303,7 +303,7 @@ public class PlayerInventory : MonoBehaviour
         return currentMoney >= cost;
     }
 
-    // ===== SELLING TO SHOP =====
+    // ===== Selling to Shop =====
 
     /// <summary>
     /// Sell harvested items to shop
@@ -386,7 +386,7 @@ public class PlayerInventory : MonoBehaviour
 
         if (showDebugLogs)
         {
-            Debug.Log($"[PlayerInventory] Set money to ${amount}");
+            Debug.Log($"[PlayerInventory] Set money to {amount}");
         }
     }
 
@@ -406,20 +406,20 @@ public class PlayerInventory : MonoBehaviour
 
     // ===== DEBUG =====
 
-    [ContextMenu("Debug Inventory")]
-    public void DebugInventory()
-    {
-        Debug.Log("=== PLAYER INVENTORY ===");
-        Debug.Log($"Money: ${currentMoney}");
-        Debug.Log($"Seed Packets: {seedPackets.Count} types");
-        foreach (var kvp in seedPackets)
-        {
-            Debug.Log($"  - {kvp.Key.cropName}: {kvp.Value} seeds");
-        }
-        Debug.Log($"Harvested Items: {harvestedItems.Count} types");
-        foreach (var kvp in harvestedItems)
-        {
-            Debug.Log($"  - {kvp.Key.itemName}: {kvp.Value}");
-        }
-    }
+    //[ContextMenu("Debug Inventory")]
+    //public void DebugInventory()
+    //{
+    //    Debug.Log("=== PLAYER INVENTORY ===");
+    //    Debug.Log($"Money: ${currentMoney}");
+    //    Debug.Log($"Seed Packets: {seedPackets.Count} types");
+    //    foreach (var kvp in seedPackets)
+    //    {
+    //        Debug.Log($"  - {kvp.Key.cropName}: {kvp.Value} seeds");
+    //    }
+    //    Debug.Log($"Harvested Items: {harvestedItems.Count} types");
+    //    foreach (var kvp in harvestedItems)
+    //    {
+    //        Debug.Log($"  - {kvp.Key.itemName}: {kvp.Value}");
+    //    }
+    //}
 }

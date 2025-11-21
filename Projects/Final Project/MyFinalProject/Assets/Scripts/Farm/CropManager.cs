@@ -73,7 +73,7 @@ public class CropManager : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogWarning("[CropManager] TimeManager not found!");
+            UnityEngine.Debug.LogWarning("[CropManager] TimeManager not found");
         }
     }
 
@@ -113,7 +113,7 @@ public class CropManager : MonoBehaviour
     {
         if (farmZoneTilemap == null)
         {
-            Debug.LogWarning("[CropManager] Farm Zone Tilemap not assigned! Allowing all positions.");
+            Debug.LogWarning("[CropManager] Farm Zone Tilemap not assigned. Allowing all positions.");
             return true;
         }
 
@@ -174,7 +174,7 @@ public class CropManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Create grid using tilemap - Part 1 Requirement
+    /// Create grid using tilemap
     /// </summary>
     public void CreateGridUsingTilemap()
     {
@@ -203,7 +203,7 @@ public class CropManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Create a single grid block - Part 1 Requirement
+    /// Create a single grid block
     /// </summary>
     private void CreateGridBlock(Vector2Int location, Vector3 position, int arrayX, int arrayY)
     {
@@ -212,7 +212,7 @@ public class CropManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Add crop block to planted crops list - Part 1 Requirement
+    /// Add crop block to planted crops list
     /// </summary>
     public void AddToPlantedCrops(CropBlock cropBlock)
     {
@@ -228,7 +228,7 @@ public class CropManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Remove crop block from planted crops list - Part 1 Requirement
+    /// Remove crop block from planted crops list
     /// </summary>
     public void RemoveFromPlantedCrops(CropBlock cropBlock)
     {
@@ -405,7 +405,7 @@ public class CropManager : MonoBehaviour
             {
                 CropBlock block = cropGrid[x, y];
 
-                // Only add if tilled but NOT planted
+                // Only add if tilled but not planted
                 if (block != null && block.isTilled && !block.isPlanted)
                 {
                     tilledBlocks.Add(block);
@@ -432,7 +432,7 @@ public class CropManager : MonoBehaviour
         UnityEngine.Debug.Log($"[CropManager] Grid size: {gridSize.x} x {gridSize.y} = {gridSize.x * gridSize.y} total blocks");
         UnityEngine.Debug.Log("========================================");
 
-        // IMPORTANT: Only clear the blocks that were actually planted!
+        // Only clear the blocks that were actually planted
         List<CropBlock> blocksToClean = new List<CropBlock>(plantedCrops);
 
         UnityEngine.Debug.Log($"[CropManager] Clearing {blocksToClean.Count} planted blocks only");
@@ -447,9 +447,6 @@ public class CropManager : MonoBehaviour
 
         // Clear the planted crops list
         plantedCrops.Clear();
-
-        // DON'T iterate through the entire grid!
-        // The untilled blocks should stay invisible/empty
 
         if (showDebugInfo)
         {
@@ -473,17 +470,17 @@ public class CropManager : MonoBehaviour
     /// <summary>
     /// Debug: Show grid info
     /// </summary>
-    [ContextMenu("Debug Grid Info")]
-    public void DebugGridInfo()
-    {
-        UnityEngine.Debug.Log($"=== CROP MANAGER DEBUG ===");
-        UnityEngine.Debug.Log($"Grid Size: {gridSize}");
-        UnityEngine.Debug.Log($"Grid Offset: {gridOffset}");
-        UnityEngine.Debug.Log($"Current Day: {currentDay}");
-        UnityEngine.Debug.Log($"Planted Crops: {plantedCrops.Count}");
-        UnityEngine.Debug.Log($"Harvestable Crops: {GetHarvestableCrops().Count}");
-        UnityEngine.Debug.Log($"Crops Needing Water: {GetCropsNeedingWater().Count}");
-    }
+    //[ContextMenu("Debug Grid Info")]
+    //public void DebugGridInfo()
+    //{
+    //    UnityEngine.Debug.Log($"=== CROP MANAGER DEBUG ===");
+    //    UnityEngine.Debug.Log($"Grid Size: {gridSize}");
+    //    UnityEngine.Debug.Log($"Grid Offset: {gridOffset}");
+    //    UnityEngine.Debug.Log($"Current Day: {currentDay}");
+    //    UnityEngine.Debug.Log($"Planted Crops: {plantedCrops.Count}");
+    //    UnityEngine.Debug.Log($"Harvestable Crops: {GetHarvestableCrops().Count}");
+    //    UnityEngine.Debug.Log($"Crops Needing Water: {GetCropsNeedingWater().Count}");
+    //}
 
     // Debug display
     //private void OnGUI()

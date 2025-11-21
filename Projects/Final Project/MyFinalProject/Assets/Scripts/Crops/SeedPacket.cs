@@ -1,5 +1,14 @@
 using UnityEngine;
 
+/// <summary>
+/// Growth type for crops - determines how they advance through stages
+/// </summary>
+public enum GrowthType
+{
+    DayBased,   // Advances 1 stage per day at sunrise (if watered)
+    HourBased   // Advances based on hours elapsed (fast crops)
+}
+
 [CreateAssetMenu(fileName = "New Seed Packet", menuName = "Farm/Seed Packet")]
 public class SeedPacket : ScriptableObject
 {
@@ -27,9 +36,16 @@ public class SeedPacket : ScriptableObject
     public GameObject harvestReadyParticles;
 
     [Header("Growth Settings")]
-    [Tooltip("Total days from seed to harvest (minimum 1 days if watered each day)")]
+    [Tooltip("How this crop grows: DayBased (traditional) or HourBased (fast crops)")]
+    public GrowthType growthType = GrowthType.DayBased;
+
+    [Tooltip("FOR DAY-BASED: Total days from seed to harvest (minimum 1 day if watered each day)")]
     [Range(1, 10)]
     public int totalGrowthDays = 3;
+
+    [Tooltip("FOR HOUR-BASED: Hours needed to advance ONE stage (4 stages total, so 8 hours/stage = 32 hours total)")]
+    [Range(1f, 24f)]
+    public float hoursPerStage = 8f;
 
     [Header("Requirements")]
     [Tooltip("Crop must be watered each day to advance to next stage")]

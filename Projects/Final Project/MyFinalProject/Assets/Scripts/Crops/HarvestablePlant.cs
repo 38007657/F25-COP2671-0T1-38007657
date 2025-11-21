@@ -63,7 +63,7 @@ public class HarvestablePlant : MonoBehaviour
             if (pickupTimer <= 0f)
             {
                 canBePickedUp = true;
-                Debug.Log($"[HarvestablePlant] {plantName} can now be picked up!");
+                Debug.Log($"[HarvestablePlant] {plantName} can now be picked up.");
             }
             return;
         }
@@ -86,7 +86,7 @@ public class HarvestablePlant : MonoBehaviour
     {
         if (inventoryItem == null)
         {
-            Debug.LogWarning($"[HarvestablePlant] No InventoryItem assigned for {plantName}!");
+            Debug.LogWarning($"[HarvestablePlant] No InventoryItem assigned for {plantName}.");
             Destroy(gameObject);
             return;
         }

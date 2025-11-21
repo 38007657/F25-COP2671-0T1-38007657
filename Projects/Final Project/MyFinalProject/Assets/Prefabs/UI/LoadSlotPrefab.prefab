@@ -509,7 +509,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 18
+    m_Left: 38
     m_Right: 0
     m_Top: 30
     m_Bottom: 0
@@ -709,12 +709,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: -94
+    m_Left: -106
     m_Right: 0
     m_Top: 50
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: -98.88
+  m_Spacing: -208.6
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0

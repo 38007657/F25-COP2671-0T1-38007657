@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e82c805ae8c94bf7aeb067985d6f192, type: 3}
+  m_Name: GrapeSeed
+  m_EditorClassIdentifier: 
+  cropName: Sunflower
+  coverImage: {fileID: 335413795, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
+  growthSprites:
+  - {fileID: 1898500995, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
+  - {fileID: -966930156, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
+  - {fileID: 2023739703, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
+  - {fileID: -1935455924, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
+  wiltedSprite: {fileID: -1228083979241763319, guid: 1f7c939d847d6b441b1a047e161bbf0f, type: 3}
+  harvestIcon: {fileID: 3206853034534342297, guid: 3c0fd9e79fa04564cb25b27e59aceaac, type: 3}
+  harvestablePrefab: {fileID: 0}
+  harvestReadyParticles: {fileID: 3861867924729211628, guid: c5d029177efa54dccab2f9b0a483d895, type: 3}
+  growthType: 0
+  totalGrowthDays: 3
+  hoursPerStage: 8
+  requiresWater: 1
+  seedsPerPacket: 3
+  packetCost: 30
+  isAvailableInShop: 1
+  harvestYield: 2
+  harvestedItem: {fileID: 0}
