@@ -2,8 +2,6 @@ using UnityEngine;
 
 /// <summary>
 /// Initializes game state on startup
-/// If a start menu exists, lets it handle loading
-/// Otherwise, can optionally auto-load the latest save
 /// </summary>
 public class GameInitializer : MonoBehaviour
 {

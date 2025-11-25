@@ -32,8 +32,8 @@ public class SaveLoadManager : MonoBehaviour
 
     private void Awake()
     {
-        //UnityEngine.Debug.Log("========================================");
-        //UnityEngine.Debug.Log("[SaveLoadManager] Awake() called");
+        UnityEngine.Debug.Log("========================================");
+        UnityEngine.Debug.Log("[SaveLoadManager] Awake() called");
 
         if (Instance != null && Instance != this)
         {
@@ -73,7 +73,7 @@ public class SaveLoadManager : MonoBehaviour
         }
     }
 
-    // ===== Save Game =====
+    // ===== SAVE GAME =====
 
     /// <summary>
     /// Save the current game state to a new or existing save slot
@@ -215,22 +215,22 @@ public class SaveLoadManager : MonoBehaviour
 
         foreach (CropBlock block in plantedCrops)
         {
-            // Only save if actually planted with a seed packet
+            // IMPORTANT: Only save if actually planted with a seed packet
             if (block == null)
             {
-                UnityEngine.Debug.LogWarning("[SaveLoadManager] Null block in plantedCrops list");
+                UnityEngine.Debug.LogWarning("[SaveLoadManager] Null block in plantedCrops list!");
                 continue;
             }
 
             if (!block.isPlanted)
             {
-                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Block at {block.gridPosition} in plantedCrops but not planted");
+                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Block at {block.gridPosition} in plantedCrops but not planted!");
                 continue;
             }
 
             if (block.seedPacket == null)
             {
-                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Block at {block.gridPosition} planted but no seed packet");
+                UnityEngine.Debug.LogWarning($"[SaveLoadManager] Block at {block.gridPosition} planted but no seed packet!");
                 continue;
             }
 
@@ -253,7 +253,7 @@ public class SaveLoadManager : MonoBehaviour
             data.plantedCrops.Add(savedBlock);
         }
 
-        // Save tilled-but-not-planted blocks
+        // NEW: Also save tilled-but-not-planted blocks
         List<CropBlock> tilledBlocks = CropManager.Instance.GetAllTilledBlocks();
         UnityEngine.Debug.Log($"[SaveLoadManager] Saving {tilledBlocks.Count} tilled (not planted) blocks");
 
@@ -285,9 +285,9 @@ public class SaveLoadManager : MonoBehaviour
         {
             UnityEngine.Debug.Log($"[SaveLoadManager] Successfully saved {data.plantedCrops.Count} total blocks (planted + tilled)");
         }
-    }
+    }   
 
-    // ===== Load Game =====
+    // ===== LOAD GAME =====
 
     public bool LoadGame(string saveId)
     {
@@ -450,6 +450,9 @@ public class SaveLoadManager : MonoBehaviour
         // Clear all existing crops first
         CropManager.Instance.ClearAllCrops();
 
+        // Wait one frame to ensure everything is cleared
+        // We'll do this synchronously for now but could use coroutine
+
         int successCount = 0;
         int failCount = 0;
 
@@ -531,7 +534,8 @@ public class SaveLoadManager : MonoBehaviour
         }
     }
 
-    // ===== Save Management =====
+
+    // ===== SAVE MANAGEMENT =====
 
     /// <summary>
     /// Get all available saves
@@ -632,7 +636,7 @@ public class SaveLoadManager : MonoBehaviour
         return GetAllSaves().Count > 0;
     }
 
-    // ===== Helper Methods =====
+    // ===== HELPER METHODS =====
 
     private string GetSaveFilePath(string saveId)
     {
@@ -676,7 +680,7 @@ public class SaveLoadManager : MonoBehaviour
 
     private string EncryptDecrypt(string data)
     {
-        string key = "COP2671";
+        string key = "FarmingGame2024";
         string output = "";
 
         for (int i = 0; i < data.Length; i++)
@@ -687,7 +691,7 @@ public class SaveLoadManager : MonoBehaviour
         return output;
     }
 
-    // ===== Public Getters =====
+    // ===== PUBLIC GETTERS =====
 
     public string GetCurrentSaveId() => currentSaveId;
 

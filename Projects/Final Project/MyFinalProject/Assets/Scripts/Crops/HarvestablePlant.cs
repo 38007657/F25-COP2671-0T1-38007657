@@ -117,7 +117,7 @@ public class HarvestablePlant : MonoBehaviour
         }
     }
 
-    // Optional: Draw pickup range in editor
+    // Optional draw pickup range in editor
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;

@@ -3,7 +3,7 @@ using UnityEngine.Tilemaps;
 
 /// <summary>
 /// Represents a single farmable tile location
-/// Part 3 Requirements: Crop growth cycle with stages
+/// Crop growth cycle with stages
 /// </summary>
 public class CropBlock
 {
@@ -38,7 +38,7 @@ public class CropBlock
     private Tilemap cropTilemap;
     private CropManager cropManager;
 
-    // Constructor - Updated to accept both tilemaps
+    // Constructor - accept both tilemaps
     public CropBlock(Vector2Int gridPos, Vector3 worldPos, Tilemap soilMap, Tilemap cropMap, CropManager manager)
     {
         this.gridPosition = gridPos;
@@ -50,7 +50,7 @@ public class CropBlock
 
     public bool TillSoil()
     {
-        // NEW: Check if this position is farmable
+        // Check if this position is farmable
         if (!cropManager.IsGridPositionFarmable(gridPosition))
         {
             UnityEngine.Debug.Log($"[CropBlock] Cannot till - not in farmable area at {gridPosition}!");
@@ -65,7 +65,7 @@ public class CropBlock
             {
                 UnityEngine.Debug.Log($"[CropBlock] Removing wilted crop at {gridPosition}");
                 ClearCrop();
-                // Now till the soil
+                // Till the soil
                 isTilled = true;
                 isWatered = false;
                 UpdateTileVisual();
@@ -76,7 +76,7 @@ public class CropBlock
             return false;
         }
 
-        // NOW check if already tilled (moved this down)
+        // Check if already tilled
         if (isTilled)
         {
             UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
@@ -94,7 +94,7 @@ public class CropBlock
     }
 
     /// <summary>
-    /// Water the soil/crop at this block - Part 3 Requirement
+    /// Water the soil/crop at this block
     /// </summary>
     public bool WaterSoil(int currentDay)
     {
@@ -143,7 +143,7 @@ public class CropBlock
     }
 
     /// <summary>
-    /// Plant a seed at this block - Part 3 Requirement
+    /// Plant a seed at this block
     /// </summary>
     public bool PlantSeed(SeedPacket seed, int currentDay)
     {
@@ -160,7 +160,7 @@ public class CropBlock
             return false;
         }
 
-        // === NEW: Check if player has seeds ===
+        // === Check if player has seeds ===
         if (PlayerInventory.Instance != null)
         {
             if (PlayerInventory.Instance.GetSeedPacketCount(seed) <= 0)
@@ -219,7 +219,7 @@ public class CropBlock
 
         HideHarvestReadyParticles();
 
-        // Spawn harvestable (if you want physical drops)
+        // Spawn harvestable 
         GameObject harvestable = null;
         if (seedPacket.harvestablePrefab != null)
         {
@@ -234,7 +234,7 @@ public class CropBlock
                 harvestScript.Initialize(
                     seedPacket.harvestIcon,
                     seedPacket.cropName,
-                    seedPacket.harvestedItem,  // Now passing the actual InventoryItem
+                    seedPacket.harvestedItem,
                     seedPacket.harvestYield
                 );
             }

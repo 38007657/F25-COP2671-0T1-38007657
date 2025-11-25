@@ -25,7 +25,6 @@ public class StartMenuManager : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.85f); // Dark overlay
-    [SerializeField] private float fadeSpeed = 2f;
 
     private bool isInStartMenu = true;
 

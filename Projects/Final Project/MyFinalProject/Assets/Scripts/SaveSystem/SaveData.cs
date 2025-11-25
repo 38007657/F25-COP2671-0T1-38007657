@@ -31,10 +31,13 @@ public class SaveData
     // Crop Data
     public List<SavedCropBlock> plantedCrops = new List<SavedCropBlock>();
 
+    // Treasure Chest Data
+    public int treasureChestLastOpenedDay = -999; // Default to very old so chest is available at start
+
     public SaveData()
     {
         saveId = System.Guid.NewGuid().ToString();
-        saveDate = System.DateTime.Now.ToString("MMM dd, yyyy • h:mm tt");
+        saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 }
 
@@ -74,10 +77,6 @@ public class SavedCropBlock
     public int dayPlanted;
     public int lastWateredDay;
     public int daysWithoutWater;
-
-    // Hour-based growth tracking
-    public float timePlanted;
-    public float hoursGrown;
 }
 
 /// <summary>

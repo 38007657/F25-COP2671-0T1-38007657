@@ -40,7 +40,7 @@ public class FarmingController : MonoBehaviour
     [Header("Visual Feedback")]
     [SerializeField] private GameObject selectionIndicator;
     [SerializeField] private bool showSelectionIndicator = true;
-    [SerializeField] private bool showDebugInfo = true;
+    //[SerializeField] private bool showDebugInfo = true;
 
     private CropManager cropManager;
     private ToolbarController toolbarController;
