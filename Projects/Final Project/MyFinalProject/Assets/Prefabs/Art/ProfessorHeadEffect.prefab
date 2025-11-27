@@ -4936,9 +4936,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   professorHeadSprite: {fileID: 4354749505218302639}
   particleEffect: {fileID: 2099642988477023354}
-  gameTimeDuration: 20
+  gameTimeDuration: 30
   rotateSlowly: 1
-  rotationSpeed: 0
+  rotationSpeed: 25
   bobUpAndDown: 1
   bobSpeed: 2
   bobHeight: 0.05
