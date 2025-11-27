@@ -1,12 +1,12 @@
-# COP2671FY25 Unity 2D Farming Simulation Game Final Project
+# Kelsey Hodge F25-COP2671-0T1-38007657 Final Project Submission - Unity 2D Farming Simulation Game 
 
 ## Overview
 
-This is a 2D farming simulation game built in Unity where you manage a small farm, grow crops, and build your agricultural empire. Plant seeds, water your crops, harvest at the right time, and sell your produce to earn coins.
+This is a 2D farming simulation game built in Unity where you manage a small farm, grow crops, and buy/sell items. Plant seeds, water your crops, harvest at the right time, and sell your produce to earn coins. 
 
 ## Game Objective
 
-Start with a modest plot of farmland and basic resources. Your goal is to:
+The goal is to:
 - Cultivate a variety of crops successfully
 - Build up your coin reserves through smart farming
 - Manage your time efficiently between day and night cycles
@@ -17,7 +17,7 @@ Start with a modest plot of farmland and basic resources. Your goal is to:
 ### Starting a New Game
 
 When you first launch the game, you'll see the main menu with several options:
-- **New Game**: Start fresh with starting resources and a clean farm
+- **New Game**: Start fresh with default resources and a clean farm
 - **Continue**: Resume from your most recent save (if available)
 - **Load Game**: Choose from multiple saved games
 - **Quit**: Exit the game
@@ -38,7 +38,7 @@ Your farm consists of a grid-based plot of land where you can till soil and plan
 - Character moves in four directions: up, down, left, right
 
 ### Farming Actions
-All farming actions are performed by clicking the toolbar buttons at the bottom of the screen with your cursor:
+All farming actions are performed by clicking the toolbar buttons at the bottom of the screen:
 
 - **Hoe Button**: Till the soil to prepare it for planting
 - **Plant Button**: Plant seeds on tilled soil (must have seeds selected)
@@ -46,10 +46,10 @@ All farming actions are performed by clicking the toolbar buttons at the bottom 
 - **Harvest Button**: Collect fully grown crops
 
 ### Seed Selection
-- **S Key**: Toggle the seed selection bar on/off
+- **S Key or Click expand/collapse arrow: Toggle the seed selection bar on/off
 - **Left Sidebar**: Click on a seed type to select it for planting
 - Selected seed will be highlighted in the seed bar
-- Close the seed bar to continue playing the game
+
 
 ### Inventory & Menus
 - **I Key**: Open/close inventory and shop menu
@@ -89,7 +89,7 @@ All farming actions are performed by clicking the toolbar buttons at the bottom 
 5. **Wait for Growth**
    - Most crops grow one stage per day if watered
    - Crops have 4 growth stages: Seed → Sprout → Growing → Harvestable
-   - Unwatered crops will wilt after the seed stage
+   - Unwatered crops will wilt after the seed stage, but unwatered seeds will remain the same
 
 6. **Harvest Crops**
    - When crops reach the final stage, they're ready to harvest
@@ -113,7 +113,6 @@ The game operates on a day/night cycle:
 
 ### Crop Growth System
 
-**Day-Based Crops** (Traditional):
 - Advance one growth stage per day at sunrise (6 AM)
 - Must be watered the previous day to advance
 - Take 3-7 days to reach harvest depending on crop type
@@ -192,13 +191,38 @@ Press **I** to access your inventory:
 
 ## Special Features
 
-### Treasure Chest
-- Contains random coin rewards (50-300 coins) every 3 days
+### Treasure Chests
+- Particles appear on the treasure chest every 3 days 
+- Contains random coin rewards (3-300 coins)
 - Look for particle effects indicating availability
 - Walk up to chest and press **E** to open
 
-### Easter Eggs
-- The game contains hidden secrets
-- Explore different areas of your farm
-- Try unusual combinations of actions
-- Rewards may include bonus coins or special effects
+### Easter Egg
+
+Hidden within your farm is a special secret!
+
+**How to Find It:**
+1. Look for a specific spot on your farm (hint: some seemingly inaccessible areas may be accessible via specific routes)
+2. When you're in the right location, you'll need to perform a secret sequence
+
+**The Secret Sequence:**
+Stand in the trigger zone and press these toolbar buttons in order:
+1. **Hoe** button × 2
+2. **Plant** button × 6
+3. **Water** button × 7
+4. **Harvest** button × 1
+
+**What Happens:**
+- A dramatic notification appears: "COP2671 Rocks! +1000 Coins!"
+- Your professor's image appears above your character with particle effects
+- You receive 1000 bonus coins
+- The effect lasts for 3 minutes of game time
+- The professor's image rotates and bobs majestically
+
+**Tips:**
+- If you leave the trigger zone, the sequence resets
+- If you press the wrong button, you'll need to start the sequence over
+- The trigger zone has a radius, so you don't need to be perfectly positioned
+- You can activate this easter egg multiple times (resets after 3 minutes)
+- Console messages will show your progress through the sequence if you're checking logs
+
