@@ -15,7 +15,7 @@ public class CropBlock
 
     // Grid info
     public Vector2Int gridPosition;
-    public Vector3 worldPosition;
+    public UnityEngine.Vector3 worldPosition;
 
     // State
     public bool isTilled = false;
@@ -39,7 +39,7 @@ public class CropBlock
     private CropManager cropManager;
 
     // Constructor - accept both tilemaps
-    public CropBlock(Vector2Int gridPos, Vector3 worldPos, Tilemap soilMap, Tilemap cropMap, CropManager manager)
+    public CropBlock(Vector2Int gridPos, UnityEngine.Vector3 worldPos, Tilemap soilMap, Tilemap cropMap, CropManager manager)
     {
         this.gridPosition = gridPos;
         this.worldPosition = worldPos;
@@ -277,7 +277,7 @@ public class CropBlock
 
         UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} advanced to stage {currentGrowthStage}");
     }
-    
+
     private void ShowHarvestReadyParticles()
     {
         if (seedPacket == null || seedPacket.harvestReadyParticles == null) return;
@@ -286,12 +286,12 @@ public class CropBlock
         {
             activeParticleInstance = Object.Instantiate(
                 seedPacket.harvestReadyParticles,
-                worldPosition + new Vector3(0, 0.5f, 0), // Above crop
+                worldPosition + new UnityEngine.Vector3(0, 0.5f, 0), // Above crop
                 Quaternion.identity
             );
         }
     }
-    
+
     private void HideHarvestReadyParticles()
     {
         if (activeParticleInstance != null)
@@ -340,7 +340,7 @@ public class CropBlock
             else
             {
                 // Seeds (stage 0) don't wilt, just don't grow
-                UnityEngine.Debug.Log($"[CropBlock] ðŸŒ± Seed remains at stage 0 (needs water to grow)");
+                UnityEngine.Debug.Log($"[CropBlock] Ã°Å¸Å’Â± Seed remains at stage 0 (needs water to grow)");
                 return; // Exit - no growth
             }
         }
@@ -365,6 +365,7 @@ public class CropBlock
             if (currentGrowthStage >= 3)
             {
                 UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} is now HARVESTABLE!");
+                ShowHarvestReadyParticles(); // Show particles when reaching harvestable stage
             }
         }
         else if (currentGrowthStage >= 3)
