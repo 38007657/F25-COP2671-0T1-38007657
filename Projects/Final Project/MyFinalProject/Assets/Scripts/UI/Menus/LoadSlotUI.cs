@@ -63,7 +63,7 @@ public class LoadSlotUI : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogError($"[LoadSlotUI] Load button is NULL!");
+            UnityEngine.Debug.LogError($"[LoadSlotUI] Load button is NULL");
         }
 
         // Set initial visual state
@@ -80,7 +80,7 @@ public class LoadSlotUI : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogError("[LoadSlotUI] menuUI or slotInfo is NULL!");
+            UnityEngine.Debug.LogError("[LoadSlotUI] menuUI or slotInfo is NULL");
         }
     }
 
@@ -111,7 +111,7 @@ public class LoadSlotUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Make entire slot clickable (not just the button)
+    /// Make entire slot clickable
     /// </summary>
     public void OnSlotClicked()
     {

@@ -41,19 +41,19 @@ public class LoadMenuUI : MonoBehaviour
 
         if (SaveLoadManager.Instance == null)
         {
-            UnityEngine.Debug.LogError("[LoadMenuUI] SaveLoadManager.Instance is NULL!");
+            UnityEngine.Debug.LogError("[LoadMenuUI] SaveLoadManager.Instance is NULL");
             return;
         }
 
         if (saveSlotContainer == null)
         {
-            UnityEngine.Debug.LogError("[LoadMenuUI] saveSlotContainer is NULL!");
+            UnityEngine.Debug.LogError("[LoadMenuUI] saveSlotContainer is NULL");
             return;
         }
 
         if (saveSlotPrefab == null)
         {
-            UnityEngine.Debug.LogError("[LoadMenuUI] saveSlotPrefab is NULL!");
+            UnityEngine.Debug.LogError("[LoadMenuUI] saveSlotPrefab is NULL");
             return;
         }
 
@@ -67,8 +67,6 @@ public class LoadMenuUI : MonoBehaviour
         List<SaveSlotInfo> saves = SaveLoadManager.Instance.GetAllSaves();
         UnityEngine.Debug.Log($"[LoadMenuUI] Found {saves.Count} saves");
 
-        // Note: StartMenuManager should prevent opening this panel if no saves exist
-        // But we'll handle it gracefully anyway
         if (saves.Count == 0)
         {
             UnityEngine.Debug.LogWarning("[LoadMenuUI] No saves found - this panel shouldn't be open");
@@ -98,15 +96,12 @@ public class LoadMenuUI : MonoBehaviour
                 SaveSlotUI saveSlotUI = slotObj.GetComponent<SaveSlotUI>();
                 if (saveSlotUI != null)
                 {
-                    // We'll need to modify it to work with LoadMenuUI
-                    UnityEngine.Debug.LogWarning("[LoadMenuUI] Using SaveSlotUI component - consider creating LoadSlotUI");
-
-                    // We can work around this by manually setting up the slot
+                    // Manually set up the slot
                     SetupSaveSlotForLoadOnly(slotObj, save);
                 }
                 else
                 {
-                    UnityEngine.Debug.LogError("[LoadMenuUI] No slot UI component found!");
+                    UnityEngine.Debug.LogError("[LoadMenuUI] No slot UI component found");
                 }
             }
         }
@@ -170,7 +165,7 @@ public class LoadMenuUI : MonoBehaviour
     {
         if (SaveLoadManager.Instance == null)
         {
-            UnityEngine.Debug.LogError("[LoadMenuUI] Cannot load - SaveLoadManager is null!");
+            UnityEngine.Debug.LogError("[LoadMenuUI] Cannot load - SaveLoadManager is null");
             return;
         }
 

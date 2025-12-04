@@ -9,7 +9,7 @@ public class DayTimeDisplay : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI dayText;
     [SerializeField] private TextMeshProUGUI timeText;
-    [SerializeField] private TextMeshProUGUI speedText; // Optional: show time speed
+    [SerializeField] private TextMeshProUGUI speedText; // Show time speed
 
     [Header("Display Settings")]
     [SerializeField] private bool show24HourFormat = false;
@@ -30,17 +30,17 @@ public class DayTimeDisplay : MonoBehaviour
 
         if (timeManager == null)
         {
-            Debug.LogError("[DayTimeDisplay] TimeManager not found!");
+            Debug.LogError("[DayTimeDisplay] TimeManager not found");
             return;
         }
 
         if (cropManager == null)
         {
-            Debug.LogError("[DayTimeDisplay] CropManager not found!");
+            Debug.LogError("[DayTimeDisplay] CropManager not found");
             return;
         }
 
-        // Subscribe to time changes for efficiency
+        // Subscribe to time changes
         timeManager.OnTimeChanged += UpdateTimeDisplay;
 
         if (showSpeedIndicator && timeManager != null)
@@ -67,7 +67,7 @@ public class DayTimeDisplay : MonoBehaviour
 
     private void Update()
     {
-        // Update day display each frame (in case it changes)
+        // Update day display each frame
         UpdateDayDisplay();
 
         // Hide during menus

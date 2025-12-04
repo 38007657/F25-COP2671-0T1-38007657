@@ -53,7 +53,7 @@ public class CropBlock
         // Check if this position is farmable
         if (!cropManager.IsGridPositionFarmable(gridPosition))
         {
-            UnityEngine.Debug.Log($"[CropBlock] Cannot till - not in farmable area at {gridPosition}!");
+            UnityEngine.Debug.Log($"[CropBlock] Cannot till - not in farmable area at {gridPosition}.");
             return false;
         }
 
@@ -72,14 +72,14 @@ public class CropBlock
                 return true;
             }
 
-            UnityEngine.Debug.Log($"[CropBlock] Cannot till - crop already planted!");
+            UnityEngine.Debug.Log($"[CropBlock] Cannot till - crop already planted.");
             return false;
         }
 
         // Check if already tilled
         if (isTilled)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled!");
+            UnityEngine.Debug.Log($"[CropBlock] Tile at {gridPosition} is already tilled.");
             return false;
         }
 
@@ -89,7 +89,7 @@ public class CropBlock
         // Update tilemap visual
         UpdateTileVisual();
 
-        UnityEngine.Debug.Log($"[CropBlock] Tilled soil at {gridPosition}");
+        UnityEngine.Debug.Log($"[CropBlock] Tilled soil at {gridPosition}.");
         return true;
     }
 
@@ -101,33 +101,33 @@ public class CropBlock
         // Must be tilled
         if (!isTilled)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Must till soil before watering!");
+            UnityEngine.Debug.Log($"[CropBlock] Must till soil before watering.");
             return false;
         }
 
         // Must have a crop planted to water
         if (!isPlanted)
         {
-            UnityEngine.Debug.Log($"[CropBlock] No crop to water! Plant seeds first.");
+            UnityEngine.Debug.Log($"[CropBlock] No crop to water. Plant seeds first.");
             return false;
         }
 
         // Can't water wilted crops
         if (isWilted)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Cannot water wilted crop! Use hoe to remove it.");
+            UnityEngine.Debug.Log($"[CropBlock] Cannot water wilted crop. Use hoe to remove it.");
             return false;
         }
 
         if (currentGrowthStage >= 3)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Crop is ready to harvest! No need to water.");
+            UnityEngine.Debug.Log($"[CropBlock] Crop is ready to harvest. No need to water.");
             return false;
         }
 
         if (isWatered && lastWateredDay == currentDay)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Already watered today!");
+            UnityEngine.Debug.Log($"[CropBlock] Already watered today");
             return false;
         }
 
@@ -150,13 +150,13 @@ public class CropBlock
         // Must be tilled before planting
         if (!isTilled)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Must till soil before planting!");
+            UnityEngine.Debug.Log($"[CropBlock] Must till soil before planting.");
             return false;
         }
 
         if (isPlanted)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Crop already planted here!");
+            UnityEngine.Debug.Log($"[CropBlock] Crop already planted here.");
             return false;
         }
 
@@ -165,14 +165,14 @@ public class CropBlock
         {
             if (PlayerInventory.Instance.GetSeedPacketCount(seed) <= 0)
             {
-                UnityEngine.Debug.Log($"[CropBlock] No {seed.cropName} seeds in inventory!");
+                UnityEngine.Debug.Log($"[CropBlock] No {seed.cropName} seeds in inventory.");
                 return false;
             }
 
             // Consume one seed
             if (!PlayerInventory.Instance.UseSeedFromPacket(seed))
             {
-                UnityEngine.Debug.Log($"[CropBlock] Failed to use seed from inventory!");
+                UnityEngine.Debug.Log($"[CropBlock] Failed to use seed from inventory.");
                 return false;
             }
         }
@@ -190,10 +190,10 @@ public class CropBlock
         // Add to planted crops list
         cropManager.AddToPlantedCrops(this);
 
-        // Update tilemap visual - Show both soil AND crop
+        // Update tilemap visual - Show both soil and crop
         UpdateTileVisual();
 
-        UnityEngine.Debug.Log($"[CropBlock] Planted {seed.cropName} at {gridPosition}");
+        UnityEngine.Debug.Log($"[CropBlock] Planted {seed.cropName} at {gridPosition}.");
         return true;
     }
 
@@ -201,19 +201,19 @@ public class CropBlock
     {
         if (!isPlanted)
         {
-            UnityEngine.Debug.Log($"[CropBlock] No crop to harvest!");
+            UnityEngine.Debug.Log($"[CropBlock] No crop to harvest.");
             return null;
         }
 
         if (isWilted)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Cannot harvest wilted crop! Use hoe to remove it.");
+            UnityEngine.Debug.Log($"[CropBlock] Cannot harvest wilted crop. Use hoe to remove it.");
             return null;
         }
 
         if (currentGrowthStage < 3)
         {
-            UnityEngine.Debug.Log($"[CropBlock] Crop not ready to harvest! Stage: {currentGrowthStage}/4");
+            UnityEngine.Debug.Log($"[CropBlock] Crop not ready to harvest. Stage: {currentGrowthStage}/4.");
             return null;
         }
 
@@ -240,7 +240,7 @@ public class CropBlock
             }
         }
 
-        UnityEngine.Debug.Log($"[CropBlock] Harvested {seedPacket.cropName} at {gridPosition}");
+        UnityEngine.Debug.Log($"[CropBlock] Harvested {seedPacket.cropName} at {gridPosition}.");
 
         // Clear the crop
         ClearCrop();
@@ -275,7 +275,7 @@ public class CropBlock
             ShowHarvestReadyParticles();
         }
 
-        UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} advanced to stage {currentGrowthStage}");
+        UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} advanced to stage {currentGrowthStage}.");
     }
 
     private void ShowHarvestReadyParticles()
@@ -327,20 +327,20 @@ public class CropBlock
         {
             daysWithoutWater++;
 
-            UnityEngine.Debug.Log($"[CropBlock] NOT watered - {daysWithoutWater} day(s) without water");
+            UnityEngine.Debug.Log($"[CropBlock] not watered - {daysWithoutWater} day(s) without water");
 
             // Wilt if past seed stage (stage > 0) and not watered
             if (currentGrowthStage > 0)
             {
                 isWilted = true;
-                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} has WILTED!");
+                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} has wilted.");
                 UpdateTileVisual();
                 return; // Exit - crop is dead
             }
             else
             {
                 // Seeds (stage 0) don't wilt, just don't grow
-                UnityEngine.Debug.Log($"[CropBlock] Ã°Å¸Å’Â± Seed remains at stage 0 (needs water to grow)");
+                UnityEngine.Debug.Log($"[CropBlock] Seed remains at stage 0 (needs water to grow)");
                 return; // Exit - no growth
             }
         }
@@ -357,14 +357,14 @@ public class CropBlock
             currentGrowthStage++;
             growthTimer = 0f; // Reset timer (not used but kept for compatibility)
 
-            UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} ADVANCED to stage {currentGrowthStage}!");
+            UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} advanced to stage {currentGrowthStage}!");
 
             // Update visual to show new stage
             UpdateTileVisual();
 
             if (currentGrowthStage >= 3)
             {
-                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} is now HARVESTABLE!");
+                UnityEngine.Debug.Log($"[CropBlock] {seedPacket.cropName} is now harvestable.");
                 ShowHarvestReadyParticles(); // Show particles when reaching harvestable stage
             }
         }
@@ -488,13 +488,13 @@ public class CropBlock
     {
         if (savedBlock == null)
         {
-            UnityEngine.Debug.LogError("[CropBlock] RestoreState called with null savedBlock!");
+            UnityEngine.Debug.LogError("[CropBlock] RestoreState called with null savedBlock.");
             return;
         }
 
         if (packet == null)
         {
-            UnityEngine.Debug.LogError("[CropBlock] RestoreState called with null packet!");
+            UnityEngine.Debug.LogError("[CropBlock] RestoreState called with null packet.");
             return;
         }
 
@@ -536,7 +536,7 @@ public class CropBlock
     {
         if (savedBlock == null)
         {
-            UnityEngine.Debug.LogError("[CropBlock] RestoreTilledState called with null savedBlock!");
+            UnityEngine.Debug.LogError("[CropBlock] RestoreTilledState called with null savedBlock.");
             return;
         }
 

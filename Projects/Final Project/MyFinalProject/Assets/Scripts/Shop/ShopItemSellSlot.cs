@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// UI slot for selling harvested crops to shop (with quantity selector)
+/// UI slot for selling harvested crops to shop
 /// </summary>
 public class ShopItemSellSlot : MonoBehaviour
 {
@@ -102,7 +102,7 @@ public class ShopItemSellSlot : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[ShopItemSellSlot] quantityText is NULL!");
+            Debug.LogError("[ShopItemSellSlot] quantityText is NULL");
         }
 
         // Update button interactability

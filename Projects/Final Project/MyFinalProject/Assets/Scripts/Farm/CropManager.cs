@@ -5,7 +5,6 @@ using System.Collections.Generic;
 /// <summary>
 /// Manages all farming operations using tilemaps
 /// Replaces FarmPlotManager and CropGrowthManager
-/// Part 1 Requirements: Grid-based crop management system
 /// </summary>
 public class CropManager : MonoBehaviour
 {
@@ -54,12 +53,10 @@ public class CropManager : MonoBehaviour
         }
         Instance = this;
 
-        // Add this debug
         Debug.Log($"[CropManager] Soil Tilemap: {soilTilemap != null}, Crop Tilemap: {cropTilemap != null}");
 
         CreateGridUsingTilemap();
 
-        // Add this too
         Debug.Log($"[CropManager] Grid created: {cropGrid != null}");
     }
 
@@ -81,7 +78,6 @@ public class CropManager : MonoBehaviour
     {
         // Growth is handled by OnSunrise() at 6 AM each day
         // No need to update crops every frame
-
         // Optional: Add visual effects here in the future
     }
 
@@ -180,7 +176,7 @@ public class CropManager : MonoBehaviour
     {
         if (soilTilemap == null || cropTilemap == null)
         {
-            UnityEngine.Debug.LogError("[CropManager] Both soil and crop tilemaps must be assigned!");
+            UnityEngine.Debug.LogError("[CropManager] Both soil and crop tilemaps must be assigned.");
             return;
         }
 
@@ -248,7 +244,7 @@ public class CropManager : MonoBehaviour
         // Add null check for grid
         if (cropGrid == null)
         {
-            Debug.LogWarning("[CropManager] cropGrid is null!");
+            Debug.LogWarning("[CropManager] cropGrid is null.");
             return null;
         }
 
@@ -293,11 +289,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && untilledTile != null)
         {
             soilTilemap.SetTile(tilePos, untilledTile);
-            Debug.Log($"[CropManager] âœ… Set untilled tile at {tilePos}");
+            Debug.Log($"[CropManager] Set untilled tile at {tilePos}");
         }
         else
         {
-            Debug.LogError($"[CropManager] âŒ Missing soilTilemap ({soilTilemap != null}) or untilledTile ({untilledTile != null})!");
+            Debug.LogError($"[CropManager] Missing soilTilemap ({soilTilemap != null}) or untilledTile ({untilledTile != null}).");
         }
     }
 
@@ -306,11 +302,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && drySoilTile != null)
         {
             soilTilemap.SetTile(tilePos, drySoilTile);
-            Debug.Log($"[CropManager] âœ… Set dry soil tile at {tilePos}");
+            Debug.Log($"[CropManager] Set dry soil tile at {tilePos}");
         }
         else
         {
-            Debug.LogError($"[CropManager] âŒ Missing soilTilemap ({soilTilemap != null}) or drySoilTile ({drySoilTile != null})!");
+            Debug.LogError($"[CropManager] Missing soilTilemap ({soilTilemap != null}) or drySoilTile ({drySoilTile != null}).");
         }
     }
 
@@ -319,11 +315,11 @@ public class CropManager : MonoBehaviour
         if (soilTilemap != null && wetSoilTile != null)
         {
             soilTilemap.SetTile(tilePos, wetSoilTile);
-            Debug.Log($"[CropManager] âœ… Set wet soil tile at {tilePos}");
+            Debug.Log($"[CropManager] Set wet soil tile at {tilePos}");
         }
         else
         {
-            Debug.LogError($"[CropManager] âŒ Missing soilTilemap ({soilTilemap != null}) or wetSoilTile ({wetSoilTile != null})!");
+            Debug.LogError($"[CropManager] Missing soilTilemap ({soilTilemap != null}) or wetSoilTile ({wetSoilTile != null})!");
         }
     }
 

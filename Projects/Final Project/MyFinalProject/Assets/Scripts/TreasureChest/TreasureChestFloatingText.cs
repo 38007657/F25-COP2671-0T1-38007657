@@ -4,7 +4,6 @@ using System.Collections;
 
 /// <summary>
 /// Simple floating text for treasure chest - attached as child of chest
-/// No prefab needed, just animates the text that's already there
 /// </summary>
 public class TreasureChestFloatingText : MonoBehaviour
 {
@@ -21,7 +20,7 @@ public class TreasureChestFloatingText : MonoBehaviour
 
     private void Awake()
     {
-        // Get or add canvas group for fading
+        // Get or add canvas group
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
@@ -71,7 +70,7 @@ public class TreasureChestFloatingText : MonoBehaviour
             yield return null;
         }
 
-        // Make sure it's hidden at the end
+        // Hide at the end
         canvasGroup.alpha = 0;
         transform.localPosition = startPosition;
     }

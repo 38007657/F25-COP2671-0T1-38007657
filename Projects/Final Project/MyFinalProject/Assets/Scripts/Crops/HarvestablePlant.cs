@@ -116,11 +116,4 @@ public class HarvestablePlant : MonoBehaviour
             Pickup();
         }
     }
-
-    // Optional draw pickup range in editor
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, pickupRange);
-    }
 }

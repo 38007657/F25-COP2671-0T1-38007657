@@ -84,7 +84,7 @@ public class ShopInventory : MonoBehaviour
             return false;
         }
 
-        // Use PlayerInventory's buy method (already handles money and adding seeds)
+        // Use PlayerInventory's buy method
         bool success = PlayerInventory.Instance.BuySeedPacket(packet);
 
         if (success)
@@ -152,7 +152,7 @@ public class ShopInventory : MonoBehaviour
             return false;
         }
 
-        // Use PlayerInventory's sell method (already handles removing items and adding money)
+        // Use PlayerInventory's sell method
         bool success = PlayerInventory.Instance.SellHarvestedItem(crop, quantity);
 
         if (success)

@@ -215,7 +215,7 @@ public class SaveLoadManager : MonoBehaviour
 
         foreach (CropBlock block in plantedCrops)
         {
-            // IMPORTANT: Only save if actually planted with a seed packet
+            // Only save if actually planted with a seed packet
             if (block == null)
             {
                 UnityEngine.Debug.LogWarning("[SaveLoadManager] Null block in plantedCrops list!");
@@ -253,7 +253,7 @@ public class SaveLoadManager : MonoBehaviour
             data.plantedCrops.Add(savedBlock);
         }
 
-        // NEW: Also save tilled-but-not-planted blocks
+        // Save tilled-but-not-planted blocks
         List<CropBlock> tilledBlocks = CropManager.Instance.GetAllTilledBlocks();
         UnityEngine.Debug.Log($"[SaveLoadManager] Saving {tilledBlocks.Count} tilled (not planted) blocks");
 
@@ -449,9 +449,6 @@ public class SaveLoadManager : MonoBehaviour
 
         // Clear all existing crops first
         CropManager.Instance.ClearAllCrops();
-
-        // Wait one frame to ensure everything is cleared
-        // We'll do this synchronously for now but could use coroutine
 
         int successCount = 0;
         int failCount = 0;
@@ -680,7 +677,7 @@ public class SaveLoadManager : MonoBehaviour
 
     private string EncryptDecrypt(string data)
     {
-        string key = "FarmingGame2024";
+        string key = "COP2671";
         string output = "";
 
         for (int i = 0; i < data.Length; i++)

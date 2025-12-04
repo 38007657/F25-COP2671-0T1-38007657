@@ -144,7 +144,7 @@ public class PauseMenuManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[PauseMenu] PauseMenuPanel is NULL!");
+            Debug.LogError("[PauseMenu] PauseMenuPanel is NULL");
         }
 
         // Show main buttons, hide save/load panel
@@ -223,7 +223,7 @@ public class PauseMenuManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[PauseMenu] pauseButtonContainer is NULL!");
+            Debug.LogError("[PauseMenu] pauseButtonContainer is NULL");
         }
 
         if (saveLoadPanel != null)
@@ -243,13 +243,13 @@ public class PauseMenuManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("[PauseMenu] SaveLoadMenuUI component NOT FOUND on saveLoadPanel!");
+                Debug.LogError("[PauseMenu] SaveLoadMenuUI component NOT FOUND on saveLoadPanel");
                 Debug.LogError($"[PauseMenu] saveLoadPanel has these components: {string.Join(", ", saveLoadPanel.GetComponents<Component>().Select(c => c.GetType().Name))}");
             }
         }
         else
         {
-            Debug.LogError("[PauseMenu] saveLoadPanel is NULL!");
+            Debug.LogError("[PauseMenu] saveLoadPanel is NULL");
         }
 
         Debug.Log("[PauseMenu] === ShowSaveLoadPanel END ===");

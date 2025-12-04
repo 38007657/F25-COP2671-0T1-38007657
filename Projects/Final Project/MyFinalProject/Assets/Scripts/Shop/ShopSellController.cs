@@ -145,7 +145,7 @@ public class ShopSellController : MonoBehaviour
         {
             Debug.Log($"[ShopSellController] Total sale: {totalItemsSold} items for ${totalEarned}");
 
-            // Refresh the shop UI (which will clear and re-register slots, updating the button)
+            // Refresh the shop UI
             if (InventoryUIManager.Instance != null)
             {
                 InventoryUIManager.Instance.RefreshCurrentTab();

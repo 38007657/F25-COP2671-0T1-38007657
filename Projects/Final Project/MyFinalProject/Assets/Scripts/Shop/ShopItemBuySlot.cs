@@ -10,7 +10,7 @@ public class ShopItemBuySlot : MonoBehaviour
     [SerializeField] private Image itemIcon;
     [SerializeField] private TextMeshProUGUI itemNameText;
     [SerializeField] private TextMeshProUGUI priceText;
-    [SerializeField] private TextMeshProUGUI seedCountText; // "5 seeds"
+    [SerializeField] private TextMeshProUGUI seedCountText;
     [SerializeField] private Button buyButton;
 
     private SeedPacket seedPacket;
@@ -57,7 +57,7 @@ public class ShopItemBuySlot : MonoBehaviour
 
         buyButton.interactable = canAfford;
 
-        // Optional: Change button color if can't afford
+        // Future Feature Option: Change button color if can't afford
         if (!canAfford && buyButton.GetComponentInChildren<TextMeshProUGUI>() != null)
         {
             buyButton.GetComponentInChildren<TextMeshProUGUI>().color = Color.gray;
@@ -77,12 +77,11 @@ public class ShopItemBuySlot : MonoBehaviour
 
             if (success)
             {
-                Debug.Log($"[ShopItemBuySlot] Successfully bought {seedPacket.cropName} seeds!");
+                Debug.Log($"[ShopItemBuySlot] Successfully bought {seedPacket.cropName} seeds");
 
                 // Refresh the shop UI
                 if (InventoryUIManager.Instance != null)
                 {
-                    // We'll add this method to InventoryUIManager next
                     InventoryUIManager.Instance.RefreshCurrentTab();
                 }
             }

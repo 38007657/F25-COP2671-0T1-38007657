@@ -58,7 +58,7 @@ public class PlayerInventory : MonoBehaviour
         currentMoney = startingMoney;
         OnMoneyChanged?.Invoke(currentMoney);
 
-        // === TESTING: Give player starting seeds ===
+        // === ive player starting seeds ===
         if (testStartingSeeds.Count > 0)
         {
             foreach (SeedPacket packet in testStartingSeeds)

@@ -4,7 +4,6 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Main menu shown when game starts
-/// Covers the game world with a dark overlay
 /// </summary>
 public class StartMenuManager : MonoBehaviour
 {
@@ -12,7 +11,7 @@ public class StartMenuManager : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private GameObject startMenuPanel;
-    [SerializeField] private Image darkOverlay;
+    [SerializeField] private Image darkOverlay; // Future Feature Option
 
     [Header("Buttons")]
     [SerializeField] private Button continueButton;
@@ -21,10 +20,10 @@ public class StartMenuManager : MonoBehaviour
     [SerializeField] private Button quitButton;
 
     [Header("Other Panels")]
-    [SerializeField] private GameObject loadGamePanel; // Your existing SaveLoadTab
+    [SerializeField] private GameObject loadGamePanel; // Existing SaveLoadTab
 
     [Header("Settings")]
-    [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.85f); // Dark overlay
+    [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.85f); // Dark overlay not currently used
 
     private bool isInStartMenu = true;
 
@@ -115,7 +114,7 @@ public class StartMenuManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Check if we have a save to continue from
+    /// Check if there is a save to continue from
     /// </summary>
     private void UpdateContinueButton()
     {
@@ -142,7 +141,7 @@ public class StartMenuManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[StartMenu] SaveLoadManager not found!");
+            Debug.LogError("[StartMenu] SaveLoadManager not found");
         }
     }
 
@@ -175,18 +174,18 @@ public class StartMenuManager : MonoBehaviour
             Debug.Log("[StartMenu] Crops cleared, day reset to 1");
         }
 
-        // Reset player position to spawn point (adjust coordinates as needed)
+        // Reset player position to spawn point
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
-            player.transform.position = new Vector3(0f, 0f, 0f); // Change to your spawn point
+            player.transform.position = new Vector3(0f, 0f, 0f);
             Debug.Log("[StartMenu] Player position reset");
         }
 
         // Hide menu and start playing
         HideStartMenu();
 
-        Debug.Log("[StartMenu] New game started successfully!");
+        Debug.Log("[StartMenu] New game started successfully");
     }
 
     /// <summary>

@@ -74,7 +74,7 @@ public class NotificationManager : MonoBehaviour
     {
         if (notificationPanel == null || notificationText == null)
         {
-            Debug.LogError("[NotificationManager] UI references not set!");
+            Debug.LogError("[NotificationManager] UI references not set");
             return;
         }
 
@@ -123,7 +123,7 @@ public class NotificationManager : MonoBehaviour
         float elapsedTime = 0f;
         while (elapsedTime < fadeInDuration)
         {
-            elapsedTime += Time.unscaledDeltaTime; // Use unscaled time so it works when game is paused
+            elapsedTime += Time.unscaledDeltaTime; // Unscaled time so it works when game is paused
             float alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeInDuration);
 
             if (canvasGroup != null)

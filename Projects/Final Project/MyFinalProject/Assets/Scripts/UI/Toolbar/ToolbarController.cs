@@ -15,7 +15,7 @@ public class ToolbarController : MonoBehaviour
     [SerializeField] private Button harvestButton;
 
     [Header("Toolbar Panel")]
-    [SerializeField] private GameObject toolbarPanel; // Drag the entire toolbar panel here
+    [SerializeField] private GameObject toolbarPanel;
 
     [Header("Farming Events - These auto-populate")]
     [Space(10)]
@@ -52,11 +52,11 @@ public class ToolbarController : MonoBehaviour
     {
         if (toolbarPanel == null)
         {
-            //UnityEngine.Debug.LogWarning("[ToolbarController] toolbarPanel is NULL! Please assign it in the Inspector.");
+            //UnityEngine.Debug.LogWarning("[ToolbarController] toolbarPanel is NULL.");
             return;
         }
 
-        // Show toolbar ONLY when not in any menu
+        // Show toolbar only when not in any menu
         bool shouldShow = true;
 
         if (StartMenuManager.Instance != null)
@@ -95,7 +95,7 @@ public class ToolbarController : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogWarning("[ToolbarController] Hoe button not assigned!");
+            UnityEngine.Debug.LogWarning("[ToolbarController] Hoe button not assigned");
         }
 
         if (plantButton != null)
@@ -107,7 +107,7 @@ public class ToolbarController : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogWarning("[ToolbarController] Plant button not assigned!");
+            UnityEngine.Debug.LogWarning("[ToolbarController] Plant button not assigned");
         }
 
         if (waterButton != null)
@@ -119,7 +119,7 @@ public class ToolbarController : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogWarning("[ToolbarController] Water button not assigned!");
+            UnityEngine.Debug.LogWarning("[ToolbarController] Water button not assigned");
         }
 
         if (harvestButton != null)
@@ -131,7 +131,7 @@ public class ToolbarController : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogWarning("[ToolbarController] Harvest button not assigned!");
+            UnityEngine.Debug.LogWarning("[ToolbarController] Harvest button not assigned");
         }
     }
 

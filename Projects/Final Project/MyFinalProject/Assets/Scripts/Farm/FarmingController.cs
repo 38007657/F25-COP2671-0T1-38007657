@@ -162,7 +162,7 @@ public class FarmingController : MonoBehaviour
         CropBlock closestBlock = null;
         float closestDistance = interactionRange;
 
-        // Check all blocks in the grid (or optimize by checking nearby area)
+        // Check all blocks in the grid
         for (int x = -2; x <= 2; x++)
         {
             for (int y = -2; y <= 2; y++)
@@ -338,7 +338,7 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Use player's CURRENT facing direction (not direction to block)
+        // Use player's current facing direction
         Vector3 facingDir = GetPlayerFacingDirection();
 
         // Only calculate direction to block if player isn't facing anywhere
@@ -374,7 +374,7 @@ public class FarmingController : MonoBehaviour
         {
             if (NotificationManager.Instance != null)
             {
-                NotificationManager.Instance.ShowWarning("No tile selected. Move closer to a tile.");
+                NotificationManager.Instance.ShowWarning("No tile selected. Move closer to a tile!");
             }
             UnityEngine.Debug.Log("[FarmingController] No block selected to plant");
             return;
@@ -426,7 +426,7 @@ public class FarmingController : MonoBehaviour
             }
         }
 
-        // Use player's CURRENT facing direction
+        // Use player's facing direction
         Vector3 facingDir = GetPlayerFacingDirection();
 
         if (facingDir == Vector3.zero)
@@ -521,7 +521,7 @@ public class FarmingController : MonoBehaviour
             return;
         }
 
-        // Use player's CURRENT facing direction
+        // Use player's facing direction
         Vector3 facingDir = GetPlayerFacingDirection();
 
         if (facingDir == Vector3.zero)
@@ -547,7 +547,6 @@ public class FarmingController : MonoBehaviour
         }
     }
 
-    // In FarmingController.HandleGatherEvent()
     public void HandleGatherEvent()
     {
         // Check time restriction
@@ -633,7 +632,7 @@ public class FarmingController : MonoBehaviour
                 direction = new Vector3(currentX, currentY, 0);
             }
 
-            // Still no direction? Default to down (not up)
+            // Still no direction? Default to down
             if (direction == Vector3.zero)
             {
                 direction = Vector3.down;

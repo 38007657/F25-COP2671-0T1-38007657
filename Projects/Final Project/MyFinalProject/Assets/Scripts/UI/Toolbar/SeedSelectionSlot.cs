@@ -62,8 +62,8 @@ public class SeedSelectionSlot : MonoBehaviour, IPointerClickHandler, IPointerEn
             quantityText.text = qty.ToString();
         }
 
-        // REMOVED: Number key hints - Click only selection!
-        // Hide number key hints (optional UI elements)
+        // Future Feature Option: use number keys for selecting seeds
+        // Hides number key hints
         if (numberKeyHint != null)
         {
             numberKeyHint.SetActive(false);
@@ -126,12 +126,11 @@ public class SeedSelectionSlot : MonoBehaviour, IPointerClickHandler, IPointerEn
         OnSlotClicked?.Invoke(this);
     }
 
+    // Future Feature Option: Show tooltip with seed name on hover
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
         UpdateVisualState();
-
-        // Optional: Show tooltip with seed name
         // TooltipManager.Show(seedPacket.cropName);
     }
 
@@ -140,7 +139,6 @@ public class SeedSelectionSlot : MonoBehaviour, IPointerClickHandler, IPointerEn
         isHovered = false;
         UpdateVisualState();
 
-        // Optional: Hide tooltip
         // TooltipManager.Hide();
     }
 }

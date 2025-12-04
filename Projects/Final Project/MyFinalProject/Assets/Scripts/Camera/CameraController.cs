@@ -24,7 +24,7 @@ public class PixelPerfectCameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
-        // Start by wanting to center on the player
+        // Start by centering on the player
         Vector3 desiredPosition = target.position;
         desiredPosition.z = transform.position.z;
 

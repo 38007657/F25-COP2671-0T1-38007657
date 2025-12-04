@@ -57,7 +57,7 @@ public class SaveSlotUI : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogError($"[SaveSlotUI] Load button is NULL! Cannot add listener.");
+            UnityEngine.Debug.LogError($"[SaveSlotUI] Load button is NULL. Cannot add listener.");
         }
 
         // Setup delete button
@@ -82,7 +82,7 @@ public class SaveSlotUI : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogError("[SaveSlotUI] menuUI is NULL! Cannot load save.");
+            UnityEngine.Debug.LogError("[SaveSlotUI] menuUI is NULL. Cannot load save.");
         }
     }
 

@@ -5,7 +5,6 @@ using TMPro;
 
 /// <summary>
 /// UI Manager for Save/Load menu tab
-/// Simplified version - no refresh button, no delete confirmation
 /// </summary>
 public class SaveLoadMenuUI : MonoBehaviour
 {
@@ -13,7 +12,7 @@ public class SaveLoadMenuUI : MonoBehaviour
     [SerializeField] private Transform saveSlotContainer;
     [SerializeField] private GameObject saveSlotPrefab;
     [SerializeField] private Button newSaveButton;
-    [SerializeField] private Button backButton; // NEW: Back to pause menu
+    [SerializeField] private Button backButton; // Back to pause menu
 
     [Header("New Save Panel")]
     [SerializeField] private GameObject newSavePanel;
@@ -66,24 +65,24 @@ public class SaveLoadMenuUI : MonoBehaviour
 
         if (SaveLoadManager.Instance == null)
         {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] SaveLoadManager.Instance is NULL!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] SaveLoadManager.Instance is NULL");
             return;
         }
-        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found âœ“");
+        UnityEngine.Debug.Log("[SaveLoadMenuUI] SaveLoadManager found");
 
         if (saveSlotContainer == null)
         {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotContainer is NULL!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotContainer is NULL");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name} âœ“");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotContainer: {saveSlotContainer.name}");
 
         if (saveSlotPrefab == null)
         {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotPrefab is NULL!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] saveSlotPrefab is NULL");
             return;
         }
-        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name} âœ“");
+        UnityEngine.Debug.Log($"[SaveLoadMenuUI] saveSlotPrefab: {saveSlotPrefab.name}");
 
         // Clear existing slots
         int childCount = saveSlotContainer.childCount;
@@ -120,7 +119,7 @@ public class SaveLoadMenuUI : MonoBehaviour
             }
             else
             {
-                UnityEngine.Debug.LogError($"[SaveLoadMenuUI] SaveSlotUI component missing on slot {i}!");
+                UnityEngine.Debug.LogError($"[SaveLoadMenuUI] SaveSlotUI component missing on slot {i}");
             }
         }
 
@@ -188,7 +187,7 @@ public class SaveLoadMenuUI : MonoBehaviour
     {
         if (SaveLoadManager.Instance == null)
         {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot create save - SaveLoadManager is null!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot create save - SaveLoadManager is null");
             return;
         }
 
@@ -210,7 +209,7 @@ public class SaveLoadMenuUI : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Failed to create save!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Failed to create save");
         }
     }
 
@@ -221,7 +220,7 @@ public class SaveLoadMenuUI : MonoBehaviour
     {
         if (SaveLoadManager.Instance == null)
         {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot load - SaveLoadManager is null!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot load - SaveLoadManager is null");
             return;
         }
 
@@ -240,13 +239,13 @@ public class SaveLoadMenuUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Delete a save immediately (no confirmation)
+    /// Delete a save
     /// </summary>
     public void DeleteSave(SaveSlotInfo slotInfo)
     {
         if (SaveLoadManager.Instance == null)
         {
-            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot delete - SaveLoadManager is null!");
+            UnityEngine.Debug.LogError("[SaveLoadMenuUI] Cannot delete - SaveLoadManager is null");
             return;
         }
 

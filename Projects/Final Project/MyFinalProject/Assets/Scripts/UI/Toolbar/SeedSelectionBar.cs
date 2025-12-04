@@ -5,7 +5,7 @@ using System.Linq;
 
 /// <summary>
 /// Vertical collapsible seed selection bar on the left side of the screen
-/// CLICK ONLY - No number keys or scroll wheel selection
+/// Click only - No number keys or scroll wheel selection
 /// </summary>
 public class SeedSelectionBar : MonoBehaviour
 {
@@ -103,9 +103,6 @@ public class SeedSelectionBar : MonoBehaviour
         {
             rectTransform.sizeDelta = Vector2.Lerp(rectTransform.sizeDelta, targetSize, Time.deltaTime * animationSpeed);
         }
-
-        // REMOVED: Number key selection - Click only!
-        // REMOVED: Scroll wheel selection - Click only!
     }
 
     /// <summary>
@@ -169,7 +166,7 @@ public class SeedSelectionBar : MonoBehaviour
     /// </summary>
     private void RefreshSeedSlots()
     {
-        // REMEMBER which seed packet was selected before clearing
+        // Remember which seed packet was selected before clearing
         SeedPacket previouslySelectedSeed = selectedSlot?.SeedPacket;
 
         // Clear existing slots
@@ -179,7 +176,7 @@ public class SeedSelectionBar : MonoBehaviour
                 Destroy(slot.gameObject);
         }
         seedSlots.Clear();
-        selectedSlot = null; // Clear the reference since we destroyed the GameObject
+        selectedSlot = null; // Clear the references
 
         // Get player's seeds
         if (PlayerInventory.Instance == null) return;
@@ -229,7 +226,7 @@ public class SeedSelectionBar : MonoBehaviour
     }
 
     /// <summary>
-    /// Handle clicking a seed slot - ONLY selection method now!
+    /// Handle clicking a seed slot
     /// </summary>
     private void HandleSlotClick(SeedSelectionSlot slot)
     {
@@ -263,15 +260,14 @@ public class SeedSelectionBar : MonoBehaviour
     }
 
     /// <summary>
-    /// Update which slot shows when collapsed
+    /// Future Feature Option: Update which slot shows when collapsed
     /// </summary>
     private void UpdateCollapsedView()
     {
         // When collapsed, only the selected slot should be visible at the top
         if (selectedSlot != null)
         {
-            // This could be done by reordering, or having a separate display
-            // For now, we'll rely on the layout to show the first slot
+            // Future Feature Option
         }
     }
 

@@ -22,13 +22,13 @@ public class TreasureChest : MonoBehaviour
     [SerializeField] private AudioClip coinSound;
 
     [Header("UI Feedback")]
-    [SerializeField] private TreasureChestFloatingText floatingText; // Drag the text object here
+    [SerializeField] private TreasureChestFloatingText floatingText;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = true;
 
     // State tracking
-    private int lastOpenedDay = -999; // Set very negative so it's available at start
+    private int lastOpenedDay = -999; // Set negative so it's available at start
     private bool isAvailable = false;
     private bool playerInRange = false;
     private GameObject activeParticleInstance;
@@ -42,9 +42,6 @@ public class TreasureChest : MonoBehaviour
         {
             playerTransform = player.transform;
         }
-
-        // Chest sprite is already set on the SpriteRenderer in the scene
-        // No need to set it here
 
         // Check if chest should be available at game start
         CheckAvailability();
@@ -126,7 +123,7 @@ public class TreasureChest : MonoBehaviour
                 availableParticles,
                 transform.position + new Vector3(0, 0.5f, 0),
                 Quaternion.identity,
-                transform // Parent to chest so it moves with it
+                transform
             );
 
             if (showDebugInfo)
@@ -177,7 +174,7 @@ public class TreasureChest : MonoBehaviour
             }
         }
 
-        // Play sounds
+        // Future Feature Option: Play sounds
         if (openSound != null)
         {
             AudioSource.PlayClipAtPoint(openSound, transform.position);
@@ -215,13 +212,13 @@ public class TreasureChest : MonoBehaviour
 
         if (showDebugInfo)
         {
-            Debug.Log($"[TreasureChest] Showing floating text: +{amount} Coins!");
+            Debug.Log($"[TreasureChest] Showing floating text: +{amount} Coins");
         }
     }
 
+    // Future Feature Option: Draw interaction range
     private void OnDrawGizmosSelected()
     {
-        // Draw interaction range
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, interactionRange);
     }
